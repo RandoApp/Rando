@@ -2,3 +2,6 @@ node_modules
 
 #Emacs
 *~
+
+#config
+config/runtime.*
