@@ -1,5 +1,8 @@
 app:
     port: 8888
+    log:
+        file: foodex.log
+        handleException: true
 
 db:
     url: mongodb://localhost/foodex

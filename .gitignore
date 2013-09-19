@@ -5,3 +5,6 @@ node_modules
 
 #config
 config/runtime.*
+
+#winston logging
+*.log
