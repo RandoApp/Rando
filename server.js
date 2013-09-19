@@ -1,5 +1,7 @@
 var express         = require('express');
 var path            = require('path'); // module allows path parsing
+var config          = require("config");
+
 var app = express();
 
 app.use(express.favicon()); // send favicon TODO: change to real favicon
@@ -25,6 +27,6 @@ app.post('/bonappetit/:id', function (req, res) {
     res.send('Bon appetit '+req.params.id);
 });
 
-app.listen(8888, function(){
-    console.log('Express server listening on port 8888');
+app.listen(config.app.port, function(){
+    console.log('Express server listening on port '+config.app.port);
 });
