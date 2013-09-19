@@ -1,7 +1,7 @@
 {
     "name": "foodex",
     "version": "0.0.1",
-    "description": "Server side of foodex project. Foodex - share your food with random people around the world",
+    "description": "Server side of foodex project. Foodex - share your food with strangers around the world",
     "engine": {
 	"node": ">=0.8.8"
     },

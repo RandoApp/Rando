@@ -1,4 +1,4 @@
 foodex
 ======
 
-Share your food and say bon appetit for mystery and random man
+Share pictures of your meal with a stranger. Look at meals of random people around the world.
