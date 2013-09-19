@@ -1,7 +1,7 @@
 {
     "name": "foodex",
     "version": "0.0.1",
-    "description": "Server side of foodex project. Foodex - share your food with strangers around the world",
+    "description": "Server side of foodex project. Foodex - share your food with random people around the world",
     "engine": {
 	"node": ">=0.8.8"
     },
@@ -13,5 +13,12 @@
 	"express": "3.x",
 	"js-yaml": "0.3.x",
 	"config": "0.4.x"
+    },
+    "devDependencies": {
+	"mocha": "*",
+	"should": "*"
+    },
+    "scripts": {
+	"test": "node_modules/.bin/mocha"
     }
 }
