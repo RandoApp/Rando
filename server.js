@@ -1,17 +1,21 @@
-var express         = require('express');
-var path            = require('path'); // module allows path parsing
-var config          = require("config");
-
+var express = require("express");
+var path = require("path");
 var app = express();
+var config = require("config");
+var logger = new require("winston");
 
-app.use(express.favicon()); // send favicon TODO: change to real favicon
-app.use(express.logger('dev')); // log all requests
-app.use(express.bodyParser()); // standart module for JSON parsing
-app.use(express.methodOverride()); // put and delete support
+logger.exitOnError = false;
+logger.add(logger.transports.File, {
+    filename: config.app.log.file,
+    handleException: config.app.log.handleException
+});
+
+app.use(express.logger('dev'));
+app.use(express.bodyParser());
 app.use(app.router);
-app.use(express.static(path.join(__dirname, "public"))); // запуск статического файлового сервера, который смотрит на папку public/ (в нашем случае отдает index.html)
 
 app.post('/food', function (req, res) {
+    logger.log("food");
     res.send('Thanks for posting your food.');
 });
 
@@ -20,13 +24,13 @@ app.get('/food', function (req, res) {
 });
 
 app.post('/report/:id', function (req, res) {
-    res.send('Image '+req.params.id+' reported.');
+    res.send('Image ' + req.params.id + ' reported');
 });
 
 app.post('/bonappetit/:id', function (req, res) {
-    res.send('Bon appetit '+req.params.id);
+    res.send('Bon appetit ' + req.params.id);
 });
 
-app.listen(config.app.port, function(){
-    console.log('Express server listening on port '+config.app.port);
+app.listen(config.app.port, function () {
+    logger.info('Express server listening on port ' + config.app.port);
 });
