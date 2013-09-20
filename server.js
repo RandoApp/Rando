@@ -2,7 +2,7 @@ var express = require("express");
 var path = require("path");
 var app = express();
 var config = require("config");
-var logger = new require("winston");
+var logger = require("winston");
 
 logger.exitOnError = false;
 logger.add(logger.transports.File, {
@@ -15,7 +15,6 @@ app.use(express.bodyParser());
 app.use(app.router);
 
 app.post('/food', function (req, res) {
-    logger.log("food");
     res.send('Thanks for posting your food.');
 });
 
