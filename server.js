@@ -3,6 +3,7 @@ var path = require("path");
 var app = express();
 var config = require("config");
 var logger = require("winston");
+var db = require("./src/db/db.js");
 
 logger.exitOnError = false;
 logger.add(logger.transports.File, {
