@@ -3,11 +3,11 @@ var winston = require("winston");
 
 module.exports = new (winston.Logger)({
     transports: [
-	new (winston.transports.Console)({level: "debug", colorize: true}),
+	new (winston.transports.Console)({level: config.app.log.level.console, colorize: true}),
 	new (winston.transports.File)({
 	    filename: config.app.log.file,
 	    handleException: config.app.log.handleException,
-	    level: "info"
+	    level: config.app.log.level.file
 	})
     ],
     levels: {

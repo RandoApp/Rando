@@ -8,13 +8,14 @@ var Account = mongoose.model("account", new mongoose.Schema({
 }));
 
 module.exports = {
-    create: function (email) {
+    create: function (email, food) {
+	logger.data("Create account: Email: %s, food: %j", email, food);
+
 	var account = new Account({email: email, food: []});
-	logger.debug("Create account with email: %s and empty food", email);
 
 	account.save( function (err) {
 	    if (err) {
-		console.log(err);
+		logger.warn("Can't create account! Email: %s, food: %s", email, food);
 	    }
 	});
     }

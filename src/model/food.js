@@ -1,18 +1,30 @@
 var mongoose = require("mongoose");
 var config = require("config");
+var logger = require("../log/logger");
 
 var Food = mongoose.model("food", new mongoose.Schema({
     email: String,
-    food: Array
+    location: Number,
+    creation: Date,
+    name: String,
+    map: String 
 }));
 
 module.exports = {
-    add: function (email, food) {
-	var food = new Food({email: email, food: food});
+    add: function (email, location, creation, name, map) {
+	logger.data("Food add. Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
 
-	food.save(function (err) {
+	var food = new Food({
+	    email: email,
+	    location: location,
+	    creation: creation,
+	    name: name,
+	    map: map
+	});
+
+	food.save( function (err) {
 	    if (err) {
-		console.log(err);
+		logger.warn("Can't add food! Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
 	    }
 	});
     }

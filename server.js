@@ -15,6 +15,7 @@ app.post('/food', function (req, res) {
 });
 
 app.get('/food', function (req, res) {
+    require("./src/model/account").create("email@bla.com", [2,4,5]);
     res.send('Here is food for you.');
 });
 

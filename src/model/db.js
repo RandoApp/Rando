@@ -1,3 +1,5 @@
+var logger = require("../log/logger");
+
 module.exports = {
     establishConnection: function () {
 	var mongoose = require("mongoose");
@@ -8,11 +10,11 @@ module.exports = {
 	var db = mongoose.connection;
 
 	db.on("error", function (e) {
-	    console.log("Monodb connection error: " + e);
+	    logger.error("Monodb connection error: " + e);
 	});
 
 	db.on("open", function () {
-	    console.log("Connection to mongodb established");
+	    logger.info("Connection to mongodb established");
 	});
     }
 };
