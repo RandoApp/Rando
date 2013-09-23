@@ -2,24 +2,20 @@ var express = require("express");
 var path = require("path");
 var app = express();
 var config = require("config");
-var logger = new require("winston");
+var logger = require("./src/log/logger");
 
-logger.exitOnError = false;
-logger.add(logger.transports.File, {
-    filename: config.app.log.file,
-    handleException: config.app.log.handleException
-});
+require("./src/model/db").establishConnection();
 
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(app.router);
 
 app.post('/food', function (req, res) {
-    logger.log("food");
     res.send('Thanks for posting your food.');
 });
 
 app.get('/food', function (req, res) {
+    require("./src/model/account").create("email@bla.com", [2,4,5]);
     res.send('Here is food for you.');
 });
 

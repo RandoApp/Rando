@@ -3,6 +3,9 @@ app:
     log:
         file: foodex.log
         handleException: true
+        level:
+            console: debug
+            file: info
 
 db:
     url: mongodb://localhost/foodex
