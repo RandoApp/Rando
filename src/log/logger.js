@@ -17,5 +17,12 @@ module.exports = new (winston.Logger)({
 	warn: 3,
 	error: 4 
     },
+    colors: {
+	debug: "grey",
+	info: "green",
+	data: "blue",
+	warn: "yellow",
+	error: "red"
+    },
     exitOnError: false
 });
