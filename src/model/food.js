@@ -27,5 +27,8 @@ module.exports = {
 		logger.warn("Can't add food! Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
 	    }
 	});
+    },
+    getAll: function (callback) {
+	return Food.find(callback);
     }
 };
