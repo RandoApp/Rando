@@ -9,7 +9,7 @@ var Account = mongoose.model("account", new mongoose.Schema({
 
 module.exports = {
     create: function (email, food) {
-	logger.data("Create account: Email: %s, food: %j", email, food);
+	logger.data("Create account: Email: %s, food: ", email, food);
 
 	var account = new Account({email: email, food: []});
 
