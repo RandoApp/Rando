@@ -9,6 +9,7 @@ var Account = mongoose.model("account", new mongoose.Schema({
 module.exports = {
     create: function (email, food) {
 	var account = new Account({email: email, food: food});
+	console.log(email + " " +  food);
 
 	account.save(function (err) {
 	    if (err) {
