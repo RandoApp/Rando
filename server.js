@@ -2,7 +2,8 @@ var express = require("express");
 var path = require("path");
 var app = express();
 var config = require("config");
-var logger = require("./src/log/logger").getLogger();
+var logger = require("./src/log/logger");
+
 require("./src/model/db").establishConnection();
 
 app.use(express.logger('dev'));
