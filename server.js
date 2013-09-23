@@ -2,14 +2,8 @@ var express = require("express");
 var path = require("path");
 var app = express();
 var config = require("config");
-var logger = require("winston");
+var logger = require("./src/log/logger").getLogger();
 require("./src/model/db").establishConnection();
-
-logger.exitOnError = false;
-logger.add(logger.transports.File, {
-    filename: config.app.log.file,
-    handleException: config.app.log.handleException
-});
 
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
