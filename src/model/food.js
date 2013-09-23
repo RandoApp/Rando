@@ -30,5 +30,14 @@ module.exports = {
     },
     getAll: function (callback) {
 	return Food.find(callback);
+    },
+    remove: function (food) {
+	if (food && food instanceof mongoose.Model) {
+	    food.remove(function (err) {
+		if (err) {
+		    logger.warn("Can't remove food! %j", food); 
+		}
+	    });
+	}
     }
-};
+}
