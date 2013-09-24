@@ -13,10 +13,25 @@ module.exports = {
 
 	var account = new Account({email: email, food: []});
 
-	account.save( function (err) {
+	account.save(function (err) {
 	    if (err) {
 		logger.warn("Can't create account! Email: %s, food: %s", email, food);
 	    }
+
+	    logger.debug("Account created. Email: %s, food: ", account.email, account.food);
 	});
+    },
+    update: function (account) {
+	if (account && account instanceof mongoose.Model) {
+	    logger.data("Update account: Email: %s, food: ", account.email, account.food);
+
+	    account.save(function (err) {
+		if (err) {
+		    logger.warn("Can't upadate account! Email: %s, food: ", account.email, account.food);
+		}
+
+		logger.debug("Account updated. Email: %s, food: ", account.email, account.food);
+	    });
+	}
     }
 };
