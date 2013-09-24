@@ -26,10 +26,11 @@ module.exports = {
 	    if (err) {
 		logger.warn("Can't add food! Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
 	    }
+	    logger.debug("Food added. Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
 	});
     },
     getAll: function (callback) {
-	return Food.find(callback);
+	Food.find(callback);
     },
     remove: function (food) {
 	if (food && food instanceof mongoose.Model) {
@@ -37,6 +38,7 @@ module.exports = {
 		if (err) {
 		    logger.warn("Can't remove food! %j", food); 
 		}
+		logger.debug("Food removed. Email: %s, location: %s, creation: %s, name: %s, map: %s", food.email, food.location, food.creation, food.name, food.map);
 	    });
 	}
     }
