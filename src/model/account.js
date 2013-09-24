@@ -33,5 +33,11 @@ module.exports = {
 		logger.debug("Account updated. Email: %s, food: ", account.email, account.food);
 	    });
 	}
+    },
+    getByEmail: function (email, callback) {
+	Account.findOne({email: email}, callback);
+    },
+    getById: function (id, callback) {
+	Account.findById(id, callback);
     }
 };
