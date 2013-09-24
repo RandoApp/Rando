@@ -30,7 +30,7 @@ module.exports = {
 	});
     },
     getAll: function (callback) {
-	return Food.find(callback);
+	Food.find(callback);
     },
     remove: function (food) {
 	if (food && food instanceof mongoose.Model) {
