@@ -3,12 +3,32 @@ var path = require("path");
 var app = express();
 var config = require("config");
 var logger = require("./src/log/logger");
+var everyauth = require("everyauth");
+var account = require("./src/service/account");
+
+everyauth.debug = true;
 
 require("./src/model/db").establishConnection();
 
+everyauth
+  .facebook
+    .appId(config.app.fb.id)
+    .appSecret(config.app.fb.secret)
+    .findOrCreateUser(function (session, accessToken, accessTokenExtra, fbUserMetadata) {
+	logger.data("Facebook audentification: ", fbUserMetadata);
+
+	var promise = new everyauth.Promise();
+	account.findOrCreateByFBData(fbUserMetadata, promise);
+	return promise;
+    })
+    .redirectPath('/');
+
+app.use(app.router);
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(app.router);
+app.use(express.cookieParser('mr ripley'));
+app.use(express.session());
+app.use(everyauth.middleware(app));
 
 app.post('/food', function (req, res) {
     res.send('Thanks for posting your food.');
