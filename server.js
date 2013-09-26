@@ -10,6 +10,8 @@ everyauth.debug = true;
 
 require("./src/model/db").establishConnection();
 
+everyauth.everymodule.findUserById(account.findUserById);
+
 everyauth
   .facebook
     .appId(config.app.fb.id)
@@ -17,10 +19,11 @@ everyauth
     .findOrCreateUser(function (session, accessToken, accessTokenExtra, fbUserMetadata) {
 	logger.data("Facebook audentification: ", fbUserMetadata);
 
-	var promise = new everyauth.Promise();
+	var promise = this.Promise();
 	account.findOrCreateByFBData(fbUserMetadata, promise);
 	return promise;
     })
+    .scope("email")
     .redirectPath('/');
 
 app.use(app.router);
