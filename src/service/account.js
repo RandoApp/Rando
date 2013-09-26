@@ -16,17 +16,16 @@ module.exports = {
 	    }
 	    if (user) {
 		logger.debug("User exist: ", user);
-		user.id = user.userId;
+		console.log(user.userId);
 		promise.fulfill(user);
 	    } else {
 		logger.debug("Can't find user. Create him");
 		var user = {
-		    userId: data.id,
+		    authId: data.id,
 		    email: data.email,
 		    food: []
 		}
 		account.create(user);
-		user.id = data.id;
 		promise.fulfill(user);
 	    }
 	});
