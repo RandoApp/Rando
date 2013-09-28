@@ -49,6 +49,22 @@ app.post('/bonappetit/:id', function (req, res) {
     res.send('Bon appetit ' + req.params.id);
 });
 
+app.post('/account', function (req, res) {
+    logger.data("POST /account ", req);
+    account.registerByEmailAndPassword(req.query.email, req.query.password, function (err) {
+	if (err) {
+	    res.send('Registration error: ' + err);
+	    return;
+	}
+
+	res.send('registration');
+    });
+});
+
+app.post('/account/:id', function (req, res) {
+    res.send('audentification');
+});
+
 app.listen(config.app.port, function () {
     logger.info('Express server listening on port ' + config.app.port);
 });

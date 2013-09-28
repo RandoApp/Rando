@@ -9,7 +9,7 @@ var Account = mongoose.model("account", new mongoose.Schema({
 }));
 
 module.exports = {
-    create: function (user) {
+    create: function (user, callback) {
 	if (!user) {
 	    logger.warn("Hey, programmer! You forgot pass user arg to account.create! or passed user arg is undefined!");
 	    return;
@@ -19,21 +19,23 @@ module.exports = {
 	    logger.warn("Hey, programmer! account.create must contains email value in arg object!");
 	    return;
 	}
+	if (!callback) {
+	    callback = function (err) {
+		if (err) {
+		    logger.warn("Can't create account! Email: %s, food: %s", email, food);
+		    return;
+		}
+
+		logger.debug("Account created: ", account);
+	    };
+	}
 
 	user.food = [];
 
 	logger.data("Create account: Email: ", user);
 
 	var account = new Account(user);
-
-	account.save(function (err) {
-	    if (err) {
-		logger.warn("Can't create account! Email: %s, food: %s", email, food);
-		return;
-	    }
-
-	    logger.debug("Account created: ", account);
-	});
+	account.save(callback);
     },
     update: function (account) {
 	if (account && account instanceof mongoose.Model) {
