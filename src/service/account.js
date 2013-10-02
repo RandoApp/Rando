@@ -1,6 +1,7 @@
 var logger = require("../log/logger");
 var account = require("../model/account");
 var async = require("async");
+var check = require("validator").check;
 
 module.exports = {
     findOrCreateByFBData: function (data, promise) {
@@ -49,25 +50,15 @@ module.exports = {
     registerByEmailAndPassword: function (email, password, callback) {
 	async.series([
 	    function (done) {
-		if (!email && !password) {
-		    done(new Error("Miss email and password"));
-		    return;
-		}
-		if (!email) {
-		    done(new Error("Miss email"));
-		    return;
-		}
-		if (!password) {
-		    done(new Error("Miss password"));
-		    return;
-		}
-		if (!callback) {
-		    logger.warn("Hey, programmer. You forgot pass callback to accountService.registerByEmailAndPassword");
-		    done(new Error("Sorry"));
-		}
+		try {
+		    check(email).isEmail();
+		    check(password, "Empty password").notEmpty();
 
-		logger.debug("accountService.registerByEmailAndPasswword arguments verification succeffuly done");
-		done(null);
+		    logger.debug("accountService.registerByEmailAndPassword arguments verification succeffuly done");
+		    done(null);
+		} catch (exc) {
+		    done(new Error(exc.message));
+		}
 	    },
 	    function (done) {
 		account.getByEmail(email, function(err, user) {
@@ -106,7 +97,7 @@ module.exports = {
 		return;
 	    }
 
-	    logger.debug("Async process serias withot any error");
+	    logger.debug("Async process serias without any error");
 	});
     }
 };
