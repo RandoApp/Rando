@@ -24,10 +24,11 @@
     "mocha": "*",
     "should": "*",
     "sinon": "*",
-	"istanbul": "*"
-
+    "istanbul": "*",
+    "coveralls": "*"
   },
   "scripts": {
-    "test": "node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --recursive"
-  }
+    "test": "node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- --recursive",
+    "coveralls": "node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report lcovonly -- --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    }
 }
