@@ -59,16 +59,16 @@ describe('Account service.', function () {
 	});
 
 	it('Can not find user by email', function (done) {
+	    var error = "Any problem with data base connection";
 	    mongooseMock.stubSave().stubFindOne(function (email, callback) {
-		callback(new Error("Any problem with data base connection"));
+		callback(new Error(error));
 	    });
 
 	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Can't find user by email");
+		err.should.have.property("message", error);
 		done();
 	    });
-	    
 	});
 
 	it('User created successful', function (done) {
@@ -86,16 +86,59 @@ describe('Account service.', function () {
 	});
 
 	it('Can not create user', function (done) {
+	    var error = "Some strange error with database";
 	    var saveCalled = false;
 	    mongooseMock.stubFindOneWithNotFoundUser().stubSave(function (callback) {
 		saveCalled = true;
-		callback(new Error("Some strange error with database"));
+		callback(new Error(error));
 	    });
 
 	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
 		saveCalled.should.be.true;
 		should.exist(err);
-		err.should.have.property("message", "Can't create user");
+		err.should.have.property("message", error);
+		done();
+	    });
+	});
+    });
+
+
+    describe('Find User By id.', function () {
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    done();
+	});
+
+	it('Cant find user by id', function (done) {
+	    var error = "Error in mongodb";
+	    mongooseMock.stubFindById(function (id, callback) {
+		callback(new Error(error));
+	    });
+
+	    account.findUserById("123123123", function (err, user) {
+		should.exist(err);
+		err.should.have.property("message", error);
+		done();
+	    });
+	});
+
+	it('User not exist', function (done) {
+	    mongooseMock.stubFindByIdWithNotFoundUser();
+
+	    account.findUserById("123123124", function (err, user) {
+		should.exist(err);
+		err.should.have.property("message", "User not found");
+		done();
+	    });
+	});
+
+	it('User exist', function (done) {
+	    mongooseMock.stubFindById();
+
+	    account.findUserById("123123125", function (err, user) {
+		should.not.exist(err);
+		should.exist(user);
+		user.should.have.property("email", "user@mail.com");
 		done();
 	    });
 	});

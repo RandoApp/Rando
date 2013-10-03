@@ -31,9 +31,29 @@ module.exports = {
 	sinon.stub(mongoose.Model, "findOne", stub);
 	return this;
     },
+    stubFindByIdWithNotFoundUser: function (stub) {
+	if (!stub) {
+	    stub = function (id, callback) {
+		callback(null, null);
+	    };
+	}
+	sinon.stub(mongoose.Model, "findById", stub);
+	return this;
+    },
+    stubFindById: function (stub) {
+	if (!stub) {
+	    stub = function (id, callback) {
+		var user = {email: "user@mail.com"};
+		callback(null, user);
+	    };
+	}
+	sinon.stub(mongoose.Model, "findById", stub);
+	return this;
+    },
     restore: function () {
 	this.restoreSave();
 	this.restoreFindOnce();
+	this.restoreFindById();
 	return this;
     },
 
@@ -46,6 +66,12 @@ module.exports = {
     restoreFindOnce: function () {
 	if (mongoose.Model.findOne.restore) {
 	    mongoose.Model.findOne.restore();
+	}
+	return this;
+    },
+    restoreFindById: function () {
+	if (mongoose.Model.findById.restore) {
+	    mongoose.Model.findById.restore();
 	}
 	return this;
     }

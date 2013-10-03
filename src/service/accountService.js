@@ -64,7 +64,7 @@ module.exports = {
 		account.getByEmail(email, function(err, user) {
 		    if (err) {
 			logger.warn("Can't find user by email: ", email);
-			done(new Error("Can't find user by email"));
+			done(err);
 			return;
 		    }
 		    if (user) {
@@ -81,7 +81,7 @@ module.exports = {
 		account.create({email: email, password: password}, function (err) {
 		    if (err) {
 			logger.warn("Can't create account! Email: ", email);
-			done(new Error("Can't create user"));
+			done(err);
 			return;
 		    }
 
