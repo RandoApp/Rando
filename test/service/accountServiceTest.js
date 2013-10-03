@@ -1,6 +1,6 @@
 var should = require("should");
 var sinon = require("sinon");
-var account = require("../../src/service/account");
+var account = require("../../src/service/accountService");
 var mongooseMock = require("../util/mongooseMock");
 
 describe('Account service.', function () {

@@ -4,7 +4,7 @@ var app = express();
 var config = require("config");
 var logger = require("./src/log/logger");
 var everyauth = require("everyauth");
-var account = require("./src/service/account");
+var account = require("./src/service/accountService");
 
 everyauth.debug = true;
 

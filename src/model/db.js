@@ -1,12 +1,10 @@
 var logger = require("../log/logger");
+var config = require("config");
+var mongoose = require("mongoose");
 
 module.exports = {
     establishConnection: function () {
-	var mongoose = require("mongoose");
-	var config = require("config");
-
 	mongoose.connect(config.db.url);
-
 	var db = mongoose.connection;
 
 	db.on("error", function (e) {

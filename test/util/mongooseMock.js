@@ -12,7 +12,6 @@ module.exports = {
 	return this;
     },
     stubFindOne: function (stub) {
-	var mongoose = require("mongoose");
 	if (!stub) {
 	    stub = function (email, callback) {
 		callback();

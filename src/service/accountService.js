@@ -1,5 +1,5 @@
 var logger = require("../log/logger");
-var account = require("../model/account");
+var account = require("../model/accountModel");
 var async = require("async");
 var check = require("validator").check;
 
