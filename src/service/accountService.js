@@ -55,7 +55,7 @@ module.exports = {
 		    check(password, "Empty password").notEmpty();
 
 		    logger.debug("accountService.registerByEmailAndPassword arguments verification succeffuly done");
-		    done(null);
+		    done();
 		} catch (exc) {
 		    done(new Error(exc.message));
 		}
@@ -74,20 +74,20 @@ module.exports = {
 		    }
 
 		    logger.debug("User with email %s is not exist. Nice!", email); 
-		    done(null);
+		    done();
 		});
 	    },
 	    function (done) {
 		account.create({email: email, password: password}, function (err) {
 		    if (err) {
-			logger.warn("Can't create account! Email: %s, food: %s", email, food);
-			done(new Error("Sorry"));
+			logger.warn("Can't create account! Email: ", email);
+			done(new Error("Can't create user"));
 			return;
 		    }
 
 		    logger.debug("User created. Nice!");
-		    callback(null);
-		    done(null);
+		    callback();
+		    done();
 		});
 	    }
 	], function (err) {

@@ -32,7 +32,7 @@ describe('Account service.', function () {
 	});
 
 	it('Correct email and password should not return Error', function (done) {
-	    mongooseMock.stubSave().stubFindOne();
+	    mongooseMock.stubSave().stubFindOneWithNotFoundUser();
 
 	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
 		should.not.exist(err);
@@ -56,7 +56,48 @@ describe('Account service.', function () {
 		err.should.have.property("message", "User already exists");
 		done();
 	    });
+	});
 
+	it('Can not find user by email', function (done) {
+	    mongooseMock.stubSave().stubFindOne(function (email, callback) {
+		callback(new Error("Any problem with data base connection"));
+	    });
+
+	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+		should.exist(err);
+		err.should.have.property("message", "Can't find user by email");
+		done();
+	    });
+	    
+	});
+
+	it('User created successful', function (done) {
+	    var saveCalled = false;
+	    mongooseMock.stubFindOneWithNotFoundUser().stubSave(function (callback) {
+		saveCalled = true;
+		callback(null);
+	    });
+
+	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+		should.not.exist(err);
+		saveCalled.should.be.true;
+		done();
+	    });
+	});
+
+	it('Can not create user', function (done) {
+	    var saveCalled = false;
+	    mongooseMock.stubFindOneWithNotFoundUser().stubSave(function (callback) {
+		saveCalled = true;
+		callback(new Error("Some strange error with database"));
+	    });
+
+	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+		saveCalled.should.be.true;
+		should.exist(err);
+		err.should.have.property("message", "Can't create user");
+		done();
+	    });
 	});
 
     });

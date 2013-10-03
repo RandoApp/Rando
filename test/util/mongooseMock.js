@@ -14,7 +14,18 @@ module.exports = {
     stubFindOne: function (stub) {
 	if (!stub) {
 	    stub = function (email, callback) {
-		callback();
+		var user = {email: email};
+		callback(null, user);
+	    };
+	}
+	sinon.stub(mongoose.Model, "findOne", stub);
+	return this;
+    },
+    stubFindOneWithNotFoundUser: function (stub) {
+	if (!stub) {
+	    stub = function (email, callback) {
+		var user = {email: email};
+		callback(null, null);
 	    };
 	}
 	sinon.stub(mongoose.Model, "findOne", stub);
