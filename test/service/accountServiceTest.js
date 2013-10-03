@@ -102,7 +102,6 @@ describe('Account service.', function () {
 	});
     });
 
-
     describe('Find User By id.', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
@@ -142,6 +141,69 @@ describe('Account service.', function () {
 		done();
 	    });
 	});
-
     });
+
+    describe('Find or create by FB data.', function () {
+	beforeEach(function (done) {
+	    this.promiseMock = sinon.mock(new require("everyauth").facebook.Promise());
+	    this.promiseMock.expects("fail").never();
+	    this.promiseMock.expects("fulfill").never();
+	    done();
+	});
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    this.promiseMock.restore();
+	    done();
+	});
+
+	it('Wrong data without email from facebook', function (done) {
+	    this.promiseMock.expects("fail").once();
+
+	    account.findOrCreateByFBData({email: null}, this.promiseMock.object);
+
+	    this.promiseMock.verify();
+	    done();
+	});
+	it('No data from facebook', function (done) {
+	    this.promiseMock.expects("fail").once();
+
+	    account.findOrCreateByFBData(null, this.promiseMock.object);
+
+	    this.promiseMock.verify();
+	    done();
+	});
+	it('Database error', function (done) {
+	    this.promiseMock.expects("fail").once();
+
+	    mongooseMock.stubFindOne(function (email, callback) {
+		callback(new Error("Data base error"));
+	    });
+
+	    account.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
+
+	    this.promiseMock.verify();
+	    done();
+	});
+	it('User exist', function (done) {
+	    this.promiseMock.expects("fulfill").once();
+
+	    mongooseMock.stubFindOne();
+
+	    account.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
+
+	    this.promiseMock.verify();
+	    done();
+	});
+	it('Create user', function (done) {
+	    this.promiseMock.expects("fulfill").once();
+
+	    mongooseMock.stubSave().stubFindOneWithNotFoundUser();
+
+	    account.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
+
+	    this.promiseMock.verify();
+	    done();
+	});
+    });
+
 });

@@ -5,7 +5,7 @@ var check = require("validator").check;
 
 module.exports = {
     findOrCreateByFBData: function (data, promise) {
-	if (!data && !data.email) {
+	if (!data || !data.email) {
 	    promise.fail();
 	    return;
 	}
