@@ -8,3 +8,6 @@ config/runtime.*
 
 #winston logging
 *.log
+
+#istanbul code coverage
+coverage

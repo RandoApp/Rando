@@ -4,22 +4,38 @@ var logger = require("../log/logger");
 
 var Account = mongoose.model("account", new mongoose.Schema({
     email: String,
+    authId: String,
     food: Array
 }));
 
 module.exports = {
-    create: function (email, food) {
-	logger.data("Create account: Email: %s, food: ", email, food);
+    create: function (user, callback) {
+	if (!user) {
+	    logger.warn("Hey, programmer! You forgot pass user arg to account.create! or passed user arg is undefined!");
+	    return;
+	}
 
-	var account = new Account({email: email, food: []});
+	if (!user.email) {
+	    logger.warn("Hey, programmer! account.create must contains email value in arg object!");
+	    return;
+	}
+	if (!callback) {
+	    callback = function (err) {
+		if (err) {
+		    logger.warn("Can't create account! Email: %s, food: %s", email, food);
+		    return;
+		}
 
-	account.save(function (err) {
-	    if (err) {
-		logger.warn("Can't create account! Email: %s, food: %s", email, food);
-	    }
+		logger.debug("Account created: ", account);
+	    };
+	}
 
-	    logger.debug("Account created. Email: %s, food: ", account.email, account.food);
-	});
+	user.food = [];
+
+	logger.data("Create account: Email: ", user);
+
+	var account = new Account(user);
+	account.save(callback);
     },
     update: function (account) {
 	if (account && account instanceof mongoose.Model) {
@@ -28,6 +44,7 @@ module.exports = {
 	    account.save(function (err) {
 		if (err) {
 		    logger.warn("Can't upadate account! Email: %s, food: ", account.email, account.food);
+		    return;
 		}
 
 		logger.debug("Account updated. Email: %s, food: ", account.email, account.food);
@@ -35,9 +52,11 @@ module.exports = {
 	}
     },
     getByEmail: function (email, callback) {
+	logger.data("Try find user by email: ", email);
 	Account.findOne({email: email}, callback);
     },
     getById: function (id, callback) {
+	logger.data("Try find user by id: ", id);
 	Account.findById(id, callback);
     }
 };

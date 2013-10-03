@@ -3,12 +3,35 @@ var path = require("path");
 var app = express();
 var config = require("config");
 var logger = require("./src/log/logger");
+var everyauth = require("everyauth");
+var account = require("./src/service/accountService");
+
+everyauth.debug = true;
 
 require("./src/model/db").establishConnection();
 
+everyauth.everymodule.findUserById(account.findUserById);
+
+everyauth
+  .facebook
+    .appId(config.app.fb.id)
+    .appSecret(config.app.fb.secret)
+    .findOrCreateUser(function (session, accessToken, accessTokenExtra, fbUserMetadata) {
+	logger.data("Facebook audentification: ", fbUserMetadata);
+
+	var promise = this.Promise();
+	account.findOrCreateByFBData(fbUserMetadata, promise);
+	return promise;
+    })
+    .scope("email")
+    .redirectPath('/');
+
+app.use(app.router);
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(app.router);
+app.use(express.cookieParser('mr ripley'));
+app.use(express.session());
+app.use(everyauth.middleware(app));
 
 app.post('/food', function (req, res) {
     res.send('Thanks for posting your food.');
@@ -24,6 +47,22 @@ app.post('/report/:id', function (req, res) {
 
 app.post('/bonappetit/:id', function (req, res) {
     res.send('Bon appetit ' + req.params.id);
+});
+
+app.post('/account', function (req, res) {
+    logger.data("POST /account ", req);
+    account.registerByEmailAndPassword(req.query.email, req.query.password, function (err) {
+	if (err) {
+	    res.send('Registration error: ' + err);
+	    return;
+	}
+
+	res.send('registration');
+    });
+});
+
+app.post('/account/:id', function (req, res) {
+    res.send('audentification');
 });
 
 app.listen(config.app.port, function () {
