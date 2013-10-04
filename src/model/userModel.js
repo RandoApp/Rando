@@ -5,7 +5,7 @@ var logger = require("../log/logger");
 var Account = mongoose.model("account", new mongoose.Schema({
     email: String,
     authId: String,
-    foods: Array
+    food: Array
 }));
 
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
-		    logger.warn("Can't create account! Email: ", user.email, "foods: ", user.foods);
+		    logger.warn("Can't create account! Email: %s, food: %s", email, food);
 		    return;
 		}
 
@@ -30,7 +30,7 @@ module.exports = {
 	    };
 	}
 
-	user.foods = [];
+	user.food = [];
 
 	logger.data("Create account: Email: ", user);
 

@@ -1,5 +1,5 @@
 var logger = require("../log/logger");
-var account = require("../model/accountModel");
+var userModel = require("../model/userModel");
 var async = require("async");
 var check = require("validator").check;
 
@@ -10,9 +10,9 @@ module.exports = {
 	    return;
 	}
 
-	account.getByEmail(data.email, function (err, user) {
+	userModel.getByEmail(data.email, function (err, user) {
 	    if (err) {
-		logger.warn("Error when account.getByEmail: ", err);
+		logger.warn("Error when user.getByEmail: ", err);
 		promise.fail();
 		return;
 	    }
@@ -22,17 +22,17 @@ module.exports = {
 	    } else {
 		logger.debug("Can't find user. Create him");
 		var user = {
-		    authId: data.id,
+		    facebookId: data.id,
 		    email: data.email,
-		    food: []
+		    foods: []
 		}
-		account.create(user);
+		userModel.create(user);
 		promise.fulfill(user);
 	    }
 	});
     },
     findUserById: function (id, callback) {
-	account.getById(id, function (err, user) {
+	userModel.getById(id, function (err, user) {
 	    if (err) {
 		logger.warn("Can't find user by id: ", id);
 		callback(err);
@@ -54,14 +54,14 @@ module.exports = {
 		    check(email).isEmail();
 		    check(password, "Empty password").notEmpty();
 
-		    logger.debug("accountService.registerByEmailAndPassword arguments verification succeffuly done");
+		    logger.debug("user.ervice.registerByEmailAndPassword arguments verification succeffuly done");
 		    done();
 		} catch (exc) {
 		    done(new Error(exc.message));
 		}
 	    },
 	    function (done) {
-		account.getByEmail(email, function(err, user) {
+		userModel.getByEmail(email, function(err, user) {
 		    if (err) {
 			logger.warn("Can't find user by email: ", email);
 			done(err);
@@ -78,9 +78,9 @@ module.exports = {
 		});
 	    },
 	    function (done) {
-		account.create({email: email, password: password}, function (err) {
+		userModel.create({email: email, password: password}, function (err) {
 		    if (err) {
-			logger.warn("Can't create account! Email: ", email);
+			logger.warn("Can't create user. Email: ", email);
 			done(err);
 			return;
 		    }
