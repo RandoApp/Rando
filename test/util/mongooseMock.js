@@ -14,7 +14,46 @@ module.exports = {
     stubFindOne: function (stub) {
 	if (!stub) {
 	    stub = function (email, callback) {
-		var user = {email: email};
+		var user = {
+		    email: email,
+		    facebookId: "111111",
+		    foods: [{
+			user: {
+			    email: email,
+			    localtion: "1111.1111, 1111.1111",
+			    food: "3333",
+			    map: "4444",
+			    bonAppetit: false
+			},
+			stranger: {
+			    email: "stranger@mail.com",
+			    localtion: "2222.2222, 2222.2222",
+			    food: "3333",
+			    map: "4444",
+			    report: false,
+			    bonAppetit: false
+			}
+		    }]
+		};
+
+		user.__proto__ = mongoose.model("user").prototype;
+
+		callback(null, user);
+	    };
+	}
+	sinon.stub(mongoose.Model, "findOne", stub);
+	return this;
+    },
+    stubFindOneWithEmptyUser: function (stub) {
+	if (!stub) {
+	    stub = function (email, callback) {
+		var user = {
+		    email: email,
+		    facebookId: "111111",
+		    foods: []
+		};
+		user.__proto__ = mongoose.model("user").prototype;
+
 		callback(null, user);
 	    };
 	}
@@ -24,7 +63,6 @@ module.exports = {
     stubFindOneWithNotFoundUser: function (stub) {
 	if (!stub) {
 	    stub = function (email, callback) {
-		var user = {email: email};
 		callback(null, null);
 	    };
 	}

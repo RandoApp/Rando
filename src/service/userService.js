@@ -24,7 +24,6 @@ module.exports = {
 		var user = {
 		    facebookId: data.id,
 		    email: data.email,
-		    foods: []
 		}
 		userModel.create(user);
 		promise.fulfill(user);

@@ -44,7 +44,7 @@ app.get('/food', function (req, res) {
 
 app.post('/report/:id', function (req, res) {
     logger.data("POST /report/:id", req);
-    comment.report(req.params.id, function (err) {
+    comment.report(req.query.email, req.params.id, function (err) {
 	if (err) {
 	    res.send('Error when report');
 	    return;
@@ -56,9 +56,9 @@ app.post('/report/:id', function (req, res) {
 
 app.post('/bonappetit/:id', function (req, res) {
     logger.data("POST /bonappetit/:id", req);
-    comment.bonAppetit(req.params.id, function (err) {
+    comment.bonAppetit(req.query.email, req.params.id, function (err) {
 	if (err) {
-	    res.send('Error when Bon appetit ');
+	    res.send('Error bon appetit');
 	    return;
 	}
 	res.send('Bon appetit ' + req.params.id);
