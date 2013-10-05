@@ -3,6 +3,9 @@ var logger = require("../log/logger");
 var async = require("async");
 var mongoose = require("mongoose");
 
+//TODO: Service needs:
+//1. userEmail and foodId verification in report and bonAppetit methods.
+//2. Move verifications into the getByEmail (in report and bonAppetit) to Util verification function, because DRY.
 module.exports = {
     report: function (userEmail, foodId, callback) {
 	userModel.getByEmail(userEmail, function (err, user) {
