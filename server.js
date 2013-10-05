@@ -4,13 +4,14 @@ var app = express();
 var config = require("config");
 var logger = require("./src/log/logger");
 var everyauth = require("everyauth");
-var account = require("./src/service/accountService");
+var user = require("./src/service/userService");
+var comment = require("./src/service/commentService");
 
 everyauth.debug = true;
 
 require("./src/model/db").establishConnection();
 
-everyauth.everymodule.findUserById(account.findUserById);
+everyauth.everymodule.findUserById(user.findUserById);
 
 everyauth
   .facebook
@@ -20,7 +21,7 @@ everyauth
 	logger.data("Facebook audentification: ", fbUserMetadata);
 
 	var promise = this.Promise();
-	account.findOrCreateByFBData(fbUserMetadata, promise);
+	user.findOrCreateByFBData(fbUserMetadata, promise);
 	return promise;
     })
     .scope("email")
@@ -42,16 +43,31 @@ app.get('/food', function (req, res) {
 });
 
 app.post('/report/:id', function (req, res) {
-    res.send('Image ' + req.params.id + ' reported');
+    logger.data("POST /report/:id", req);
+    comment.report(req.query.email, req.params.id, function (err) {
+	if (err) {
+	    res.send('Error when report');
+	    return;
+	}
+
+	res.send('Image ' + req.params.id + ' reported');
+    });
 });
 
 app.post('/bonappetit/:id', function (req, res) {
-    res.send('Bon appetit ' + req.params.id);
+    logger.data("POST /bonappetit/:id", req);
+    comment.bonAppetit(req.query.email, req.params.id, function (err) {
+	if (err) {
+	    res.send('Error bon appetit');
+	    return;
+	}
+	res.send('Bon appetit ' + req.params.id);
+    });
 });
 
-app.post('/account', function (req, res) {
-    logger.data("POST /account ", req);
-    account.registerByEmailAndPassword(req.query.email, req.query.password, function (err) {
+app.post('/user', function (req, res) {
+    logger.data("POST /user ", req);
+    user.registerByEmailAndPassword(req.query.email, req.query.password, function (err) {
 	if (err) {
 	    res.send('Registration error: ' + err);
 	    return;
@@ -61,7 +77,7 @@ app.post('/account', function (req, res) {
     });
 });
 
-app.post('/account/:id', function (req, res) {
+app.post('/user/:id', function (req, res) {
     res.send('audentification');
 });
 

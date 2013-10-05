@@ -1,9 +1,9 @@
 var should = require("should");
 var sinon = require("sinon");
-var account = require("../../src/service/accountService");
+var userService = require("../../src/service/userService");
 var mongooseMock = require("../util/mongooseMock");
 
-describe('Account service.', function () {
+describe('User service.', function () {
     describe('Register by email.', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
@@ -11,21 +11,21 @@ describe('Account service.', function () {
 	});
 
 	it('Invalid email should return Error', function () {
-	    account.registerByEmailAndPassword("this is not email", "", function (err) {
+	    userService.registerByEmailAndPassword("this is not email", "", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Invalid email");
 	    });
 	});
 
 	it('Empty email should return Error', function () {
-	    account.registerByEmailAndPassword("", "password", function (err) {
+	    userService.registerByEmailAndPassword("", "password", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Invalid email");
 	    });
 	});
 
 	it('Empty password should return Error', function () {
-	    account.registerByEmailAndPassword("this@is.email", "", function (err) {
+	    userService.registerByEmailAndPassword("this@is.email", "", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Empty password");
 	    });
@@ -34,7 +34,7 @@ describe('Account service.', function () {
 	it('Correct email and password should not return Error', function (done) {
 	    mongooseMock.stubSave().stubFindOneWithNotFoundUser();
 
-	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
 		should.not.exist(err);
 		done();
 	    });
@@ -51,7 +51,7 @@ describe('Account service.', function () {
 		callback(null, {user: "some user"});
 	    });
 
-	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "User already exists");
 		done();
@@ -64,7 +64,7 @@ describe('Account service.', function () {
 		callback(new Error(error));
 	    });
 
-	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
 		should.exist(err);
 		err.should.have.property("message", error);
 		done();
@@ -78,7 +78,7 @@ describe('Account service.', function () {
 		callback(null);
 	    });
 
-	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
 		should.not.exist(err);
 		saveCalled.should.be.true;
 		done();
@@ -93,7 +93,7 @@ describe('Account service.', function () {
 		callback(new Error(error));
 	    });
 
-	    account.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
 		saveCalled.should.be.true;
 		should.exist(err);
 		err.should.have.property("message", error);
@@ -114,7 +114,7 @@ describe('Account service.', function () {
 		callback(new Error(error));
 	    });
 
-	    account.findUserById("123123123", function (err, user) {
+	    userService.findUserById("123123123", function (err, user) {
 		should.exist(err);
 		err.should.have.property("message", error);
 		done();
@@ -124,7 +124,7 @@ describe('Account service.', function () {
 	it('User not exist', function (done) {
 	    mongooseMock.stubFindByIdWithNotFoundUser();
 
-	    account.findUserById("123123124", function (err, user) {
+	    userService.findUserById("123123124", function (err, user) {
 		should.exist(err);
 		err.should.have.property("message", "User not found");
 		done();
@@ -134,7 +134,7 @@ describe('Account service.', function () {
 	it('User exist', function (done) {
 	    mongooseMock.stubFindById();
 
-	    account.findUserById("123123125", function (err, user) {
+	    userService.findUserById("123123125", function (err, user) {
 		should.not.exist(err);
 		should.exist(user);
 		user.should.have.property("email", "user@mail.com");
@@ -159,7 +159,7 @@ describe('Account service.', function () {
 	it('Wrong data without email from facebook', function (done) {
 	    this.promiseMock.expects("fail").once();
 
-	    account.findOrCreateByFBData({email: null}, this.promiseMock.object);
+	    userService.findOrCreateByFBData({email: null}, this.promiseMock.object);
 
 	    this.promiseMock.verify();
 	    done();
@@ -167,7 +167,7 @@ describe('Account service.', function () {
 	it('No data from facebook', function (done) {
 	    this.promiseMock.expects("fail").once();
 
-	    account.findOrCreateByFBData(null, this.promiseMock.object);
+	    userService.findOrCreateByFBData(null, this.promiseMock.object);
 
 	    this.promiseMock.verify();
 	    done();
@@ -179,7 +179,7 @@ describe('Account service.', function () {
 		callback(new Error("Data base error"));
 	    });
 
-	    account.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
+	    userService.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
 
 	    this.promiseMock.verify();
 	    done();
@@ -189,7 +189,7 @@ describe('Account service.', function () {
 
 	    mongooseMock.stubFindOne();
 
-	    account.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
+	    userService.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
 
 	    this.promiseMock.verify();
 	    done();
@@ -199,7 +199,7 @@ describe('Account service.', function () {
 
 	    mongooseMock.stubSave().stubFindOneWithNotFoundUser();
 
-	    account.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
+	    userService.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
 
 	    this.promiseMock.verify();
 	    done();
