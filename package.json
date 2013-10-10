@@ -18,7 +18,8 @@
     "winston": "0.7.x",
     "everyauth": "0.4.x",
     "async": "0.2.x",
-    "validator": "1.5.x"
+    "validator": "1.5.x",
+	"mv": "1.0.x"
   },
   "devDependencies": {
     "mocha": "*",
