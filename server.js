@@ -1,13 +1,14 @@
 var express = require("express");
-var path = require("path");
-var app = express();
 var config = require("config");
-var logger = require("./src/log/logger");
 var everyauth = require("everyauth");
+var logger = require("./src/log/logger");
 var user = require("./src/service/userService");
 var comment = require("./src/service/commentService");
+var food = require("./src/service/foodService");
+var app = express();
 
 everyauth.debug = true;
+
 
 require("./src/model/db").establishConnection();
 
@@ -27,15 +28,23 @@ everyauth
     .scope("email")
     .redirectPath('/');
 
-app.use(app.router);
+app.use(express.static(__dirname + '/foods'));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.cookieParser('mr ripley'));
 app.use(express.session());
 app.use(everyauth.middleware(app));
+app.use(app.router);
 
-app.post('/food', function (req, res) {
-    res.send('Thanks for posting your food.');
+app.post('/food', function (req, res, next) {
+    food.saveFood(req.files.image.path, function (err) {
+	if (err) {
+	    res.send("Error: " + err);
+	    return;
+	}
+
+	res.send("Ok");
+    });
 });
 
 app.get('/food', function (req, res) {
