@@ -11,8 +11,18 @@ var Food = mongoose.model("food", new mongoose.Schema({
 }));
 
 module.exports = {
-    add: function (email, location, creation, name, map) {
+    add: function (email, location, creation, name, map, callback) {
 	logger.data("Food add. Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
+
+	if (!callback) {
+	    callback = function (err) {
+		if (err) {
+		    logger.warn("Can't add food! Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
+		    return;
+		}
+		logger.debug("Food added. Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
+	    }
+	}
 
 	var food = new Food({
 	    email: email,
@@ -22,12 +32,7 @@ module.exports = {
 	    map: map
 	});
 
-	food.save( function (err) {
-	    if (err) {
-		logger.warn("Can't add food! Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
-	    }
-	    logger.debug("Food added. Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
-	});
+	food.save(callback);
     },
     getAll: function (callback) {
 	Food.find(callback);
@@ -37,6 +42,7 @@ module.exports = {
 	    food.remove(function (err) {
 		if (err) {
 		    logger.warn("Can't remove food! %j", food); 
+		    return;
 		}
 		logger.debug("Food removed. Email: %s, location: %s, creation: %s, name: %s, map: %s", food.email, food.location, food.creation, food.name, food.map);
 	    });
