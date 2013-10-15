@@ -1,11 +1,10 @@
 var logger = require("../log/logger");
-var userModel = require("../model/userModel");
 var async = require("async");
 var check = require("validator").check;
-var fs = require("fs");
-var config = require("config");
 var util = require("../util/util");
 var mv = require("mv");
+var foodModel = require("../model/foodModel");
+var userModel = require("../model/userModel");
 
 module.exports =  {
     saveFood: function (foodPath, callback) {
@@ -30,16 +29,17 @@ module.exports =  {
 		});
 	    },
 	    function (name, done) {
-		logger.debug("move: " + foodPath + " --> " + name);
+		logger.debug("move: ", foodPath, " --> ", name);
 		mv(foodPath, name, {mkdirp: true}, function (err) {
 		    if (err) {
 			logger.warn("Can't move  ", foodPath, " to ", name);
 			done(err);
 			return;
 		    }
-		    done(null);
+		    done(null, name);
 		});
-	    }
+	    },
+	    this.updateFood
 	], function (err) {
 	    if (err) {
 		logger.warn("Can't save food, because: ", err);
@@ -50,5 +50,31 @@ module.exports =  {
 	    logger.debug("saveFood done");
 	    callback();
 	});
+    },
+    updateFood: function (name, callback) {
+	async.parallel({
+		addFood: function (done) {
+		    foodModel.add(email, location, creation, name, map, function (err) {
+			if (err) {
+			    logger.warn("Can't add food");
+			    done(err);
+			    return;
+			}
+			done(null);
+		    );
+		},
+		updateUser: function (done) {
+		    userModel.getUserByEmail();
+		    userModel.update();
+		}
+	    },
+	    function (err) {
+		if (err) {
+		    callback(err);
+		    return;
+		}
+		callback(null);
+	    }
+	);
     }
 };
