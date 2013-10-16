@@ -13,7 +13,6 @@ module.exports = {
 	}
 
 	var self = this;
-
 	userModel.getByEmail(email, function(err, user) {
 	    if (err) {
 		logger.warn("Error when user.getByEmail: ", err);

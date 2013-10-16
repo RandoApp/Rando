@@ -7,17 +7,9 @@ var food = require("./src/service/foodService");
 var passport = require("passport");
 var FacebookStrategy = require('passport-facebook').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
+var MongoStore = require('connect-mongo')(express);
+var mongodbConnection = require("./src/model/db").establishConnection();
 var app = express();
-
-require("./src/model/db").establishConnection();
-
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
-
-passport.deserializeUser(function(obj, done) {
-    done(null, obj);
-});
 
 passport.use(new FacebookStrategy({
     clientID: config.app.fb.id,
@@ -36,8 +28,11 @@ passport.use(new LocalStrategy(function(email, password, done) {
 app.use(express.static(__dirname + '/foods'));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(express.cookieParser());
-app.use(express.session({secret: "config.app.secretKey" }));
+app.use(express.cookieParser(config.app.secret));
+app.use(express.session({
+    secret: config.app.secret,
+    store: new MongoStore({mongoose_connection: mongodbConnection})
+}));
 app.use(passport.initialize())
 
 app.post('/food', function (req, res, next) {
@@ -60,6 +55,7 @@ app.post('/report/:id', function (req, res) {
     comment.report(req.query.email, req.params.id, function (err) {
 	if (err) {
 	    res.send('Error when report');
+
 	    return;
 	}
 
@@ -83,7 +79,7 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
     res.redirect('/');
 });
 
-app.post('/user', function(req, res) {
+app.post('/user', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
 	logger.debug("YYYYYY");
 	if (err) {
@@ -101,7 +97,7 @@ app.post('/user', function(req, res) {
 	    }
 	    return res.send('OK');
 	});
-    })(req, res);
+    })(req, res, next);
 });
 
 app.listen(config.app.port, function () {
