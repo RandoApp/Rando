@@ -61,8 +61,7 @@ module.exports =  {
 			    return;
 			}
 			done(null);
-		    );
-		},
+		})},
 		updateUser: function (done) {
 		    userModel.getUserByEmail();
 		    userModel.update();

@@ -1,40 +1,44 @@
 var express = require("express");
 var config = require("config");
-var everyauth = require("everyauth");
 var logger = require("./src/log/logger");
 var user = require("./src/service/userService");
 var comment = require("./src/service/commentService");
 var food = require("./src/service/foodService");
+var passport = require("passport");
+var FacebookStrategy = require('passport-facebook').Strategy;
+var LocalStrategy = require('passport-local').Strategy;
 var app = express();
-
-everyauth.debug = true;
-
 
 require("./src/model/db").establishConnection();
 
-everyauth.everymodule.findUserById(user.findUserById);
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
 
-everyauth
-  .facebook
-    .appId(config.app.fb.id)
-    .appSecret(config.app.fb.secret)
-    .findOrCreateUser(function (session, accessToken, accessTokenExtra, fbUserMetadata) {
-	logger.data("Facebook audentification: ", fbUserMetadata);
+passport.deserializeUser(function(obj, done) {
+    done(null, obj);
+});
 
-	var promise = this.Promise();
-	user.findOrCreateByFBData(fbUserMetadata, promise);
-	return promise;
-    })
-    .scope("email")
-    .redirectPath('/');
+passport.use(new FacebookStrategy({
+    clientID: config.app.fb.id,
+    clientSecret: config.app.fb.secret,
+    callbackURL: "/auth/facebook/callback"
+}, function(accessToken, refreshToken, profile, done) {
+    user.findOrCreateByFBData(profile._json, done);
+}));
+
+passport.use(new LocalStrategy(function(email, password, done) {
+    console.warn("USRENAME: ", email);
+    console.warn("pas: ", password);
+    user.findOrCreateByLoginAndPassword(email, password, done);
+}));
 
 app.use(express.static(__dirname + '/foods'));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(express.cookieParser('mr ripley'));
-app.use(express.session());
-app.use(everyauth.middleware(app));
-app.use(app.router);
+app.use(express.cookieParser());
+app.use(express.session({secret: "config.app.secretKey" }));
+app.use(passport.initialize())
 
 app.post('/food', function (req, res, next) {
     food.saveFood(req.files.image.path, function (err) {
@@ -74,20 +78,30 @@ app.post('/bonappetit/:id', function (req, res) {
     });
 });
 
-app.post('/user', function (req, res) {
-    logger.data("POST /user ", req);
-    user.registerByEmailAndPassword(req.query.email, req.query.password, function (err) {
-	if (err) {
-	    res.send('Registration error: ' + err);
-	    return;
-	}
-
-	res.send('registration');
-    });
+app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), function(req, res) {
+    res.redirect('/');
 });
 
-app.post('/user/:id', function (req, res) {
-    res.send('audentification');
+app.post('/user', function(req, res) {
+    passport.authenticate('local', function(err, user, info) {
+	logger.debug("YYYYYY");
+	if (err) {
+	    res.send("ERROR: " + err);
+	    return;
+	}
+	if (!user) {
+	    req.session.messages = [info.message];
+	    return res.redirect('/login')
+	}
+	req.logIn(user, function(err) {
+	    if (err) {
+		res.send("ERROR: " + err);
+		return;
+	    }
+	    return res.send('OK');
+	});
+    })(req, res);
 });
 
 app.listen(config.app.port, function () {

@@ -17,6 +17,8 @@
     "mongoose": "3.6.x",
     "winston": "0.7.x",
     "passport": "0.1.x",
+	"passport-local": "0.1.x",
+	"passport-facebook": "1.0.x",
     "async": "0.2.x",
     "validator": "1.5.x",
 	"mv": "1.0.x"
