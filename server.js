@@ -20,22 +20,30 @@ passport.use(new FacebookStrategy({
 }));
 
 passport.use(new LocalStrategy(function(email, password, done) {
-    console.warn("USRENAME: ", email);
-    console.warn("pas: ", password);
     user.findOrCreateByLoginAndPassword(email, password, done);
 }));
+
+
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function(id, done) {
+    done(null, id);
+});
 
 app.use(express.static(__dirname + '/foods'));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(express.cookieParser(config.app.secret));
+app.use(express.cookieParser());
 app.use(express.session({
     secret: config.app.secret,
     store: new MongoStore({mongoose_connection: mongodbConnection})
 }));
-app.use(passport.initialize())
+app.use(passport.initialize());
 
 app.post('/food', function (req, res, next) {
+    var userId = req.session.passport.user;
     food.saveFood(req.files.image.path, function (err) {
 	if (err) {
 	    res.send("Error: " + err);
@@ -46,16 +54,12 @@ app.post('/food', function (req, res, next) {
     });
 });
 
-app.get('/food', function (req, res) {
-    res.send('Here is food for you.'); 
-});
-
 app.post('/report/:id', function (req, res) {
     logger.data("POST /report/:id", req);
+    var userId = req.session.passport.user;
     comment.report(req.query.email, req.params.id, function (err) {
 	if (err) {
 	    res.send('Error when report');
-
 	    return;
 	}
 
@@ -65,6 +69,7 @@ app.post('/report/:id', function (req, res) {
 
 app.post('/bonappetit/:id', function (req, res) {
     logger.data("POST /bonappetit/:id", req);
+    var userId = req.session.passport.user;
     comment.bonAppetit(req.query.email, req.params.id, function (err) {
 	if (err) {
 	    res.send('Error bon appetit');
@@ -81,7 +86,6 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 
 app.post('/user', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
-	logger.debug("YYYYYY");
 	if (err) {
 	    res.send("ERROR: " + err);
 	    return;
