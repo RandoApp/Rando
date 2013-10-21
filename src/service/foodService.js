@@ -7,14 +7,14 @@ var foodModel = require("../model/foodModel");
 var userModel = require("../model/userModel");
 
 module.exports =  {
-    saveFood: function (foodPath, callback) {
-	logger.debug("Try save food from: ", foodPath);
+    saveFood: function (userId, foodPath, location, callback) {
+	logger.debug("Try save food from: ", foodPath, " for: ", userId, " location: ", location);
 
 	async.waterfall([
 	    function (done) {
-		if (!foodPath || !check(foodPath).notEmpty()) {
-		    logger.warn("Incorect food path: ", foodPath);
-		    done(new Error("Incorect food path"));
+		if (!userId || !foodPath || !check(foodPath).notEmpty() || !location) {
+		    logger.warn("Incorect args: ", userId, foodPath, location);
+		    done(new Error("Incorect args"));
 		    return;
 		}
 		done(null);
@@ -36,7 +36,7 @@ module.exports =  {
 			done(err);
 			return;
 		    }
-		    done(null, name);
+		    done(null, userId, name, location);
 		});
 	    },
 	    this.updateFood
@@ -51,10 +51,10 @@ module.exports =  {
 	    callback();
 	});
     },
-    updateFood: function (name, callback) {
+    updateFood: function (userId, name, location, callback) {
 	async.parallel({
 		addFood: function (done) {
-		    foodModel.add(email, location, creation, name, map, function (err) {
+		    foodModel.add(userId, location, Date.now(), name, function (err) {
 			if (err) {
 			    logger.warn("Can't add food");
 			    done(err);
@@ -63,8 +63,37 @@ module.exports =  {
 			done(null);
 		})},
 		updateUser: function (done) {
-		    userModel.getUserByEmail();
-		    userModel.update();
+		    var id = userId;
+		    var name = name;
+		    var location = location;
+		    userModel.getById(userId, function (err, user) {
+			if (err)  {
+			    logger.warn("Can't find user: ", userId, " because: ", err);
+			    done(err);
+			    return;
+			}
+
+			user.foods.push({
+			    user: {
+				email: user.email,
+				location: location,
+				food: name,
+				map: "",
+				bonAppetit: false
+			    },
+			    stranger: {
+				email: "",
+				location: "",
+				food: "",
+				map: "",
+				report: false,
+				bonAppetit: false
+			    }
+			});
+
+			userModel.update(user);
+			done(null);
+		    });
 		}
 	    },
 	    function (err) {

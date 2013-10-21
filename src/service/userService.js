@@ -57,7 +57,7 @@ module.exports = {
 	userModel.getByEmail(data.email, function (err, user) {
 	    if (err) {
 		logger.warn("Error when user.getByEmail: ", err);
-		callback(new Error("Error db"));
+		callback(err);
 		return;
 	    }
 	    if (user) {

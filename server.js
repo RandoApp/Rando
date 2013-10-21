@@ -44,7 +44,7 @@ app.use(passport.initialize());
 
 app.post('/food', function (req, res, next) {
     var userId = req.session.passport.user;
-    food.saveFood(req.files.image.path, function (err) {
+    food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err) {
 	if (err) {
 	    res.send("Error: " + err);
 	    return;
