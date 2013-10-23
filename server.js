@@ -12,6 +12,7 @@ var mongodbConnection = require("./src/model/db").establishConnection();
 var app = express();
 
 passport.use(new FacebookStrategy({
+
     clientID: config.app.fb.id,
     clientSecret: config.app.fb.secret,
     callbackURL: "/auth/facebook/callback"
@@ -32,7 +33,7 @@ passport.deserializeUser(function(id, done) {
     done(null, id);
 });
 
-app.use(express.static(__dirname + '/foods'));
+app.use(express.static(__dirname + '/static'));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.cookieParser());
