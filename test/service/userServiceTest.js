@@ -144,65 +144,54 @@ describe('User service.', function () {
     });
 
     describe('Find or create by FB data.', function () {
-	beforeEach(function (done) {
-	    this.promiseMock = sinon.mock(new require("everyauth").facebook.Promise());
-	    this.promiseMock.expects("fail").never();
-	    this.promiseMock.expects("fulfill").never();
-	    done();
-	});
 	afterEach(function (done) {
 	    mongooseMock.restore();
-	    this.promiseMock.restore();
 	    done();
 	});
 
 	it('Wrong data without email from facebook', function (done) {
-	    this.promiseMock.expects("fail").once();
+	    userService.findOrCreateByFBData({email: null}, function (err) {
+		should.exist(err);
+		err.should.have.property("message", "No email");
+		done();
+	    });
 
-	    userService.findOrCreateByFBData({email: null}, this.promiseMock.object);
-
-	    this.promiseMock.verify();
-	    done();
 	});
 	it('No data from facebook', function (done) {
-	    this.promiseMock.expects("fail").once();
-
-	    userService.findOrCreateByFBData(null, this.promiseMock.object);
-
-	    this.promiseMock.verify();
-	    done();
+	    userService.findOrCreateByFBData(null, function (err) {
+		should.exist(err);
+		err.should.have.property("message", "No email");
+		done();
+	    });
 	});
 	it('Database error', function (done) {
-	    this.promiseMock.expects("fail").once();
-
 	    mongooseMock.stubFindOne(function (email, callback) {
 		callback(new Error("Data base error"));
 	    });
 
-	    userService.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
-
-	    this.promiseMock.verify();
-	    done();
+	    userService.findOrCreateByFBData({email: "user@mail.com"}, function (err) {
+		should.exist(err);
+		err.should.have.property("message", "Data base error");
+		done();
+	    });
 	});
 	it('User exist', function (done) {
-	    this.promiseMock.expects("fulfill").once();
-
 	    mongooseMock.stubFindOne();
 
-	    userService.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
-
-	    this.promiseMock.verify();
-	    done();
+	    userService.findOrCreateByFBData({email: "user@mail.com"}, function (err, userId) {
+		should.not.exist(err);
+		should.exist(userId);
+		done();
+	    });
 	});
 	it('Create user', function (done) {
-	    this.promiseMock.expects("fulfill").once();
-
 	    mongooseMock.stubSave().stubFindOneWithNotFoundUser();
 
-	    userService.findOrCreateByFBData({email: "user@mail.com"}, this.promiseMock.object);
-
-	    this.promiseMock.verify();
-	    done();
+	    userService.findOrCreateByFBData({email: "user@mail.com", id: "23131231"}, function (err, userId) {
+		should.not.exist(err);
+		should.exist(userId);
+		done();
+	    });
 	});
     });
 

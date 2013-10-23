@@ -5,7 +5,12 @@ module.exports = {
     stubSave: function (stub) {
 	if (!stub) {
 	    stub = function (callback) {
-		callback(null);
+		callback(null, {
+		    id: "524ea2324a590391a3e8b516",
+		    email: "user@mail.com",
+		    facebookId: "111111",
+		    foods: []
+		});
 	    };
 	}
 	sinon.stub(mongoose.Model.prototype, "save", stub);
@@ -15,6 +20,7 @@ module.exports = {
 	if (!stub) {
 	    stub = function (email, callback) {
 		var user = {
+		    id: "524ea2324a590391a3e8b516",
 		    email: email,
 		    facebookId: "111111",
 		    foods: [{
@@ -48,6 +54,7 @@ module.exports = {
 	if (!stub) {
 	    stub = function (email, callback) {
 		var user = {
+		    id: "524ea2324a590391a3e8b516",
 		    email: email,
 		    facebookId: "111111",
 		    foods: []
@@ -81,7 +88,12 @@ module.exports = {
     stubFindById: function (stub) {
 	if (!stub) {
 	    stub = function (id, callback) {
-		var user = {email: "user@mail.com"};
+		var user = {
+		    id: "524ea2324a590391a3e8b516",
+		    email: "user@mail.com",
+		    facebookId: "111111",
+		    foods: []
+		};
 		callback(null, user);
 	    };
 	}

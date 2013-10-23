@@ -14,5 +14,6 @@ module.exports = {
 	db.on("open", function () {
 	    logger.info("Connection to mongodb established");
 	});
+	return db;
     }
 };

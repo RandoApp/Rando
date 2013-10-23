@@ -3,7 +3,7 @@ var config = require("config");
 var logger = require("../log/logger");
 
 var Food = mongoose.model("food", new mongoose.Schema({
-    email: String,
+    user: String,
     location: Number,
     creation: Date,
     name: String,
@@ -11,23 +11,28 @@ var Food = mongoose.model("food", new mongoose.Schema({
 }));
 
 module.exports = {
-    add: function (email, location, creation, name, map) {
-	logger.data("Food add. Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
+    add: function (userId, location, creation, name, callback) {
+	logger.data("Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", name: ", name);
+
+	if (!callback) {
+	    callback = function (err) {
+		if (err) {
+		    logger.warn("Can't add food! User: %s, location: %s, creation: %s, name: %s, map: %s", userId, location, creation, name, map);
+		    return;
+		}
+		logger.debug("Food added. User: %s, location: %s, creation: %s, name: %s, map: %s", userId, location, creation, name, map);
+	    }
+	}
 
 	var food = new Food({
-	    email: email,
+	    user: userId,
 	    location: location,
 	    creation: creation,
 	    name: name,
-	    map: map
+	    map: null
 	});
 
-	food.save( function (err) {
-	    if (err) {
-		logger.warn("Can't add food! Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
-	    }
-	    logger.debug("Food added. Email: %s, location: %s, creation: %s, name: %s, map: %s", email, location, creation, name, map);
-	});
+	food.save(callback);
     },
     getAll: function (callback) {
 	Food.find(callback);
@@ -37,8 +42,9 @@ module.exports = {
 	    food.remove(function (err) {
 		if (err) {
 		    logger.warn("Can't remove food! %j", food); 
+		    return;
 		}
-		logger.debug("Food removed. Email: %s, location: %s, creation: %s, name: %s, map: %s", food.email, food.location, food.creation, food.name, food.map);
+		logger.debug("Food removed. User: %s, location: %s, creation: %s, name: %s, map: %s", food.user, food.location, food.creation, food.name, food.map);
 	    });
 	}
     }
