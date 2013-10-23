@@ -4,7 +4,7 @@ var userService = require("../../src/service/userService");
 var mongooseMock = require("../util/mongooseMock");
 
 describe('User service.', function () {
-    describe('Register by email.', function () {
+    describe('Find or create user by login and password', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
 	    done();
@@ -194,5 +194,4 @@ describe('User service.', function () {
 	    });
 	});
     });
-
 });
