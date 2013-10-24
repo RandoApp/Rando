@@ -4,7 +4,7 @@ var userService = require("../../src/service/userService");
 var mongooseMock = require("../util/mongooseMock");
 
 describe('User service.', function () {
-    describe('Find or create user by login and password', function () {
+    describe('Find or create user by login and password.', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
 	    done();
@@ -13,35 +13,35 @@ describe('User service.', function () {
 	it('Invalid email should return Error', function () {
 	    userService.findOrCreateByLoginAndPassword("this is not email", "", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Invalid email");
+		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
 	it('Empty email should return Error', function () {
 	    userService.findOrCreateByLoginAndPassword("", "password", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Invalid email");
+		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
 	it('Empty password should return Error', function () {
 	    userService.findOrCreateByLoginAndPassword("this@is.email", "", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Invalid email");
+		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
 	it('Undefined email should return Error', function () {
 	    userService.findOrCreateByLoginAndPassword(null, "", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Invalid email");
+		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
 	it('Undefined password should return Error', function () {
 	    userService.findOrCreateByLoginAndPassword("this@is.email", null, function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Invalid email");
+		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
@@ -81,7 +81,7 @@ describe('User service.', function () {
 
 	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password2", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Password is not correct");
+		err.should.have.property("message", "Incorrect args");
 		done();
 	    });
 	});
@@ -113,7 +113,7 @@ describe('User service.', function () {
 	});
     });
 
-    describe('Generate Hash for password', function () {
+    describe('Generate Hash for password.', function () {
 	it('Sha1 algorithm should work', function (done) {
 	    var expected = "7548a5ca114de42a25cc6d93e2ab74095b290ec5"; //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
 	    var actual = userService.generateHashForPassword("user@mail.com", "passwordForSha1");
@@ -122,7 +122,7 @@ describe('User service.', function () {
 	});
     });
 
-    describe('Is password correct', function () {
+    describe('Is password correct.', function () {
 	it('Same passwords return true', function (done) {
 	    var user = {
 		email: "user@mail.com",
@@ -153,7 +153,7 @@ describe('User service.', function () {
 	it('Wrong data without email from facebook', function (done) {
 	    userService.findOrCreateByFBData({email: null}, function (err) {
 		should.exist(err);
-		err.should.have.property("message", "No email");
+		err.should.have.property("message", "Incorrect args");
 		done();
 	    });
 
@@ -161,7 +161,7 @@ describe('User service.', function () {
 	it('No data from facebook', function (done) {
 	    userService.findOrCreateByFBData(null, function (err) {
 		should.exist(err);
-		err.should.have.property("message", "No email");
+		err.should.have.property("message", "Incorrect args");
 		done();
 	    });
 	});

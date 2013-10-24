@@ -10,7 +10,7 @@ describe('Food service.', function () {
 	it('Undefined userId', function (done) {
 	    foodService.saveFood(null, null, null, function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Incorect args");
+		err.should.have.property("message", "Incorrect args");
 		done();
 	    });
 	});
@@ -18,7 +18,7 @@ describe('Food service.', function () {
 	it('Undefined food path', function (done) {
 	    foodService.saveFood("userid", null, {lat: "32", long: "23"}, function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Incorect args");
+		err.should.have.property("message", "Incorrect args");
 		done();
 	    });
 	});

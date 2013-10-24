@@ -4,11 +4,12 @@ var async = require("async");
 var check = require("validator").check;
 var crypto = require("crypto");
 var config = require("config");
+var Errors = require("../error/errors");
 
 module.exports = {
     findOrCreateByLoginAndPassword: function (email, password, callback) {
 	if (!email || !password) {
-	    callback(new Error("Invalid email"));
+	    callback(Errors.LoginAndPasswordIncorrectArgs());
 	    return;
 	}
 
@@ -16,7 +17,7 @@ module.exports = {
 	userModel.getByEmail(email, function(err, user) {
 	    if (err) {
 		logger.warn("Error when user.getByEmail: ", err);
-		callback(err);
+		callback(Errors.System(err));
 		return;
 	    }
 	    if (user) {
@@ -24,7 +25,8 @@ module.exports = {
 		if (self.isPasswordCorrect(password, user)) {
 		    callback(null, user.id);
 		} else {
-		    callback(new Error("Password is not correct"));
+		    logger.info("Password is not correct");
+		    callback(Errors.LoginAndPasswordIncorrectArgs());
 		}
 	    } else {
 		logger.debug("Can't find user. Create him");
@@ -50,14 +52,14 @@ module.exports = {
     },
     findOrCreateByFBData: function (data, callback) {
 	if (!data || !data.email) {
-	    callback(new Error("No email"));
+	    callback(Errors.FBIncorrectArgs());
 	    return;
 	}
 
 	userModel.getByEmail(data.email, function (err, user) {
 	    if (err) {
 		logger.warn("Error when user.getByEmail: ", err);
-		callback(err);
+		callback(Errors.System(err));
 		return;
 	    }
 	    if (user) {
@@ -70,6 +72,11 @@ module.exports = {
 		    email: data.email,
 		}
 		userModel.create(user, function (err, user) {
+		    if (err) {
+			logger.warn("Can't create user: ", user, "because: ", err);
+			callback(Errors.System(err));
+			return;
+		    };
 		    callback(null, user.id);
 		});
 	    }
