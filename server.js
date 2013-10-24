@@ -12,7 +12,6 @@ var mongodbConnection = require("./src/model/db").establishConnection();
 var app = express();
 
 passport.use(new FacebookStrategy({
-
     clientID: config.app.fb.id,
     clientSecret: config.app.fb.secret,
     callbackURL: "/auth/facebook/callback"

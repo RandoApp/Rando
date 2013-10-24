@@ -4,43 +4,71 @@ var userService = require("../../src/service/userService");
 var mongooseMock = require("../util/mongooseMock");
 
 describe('User service.', function () {
-    describe('Register by email.', function () {
+    describe('Find or create user by login and password', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
 	    done();
 	});
 
 	it('Invalid email should return Error', function () {
-	    userService.registerByEmailAndPassword("this is not email", "", function (err) {
+	    userService.findOrCreateByLoginAndPassword("this is not email", "", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Invalid email");
 	    });
 	});
 
 	it('Empty email should return Error', function () {
-	    userService.registerByEmailAndPassword("", "password", function (err) {
+	    userService.findOrCreateByLoginAndPassword("", "password", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Invalid email");
 	    });
 	});
 
 	it('Empty password should return Error', function () {
-	    userService.registerByEmailAndPassword("this@is.email", "", function (err) {
+	    userService.findOrCreateByLoginAndPassword("this@is.email", "", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Empty password");
+		err.should.have.property("message", "Invalid email");
+	    });
+	});
+
+	it('Undefined email should return Error', function () {
+	    userService.findOrCreateByLoginAndPassword(null, "", function (err) {
+		should.exist(err);
+		err.should.have.property("message", "Invalid email");
+	    });
+	});
+
+	it('Undefined password should return Error', function () {
+	    userService.findOrCreateByLoginAndPassword("this@is.email", null, function (err) {
+		should.exist(err);
+		err.should.have.property("message", "Invalid email");
 	    });
 	});
 
 	it('Correct email and password should not return Error', function (done) {
 	    mongooseMock.stubSave().stubFindOneWithNotFoundUser();
 
-	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err) {
 		should.not.exist(err);
 		done();
 	    });
 	});
 
-	it('User already exist', function (done) {
+	it('Data base error should return error', function (done) {
+	    var error = "Data base error";
+
+	    mongooseMock.stubFindOne(function (email, callback) {
+		callback(new Error(error));
+	    });
+
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err) {
+		should.exist(err);
+		err.should.have.property("message", error);
+		done();
+	    });
+	});
+
+	it('Differents passwords should return error', function (done) {
 	    mongooseMock.stubSave().stubFindOne(function (email, callback) {
 		try {
 		    email.should.have.property("email", "email@mail.com");
@@ -51,95 +79,68 @@ describe('User service.', function () {
 		callback(null, {user: "some user"});
 	    });
 
-	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password2", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "User already exists");
+		err.should.have.property("message", "Password is not correct");
 		done();
 	    });
 	});
 
-	it('Can not find user by email', function (done) {
-	    var error = "Any problem with data base connection";
-	    mongooseMock.stubSave().stubFindOne(function (email, callback) {
-		callback(new Error(error));
+	it('Same passwords should return user', function (done) {
+	    mongooseMock.stubFindOne(function (email, callback) {
+		callback(null, {
+		    id: "123456789",
+		    email: "user@mail.com",
+		    password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5" //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+		});
 	    });
 
-	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
-		should.exist(err);
-		err.should.have.property("message", error);
-		done();
-	    });
-	});
-
-	it('User created successful', function (done) {
-	    var saveCalled = false;
-	    mongooseMock.stubFindOneWithNotFoundUser().stubSave(function (callback) {
-		saveCalled = true;
-		callback(null);
-	    });
-
-	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
+	    userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", function (err, userId) {
 		should.not.exist(err);
-		saveCalled.should.be.true;
+		userId.should.be.equal("123456789");
 		done();
 	    });
 	});
 
-	it('Can not create user', function (done) {
-	    var error = "Some strange error with database";
-	    var saveCalled = false;
-	    mongooseMock.stubFindOneWithNotFoundUser().stubSave(function (callback) {
-		saveCalled = true;
-		callback(new Error(error));
-	    });
+	it('New user should be created in data base and return user', function (done) {
+	    mongooseMock.stubFindOneWithNotFoundUser().stubSave();
 
-	    userService.registerByEmailAndPassword("email@mail.com", "password", function (err) {
-		saveCalled.should.be.true;
-		should.exist(err);
-		err.should.have.property("message", error);
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err, userId) {
+		should.not.exist(err);
+		userId.should.be.equal("524ea2324a590391a3e8b516"); //this id from mongooseMock.stubSave
 		done();
 	    });
 	});
     });
 
-    describe('Find User By id.', function () {
-	afterEach(function (done) {
-	    mongooseMock.restore();
+    describe('Generate Hash for password', function () {
+	it('Sha1 algorithm should work', function (done) {
+	    var expected = "7548a5ca114de42a25cc6d93e2ab74095b290ec5"; //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+	    var actual = userService.generateHashForPassword("user@mail.com", "passwordForSha1");
+	    actual.should.be.equal(expected);
+	    done();
+	});
+    });
+
+    describe('Is password correct', function () {
+	it('Same passwords return true', function (done) {
+	    var user = {
+		email: "user@mail.com",
+		password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5" //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+	    };
+	    var actual = userService.isPasswordCorrect("passwordForSha1", user);
+	    actual.should.be.true;
 	    done();
 	});
 
-	it('Cant find user by id', function (done) {
-	    var error = "Error in mongodb";
-	    mongooseMock.stubFindById(function (id, callback) {
-		callback(new Error(error));
-	    });
-
-	    userService.findUserById("123123123", function (err, user) {
-		should.exist(err);
-		err.should.have.property("message", error);
-		done();
-	    });
-	});
-
-	it('User not exist', function (done) {
-	    mongooseMock.stubFindByIdWithNotFoundUser();
-
-	    userService.findUserById("123123124", function (err, user) {
-		should.exist(err);
-		err.should.have.property("message", "User not found");
-		done();
-	    });
-	});
-
-	it('User exist', function (done) {
-	    mongooseMock.stubFindById();
-
-	    userService.findUserById("123123125", function (err, user) {
-		should.not.exist(err);
-		should.exist(user);
-		user.should.have.property("email", "user@mail.com");
-		done();
-	    });
+	it('Differents passwords return false', function (done) {
+	    var user = {
+		email: "user@mail.com",
+		password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5" //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+	    };
+	    var actual = userService.isPasswordCorrect("differentPassword", user);
+	    actual.should.be.false;
+	    done();
 	});
     });
 
@@ -194,5 +195,4 @@ describe('User service.', function () {
 	    });
 	});
     });
-
 });
