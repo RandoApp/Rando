@@ -26,8 +26,8 @@ module.exports =  {
 	error.foodex = {
 	    status: 400,
 	    code: 403,
-	    message: "",
-	    description: ""
+	    message: "Food not found",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#report"
 	}
 	return error;
     },
@@ -36,8 +36,8 @@ module.exports =  {
 	error.foodex = {
 	    status: 400,
 	    code: 404,
-	    message: "",
-	    description: ""
+	    message: "User not found",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#bon-appetit"
 	}
 	return error;
     },
@@ -46,8 +46,8 @@ module.exports =  {
 	error.foodex = {
 	    status: 400,
 	    code: 405,
-	    message: "",
-	    description: ""
+	    message: "Food not found",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#bon-appetit"
 	}
 	return error;
     },
@@ -56,8 +56,8 @@ module.exports =  {
 	error.foodex = {
 	    status: 400,
 	    code: 406,
-	    message: "",
-	    description: ""
+	    message: "Incorrect args",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#user"
 	}
 	return error;
     },
@@ -66,8 +66,8 @@ module.exports =  {
 	error.foodex = {
 	    status: 400,
 	    code: 407,
-	    message: "",
-	    description: ""
+	    message: "Incorrect args",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#user"
 	}
 	return error;
     },
@@ -75,8 +75,8 @@ module.exports =  {
 	err.foodex = {
 	    status: 500,
 	    code: 501,
-	    message: "",
-	    description: ""
+	    message: "Internal Server Error",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
 	}
 	return  err;
     },
@@ -89,8 +89,8 @@ module.exports =  {
 	return {
 	    status: 500,
 	    code: 500,
-	    message: "",
-	    description: ""
+	    message: "Internal Server Error",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
 	};
     }
 };
