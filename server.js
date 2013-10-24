@@ -96,7 +96,7 @@ app.post('/user', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
 	if (err) {
 	    var response = Errors.toReponse(err);
-	    res.status(response.status;
+	    res.status(response.status);
 	    res.send(response);
 	    return;
 	}
@@ -114,6 +114,19 @@ app.post('/user', function(req, res, next) {
 	    return res.send('OK');
 	});
     })(req, res, next);
+});
+
+app.get('/user', function (req, res) {
+    var userId = req.session.passport.user;
+    user.getUser(userId, function (err, user) {
+	if (err) {
+	    var response = Errors.toReponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+	res.send(user);
+    }
 });
 
 app.listen(config.app.port, function () {

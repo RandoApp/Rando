@@ -7,6 +7,22 @@ var config = require("config");
 var Errors = require("../error/errors");
 
 module.exports = {
+    getUser: function (userId, callback) {
+	userModel.getById(userId, function(err, user) {
+	    if (err) {
+		callback(Errors.System(err));
+		return;
+	    }
+	    if (!user) {
+		callback(Errors.UserForGetNotFound());
+		return;
+	    } else {
+		var userResponse = {
+		}
+		return userResponse;
+	    }
+	});
+    },
     findOrCreateByLoginAndPassword: function (email, password, callback) {
 	if (!email || !password) {
 	    callback(Errors.LoginAndPasswordIncorrectArgs());
