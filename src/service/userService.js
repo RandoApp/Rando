@@ -8,7 +8,7 @@ var config = require("config");
 module.exports = {
     findOrCreateByLoginAndPassword: function (email, password, callback) {
 	if (!email || !password) {
-	    callback(new Error("No email"));
+	    callback(new Error("Invalid email"));
 	    return;
 	}
 
@@ -16,7 +16,7 @@ module.exports = {
 	userModel.getByEmail(email, function(err, user) {
 	    if (err) {
 		logger.warn("Error when user.getByEmail: ", err);
-		callback(new Error("Error db"));
+		callback(err);
 		return;
 	    }
 	    if (user) {
@@ -24,7 +24,7 @@ module.exports = {
 		if (self.isPasswordCorrect(password, user)) {
 		    callback(null, user.id);
 		} else {
-		    callback(new Error("password is not correct"));
+		    callback(new Error("Password is not correct"));
 		}
 	    } else {
 		logger.debug("Can't find user. Create him");
