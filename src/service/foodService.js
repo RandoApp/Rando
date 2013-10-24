@@ -5,6 +5,7 @@ var util = require("../util/util");
 var mv = require("mv");
 var foodModel = require("../model/foodModel");
 var userModel = require("../model/userModel");
+var Errors = require("../error/errors");
 
 module.exports =  {
     saveFood: function (userId, foodPath, location, callback) {
@@ -14,7 +15,7 @@ module.exports =  {
 	    function (done) {
 		if (!userId || !foodPath || !check(foodPath).notEmpty() || !location) {
 		    logger.warn("Incorect args: ", userId, foodPath, location);
-		    done(new Error("Incorect args"));
+		    done(Errors.IncorrectFoodArgs());
 		    return;
 		}
 		done(null);
@@ -22,7 +23,8 @@ module.exports =  {
 	    function (done) {
 		util.generateFoodName(function (err, name) {
 		    if (err) {
-			done(err);
+			logger.warn("Can't generateFoodName, because: ", err);
+			done(Errors.System(err));
 			return;
 		    }
 		    done(null, name);
@@ -33,7 +35,7 @@ module.exports =  {
 		mv(foodPath, name, {mkdirp: true}, function (err) {
 		    if (err) {
 			logger.warn("Can't move  ", foodPath, " to ", name);
-			done(err);
+			done(Errors.System(err));
 			return;
 		    }
 		    done(null, userId, name, location);
@@ -57,7 +59,7 @@ module.exports =  {
 		    foodModel.add(userId, location, Date.now(), name, function (err) {
 			if (err) {
 			    logger.warn("Can't add food");
-			    done(err);
+			    done(Errors.System(err));
 			    return;
 			}
 			done(null);
@@ -69,7 +71,7 @@ module.exports =  {
 		    userModel.getById(userId, function (err, user) {
 			if (err)  {
 			    logger.warn("Can't find user: ", userId, " because: ", err);
-			    done(err);
+			    done(Errors.System(err));
 			    return;
 			}
 

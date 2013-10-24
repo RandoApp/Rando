@@ -47,12 +47,12 @@ describe('Comment service.', function () {
 	    });
 	});
 
-	it('Foods not found', function (done) {
+	it('Food not found', function (done) {
 	    mongooseMock.stubFindOneWithEmptyUser();
 
 	    commentService.report("user@mail.com", "3333", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Foods not found");
+		err.should.have.property("message", "Food not found");
 		done();
 	    });
 	});
@@ -101,12 +101,12 @@ describe('Comment service.', function () {
 	    });
 	});
 
-	it('Foods not found', function (done) {
+	it('Food not found', function (done) {
 	    mongooseMock.stubFindOneWithEmptyUser();
 
 	    commentService.bonAppetit("user@mail.com", "3333", function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Foods not found");
+		err.should.have.property("message", "Food not found");
 		done();
 	    });
 	});

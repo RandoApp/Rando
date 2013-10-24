@@ -9,6 +9,7 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 var MongoStore = require('connect-mongo')(express);
 var mongodbConnection = require("./src/model/db").establishConnection();
+var Errors = require("./src/error/errors");
 var app = express();
 
 passport.use(new FacebookStrategy({
@@ -46,10 +47,13 @@ app.post('/food', function (req, res, next) {
     var userId = req.session.passport.user;
     food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err) {
 	if (err) {
-	    res.send("Error: " + err);
+	    var response = Errors.toReponse(err);
+	    res.status(response.code);
+	    res.send(response);
 	    return;
 	}
 
+	res.status(200);
 	res.send("Ok");
     });
 });
@@ -59,7 +63,9 @@ app.post('/report/:id', function (req, res) {
     var userId = req.session.passport.user;
     comment.report(req.query.email, req.params.id, function (err) {
 	if (err) {
-	    res.send('Error when report');
+	    var response = Errors.toReponse(err);
+	    res.status(response.code);
+	    res.send(response);
 	    return;
 	}
 
@@ -72,7 +78,9 @@ app.post('/bonappetit/:id', function (req, res) {
     var userId = req.session.passport.user;
     comment.bonAppetit(req.query.email, req.params.id, function (err) {
 	if (err) {
-	    res.send('Error bon appetit');
+	    var response = Errors.toReponse(err);
+	    res.status(response.code);
+	    res.send(response);
 	    return;
 	}
 	res.send('Bon appetit ' + req.params.id);
@@ -87,7 +95,9 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 app.post('/user', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
 	if (err) {
-	    res.send("ERROR: " + err);
+	    var response = Errors.toReponse(err);
+	    res.status(response.code);
+	    res.send(response);
 	    return;
 	}
 	if (!user) {
@@ -96,7 +106,9 @@ app.post('/user', function(req, res, next) {
 	}
 	req.logIn(user, function(err) {
 	    if (err) {
-		res.send("ERROR: " + err);
+		var response = Errors.toReponse(err);
+		res.status(response.code);
+		res.send(response);
 		return;
 	    }
 	    return res.send('OK');

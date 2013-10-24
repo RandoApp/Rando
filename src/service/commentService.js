@@ -2,6 +2,7 @@ var userModel = require("../model/userModel");
 var logger = require("../log/logger");
 var async = require("async");
 var mongoose = require("mongoose");
+var Errors = require("../error/errors");
 
 //TODO: Service needs:
 //1. userEmail and foodId verification in report and bonAppetit methods.
@@ -11,16 +12,16 @@ module.exports = {
 	userModel.getByEmail(userEmail, function (err, user) {
 	    if (err) {
 		logger.warn("Can't find user by email: ", userEmail);
-		callback(err);
+		callback(Errors.System(err));
 		return;
 	    }
 	    if (!user) {
 		logger.warn("User not found: ", userEmail);
-		callback(new Error("User not found"));
+		callback(Errors.UserForReportNotFound());
 		return;
 	    }
 	    if (!user.foods || user.foods.length == 0) {
-		callback(new Error("Foods not found"));
+		callback(Errors.FoodForReportNotFound());
 	    }
 
 	    async.each(user.foods, function (food, done) {
@@ -43,16 +44,16 @@ module.exports = {
 		userModel.getByEmail(userEmail, function (err, user) {
 		    if (err) {
 			logger.warn("Can't find user by email: ", userEmail);
-			waterfall(err);
+			waterfall(Errors.System(err));
 			return;
 		    }
 		    if (!user) {
 			logger.warn("User not found: ", userEmail);
-			waterfall(new Error("User not found"));
+			waterfall(Errors.UserForBonAppetitNotFound());
 			return;
 		    }
 		    if (!user.foods || user.foods.length == 0) {
-			waterfall(new Error("Foods not found"));
+			waterfall(Errors.FoodForBonAppetitNotFound());
 		    }
 
 		    //TODO: What if each function done and waterfall callback is not called?
@@ -74,16 +75,16 @@ module.exports = {
 		userModel.getByEmail(strangerEmail, function (err, user) {
 		    if (err) {
 			logger.warn("Can't find user by email: ", userEmail);
-			waterfall(err);
+			waterfall(Errors.System(err));
 			return;
 		    }
 		    if (!user) {
 			logger.warn("User not found: ", userEmail);
-			waterfall(new Error("User not found"));
+			waterfall(Errors.UserForBonAppetitNotFound());
 			return;
 		    }
 		    if (!user.foods || user.foods.length == 0) {
-			waterfall(new Error("Foods not found"));
+			waterfall(Errors.FoodForBonAppetitNotFound());
 		    }
 
 		    //TODO: What if each function done and waterfall callback is not called?
