@@ -48,7 +48,7 @@ app.post('/food', function (req, res, next) {
     food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err) {
 	if (err) {
 	    var response = Errors.toReponse(err);
-	    res.status(response.code);
+	    res.status(response.status);
 	    res.send(response);
 	    return;
 	}
@@ -64,7 +64,7 @@ app.post('/report/:id', function (req, res) {
     comment.report(req.query.email, req.params.id, function (err) {
 	if (err) {
 	    var response = Errors.toReponse(err);
-	    res.status(response.code);
+	    res.status(response.status);
 	    res.send(response);
 	    return;
 	}
@@ -79,7 +79,7 @@ app.post('/bonappetit/:id', function (req, res) {
     comment.bonAppetit(req.query.email, req.params.id, function (err) {
 	if (err) {
 	    var response = Errors.toReponse(err);
-	    res.status(response.code);
+	    res.status(response.status);
 	    res.send(response);
 	    return;
 	}
@@ -96,7 +96,7 @@ app.post('/user', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
 	if (err) {
 	    var response = Errors.toReponse(err);
-	    res.status(response.code);
+	    res.status(response.status;
 	    res.send(response);
 	    return;
 	}
@@ -107,7 +107,7 @@ app.post('/user', function(req, res, next) {
 	req.logIn(user, function(err) {
 	    if (err) {
 		var response = Errors.toReponse(err);
-		res.status(response.code);
+		res.status(response.status);
 		res.send(response);
 		return;
 	    }
