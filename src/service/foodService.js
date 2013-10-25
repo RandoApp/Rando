@@ -9,12 +9,12 @@ var Errors = require("../error/errors");
 
 module.exports =  {
     saveFood: function (userId, foodPath, location, callback) {
-	logger.debug("Try save food from: ", foodPath, " for: ", userId, " location: ", location);
+	logger.debug("[foodService.saveFood, ", userId, "] Try save food from: ", foodPath, " for: ", userId, " location: ", location);
 
 	async.waterfall([
 	    function (done) {
 		if (!userId || !foodPath || !check(foodPath).notEmpty() || !location) {
-		    logger.warn("Incorect args: ", userId, foodPath, location);
+		    logger.warn("[foodService.saveFood, ", userId, "] Incorect args. userId: ", userId, "; foodPath: ", foodPath, "; location: " , location);
 		    done(Errors.IncorrectFoodArgs());
 		    return;
 		}
@@ -23,7 +23,7 @@ module.exports =  {
 	    function (done) {
 		util.generateFoodName(function (err, name) {
 		    if (err) {
-			logger.warn("Can't generateFoodName, because: ", err);
+			logger.warn("[foodService.saveFood, ", userId, "] Can't generateFoodName, because: ", err);
 			done(Errors.System(err));
 			return;
 		    }
@@ -31,10 +31,10 @@ module.exports =  {
 		});
 	    },
 	    function (name, done) {
-		logger.debug("move: ", foodPath, " --> ", name);
+		logger.data("[foodService.saveFood, ", userId, "] move: ", foodPath, " --> ", name);
 		mv(foodPath, name, {mkdirp: true}, function (err) {
 		    if (err) {
-			logger.warn("Can't move  ", foodPath, " to ", name);
+			logger.warn("[foodService.saveFood, ", userId, "] Can't move  ", foodPath, " to ", name, " because: ", err);
 			done(Errors.System(err));
 			return;
 		    }
@@ -44,21 +44,22 @@ module.exports =  {
 	    this.updateFood
 	], function (err) {
 	    if (err) {
-		logger.warn("Can't save food, because: ", err);
+		logger.warn("[foodService.saveFood, ", userId, "] Can't save food, because: ", err);
 		callback(err);
 		return;
 	    }
 
-	    logger.debug("saveFood done");
+	    logger.debug("[foodService.saveFood, ", userId, "] save done");
 	    callback();
 	});
     },
     updateFood: function (userId, name, location, callback) {
+	logger.debug("[foodService.updateFood, ", userId, "] Try update food for: ", userId, " location: ", location, " name: ", name);
 	async.parallel({
 		addFood: function (done) {
 		    foodModel.add(userId, location, Date.now(), name, function (err) {
 			if (err) {
-			    logger.warn("Can't add food");
+			    logger.warn("[foodService.updateFood.addFood, ", userId, "] Can't add food because: ", err);
 			    done(Errors.System(err));
 			    return;
 			}
@@ -70,7 +71,7 @@ module.exports =  {
 		    var location = location;
 		    userModel.getById(userId, function (err, user) {
 			if (err)  {
-			    logger.warn("Can't find user: ", userId, " because: ", err);
+			    logger.warn("[foodService.updateFood.updateUser, ", userId, "] Can't find user: ", userId, " because: ", err);
 			    done(Errors.System(err));
 			    return;
 			}
@@ -93,6 +94,7 @@ module.exports =  {
 			    }
 			});
 
+			logger.data("[foodService.updateFood.updateUser, ", userId, "] Try update user");
 			userModel.update(user);
 			done(null);
 		    });
@@ -100,6 +102,7 @@ module.exports =  {
 	    },
 	    function (err) {
 		if (err) {
+		    logger.debug("[foodService.updateFood, ", userId, "] asyn parallel get error: ", err);
 		    callback(err);
 		    return;
 		}

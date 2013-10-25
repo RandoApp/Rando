@@ -126,7 +126,7 @@ app.get('/user', function (req, res) {
 	    return;
 	}
 	res.send(user);
-    }
+    });
 });
 
 app.listen(config.app.port, function () {
