@@ -80,7 +80,6 @@ module.exports =  {
 	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#user"
 	}
 	return error;
-
     },
     System: function (err) {
 	err.foodex = {

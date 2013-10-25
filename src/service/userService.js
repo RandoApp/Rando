@@ -17,9 +17,25 @@ module.exports = {
 		callback(Errors.UserForGetNotFound());
 		return;
 	    } else {
-		var userResponse = {
+		var userJSON = {
+		    email: user.email,
+		    foods: []
 		}
-		return userResponse;
+		async.each(user.foods, function (food, done) {
+		    if (food) {
+			delete food.user.userId;
+			delete food.stranger.strangerId;
+			userJSON.foods.push(food);
+		    }
+		    done();
+		}, function (err) {
+		    if (err) {
+			logger.warn("Error when each foods for: ", user);
+			callback(Errors.System(err));
+			return;
+		    }
+		    callback(null, userJSON);
+		});
 	    }
 	});
     },
