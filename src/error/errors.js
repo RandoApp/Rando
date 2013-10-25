@@ -71,6 +71,16 @@ module.exports =  {
 	}
 	return error;
     },
+    UserForGetNotFound: function () {
+	var error = new Error("User not found");
+	error.foodex = {
+	    status: 400,
+	    code: 408,
+	    message: "User not found",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#user"
+	}
+	return error;
+    },
     System: function (err) {
 	err.foodex = {
 	    status: 500,

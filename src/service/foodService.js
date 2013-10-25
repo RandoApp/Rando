@@ -77,14 +77,14 @@ module.exports =  {
 
 			user.foods.push({
 			    user: {
-				email: user.email,
+				userId: id,
 				location: location,
 				food: name,
 				map: "",
 				bonAppetit: false
 			    },
 			    stranger: {
-				email: "",
+				strangerId: "",
 				location: "",
 				food: "",
 				map: "",

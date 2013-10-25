@@ -8,14 +8,15 @@ var User = mongoose.model("user", new mongoose.Schema({
     password: String,
     foods: [{
 	user: {
-	    email: String,
+	    userId: String,
 	    location: String,
 	    food: String,
+	    creation: Date,
 	    map: String,
 	    bonAppetit: Boolean
 	},
 	stranger: {
-	    email: String,
+	    strangerId: String,
 	    location: String,
 	    food: String,
 	    map: String,

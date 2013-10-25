@@ -195,4 +195,126 @@ describe('User service.', function () {
 	    });
 	});
     });
+    describe('Get user.', function () {
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    done();
+	});
+
+	it('Data base error should return error', function (done) {
+	    var error = "Data base error";
+	    mongooseMock.stubFindById(function (userId, callback) {
+		callback(new Error(error));
+	    });
+
+	    userService.getUser("32423432", function(err, user) {
+		should.exist(err);
+		err.should.have.property("message", error);
+		done();
+	    });
+	});
+
+	it('User not found should return error', function (done) {
+	    mongooseMock.stubFindByIdWithNotFoundUser();
+	    userService.getUser("32423432", function(err, user) {
+		should.exist(err);
+		err.should.have.property("message", "User not found");
+		done();
+	    });
+	});
+
+	it('Get user successfully', function (done) {
+	    mongooseMock.stubFindById(function (id, callback) {
+		callback(null, {
+		    id: "524ea2324a590391a3e8b516",
+		    email: "user@mail.com",
+		    facebookId: "111111",
+		    foods: [{
+			user: {
+			    userId: "524ea2324a590391a3e8b516",
+			    location: {
+				lat: "3333",
+				long: "4444"
+			    },
+			    createion: "24324234",
+			    food: "435345.png",
+			    map: "32432432.png",
+			    bonAppetit: false
+			},
+			stranger: {
+			    strangerId: "624ea2324a590391a3e8b516",
+			    location: {
+				lat: "4333",
+				long: "5444"
+			    },
+			    createion: "54324234",
+			    food: "635345.png",
+			    map: "52432432.png",
+			    bonAppetit: false
+			}
+		    },
+		    {
+			user: {
+			    userId: "524ea2324a590391a3e8b516",
+			    location: {
+				lat: "3333",
+				long: "4444"
+			    },
+			    createion: "34324234",
+			    food: "935345.png",
+			    map: "32432432.png",
+			    bonAppetit: false
+			},
+			stranger: {
+			}
+		    }]
+		});
+	    });
+
+	    userService.getUser("524ea2324a590391a3e8b516", function (err, user) {
+		should.not.exist(err);
+		user.should.be.eql({
+		    email: "user@mail.com",
+		    foods: [{
+			user: {
+			    location: {
+				lat: "3333",
+				long: "4444"
+			    },
+			    createion: "24324234",
+			    food: "435345.png",
+			    map: "32432432.png",
+			    bonAppetit: false
+			},
+			stranger: {
+			    location: {
+				lat: "4333",
+				long: "5444"
+			    },
+			    createion: "54324234",
+			    food: "635345.png",
+			    map: "52432432.png",
+			    bonAppetit: false
+			}
+		    },
+		    {
+			user: {
+			    location: {
+				lat: "3333",
+				long: "4444"
+			    },
+			    createion: "34324234",
+			    food: "935345.png",
+			    map: "32432432.png",
+			    bonAppetit: false
+			},
+			stranger: {
+			}
+		    }]
+		});
+
+		done();
+	    });
+	});
+    });
 });

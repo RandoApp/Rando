@@ -7,6 +7,38 @@ var config = require("config");
 var Errors = require("../error/errors");
 
 module.exports = {
+    getUser: function (userId, callback) {
+	userModel.getById(userId, function(err, user) {
+	    if (err) {
+		callback(Errors.System(err));
+		return;
+	    }
+	    if (!user) {
+		callback(Errors.UserForGetNotFound());
+		return;
+	    } else {
+		var userJSON = {
+		    email: user.email,
+		    foods: []
+		}
+		async.each(user.foods, function (food, done) {
+		    if (food) {
+			delete food.user.userId;
+			delete food.stranger.strangerId;
+			userJSON.foods.push(food);
+		    }
+		    done();
+		}, function (err) {
+		    if (err) {
+			logger.warn("Error when each foods for: ", user);
+			callback(Errors.System(err));
+			return;
+		    }
+		    callback(null, userJSON);
+		});
+	    }
+	});
+    },
     findOrCreateByLoginAndPassword: function (email, password, callback) {
 	if (!email || !password) {
 	    callback(Errors.LoginAndPasswordIncorrectArgs());
