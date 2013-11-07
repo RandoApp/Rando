@@ -9,24 +9,29 @@ var Errors = require("../error/errors");
 //2. Move verifications into the getByEmail (in report and bonAppetit) to Util verification function, because DRY.
 module.exports = {
     report: function (userId, foodId, callback) {
+	logger.debug("[commentService.report, ", userId, "] Start report for food: ", foodId);
 	userModel.getById(userId, function (err, user) {
 	    if (err) {
-		logger.warn("Can't find user by id: ", userId);
+		logger.warn("[commentService.report, ", userId, "] Can't find user by id: ", userId);
 		callback(Errors.System(err));
 		return;
 	    }
 	    if (!user) {
-		logger.warn("User not found: ", userId);
+		logger.warn("[commentService.report, ", userId, "] User not found");
 		callback(Errors.UserForReportNotFound());
 		return;
 	    }
 	    if (!user.foods || user.foods.length == 0) {
+		logger.warn("[commentService.report, ", userId, "] Food not found");
 		callback(Errors.FoodForReportNotFound());
+		return;
 	    }
 
 	    async.each(user.foods, function (food, done) {
-		if (food.stranger && food.stranger.food == foodId) {
+		logger.debug("[commentService.report, ", userId, "] Next iterate over foods food.stranger.foodId[", food.stranger.foodId, "] == foodId[", foodId, "]");
+		if (food.stranger && food.stranger.foodId == foodId) {
 		    food.stranger.report = true;
+		    logger.debug("[commentService.report, ", userId, "] Report food: ", foodId);
 		    userModel.update(user);
 		    callback();
 		}
@@ -34,6 +39,7 @@ module.exports = {
 	    }, function (err) {
 		if (err) {
 		    logger.warn("Error when async iterate over foods: ", user.foods);
+		    callback(err);
 		}
 	    });
 	});

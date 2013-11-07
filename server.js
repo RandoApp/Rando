@@ -61,6 +61,7 @@ app.post('/food', function (req, res, next) {
 app.post('/report/:id', function (req, res) {
     logger.data("POST /report/:id", req);
     var userId = req.session.passport.user;
+    logger.debug("REPORT");
     comment.report(userId, req.params.id, function (err) {
 	if (err) {
 	    var response = Errors.toResponse(err);
