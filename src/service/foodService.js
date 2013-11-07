@@ -90,7 +90,7 @@ module.exports =  {
 				foodId: foodId,
 				foodUrl: foodUrl,
 				mapUrl: "",
-				bonAppetit: false
+				bonAppetit: 0
 			    },
 			    stranger: {
 				strangerId: "",
@@ -98,8 +98,8 @@ module.exports =  {
 				foodId: "",
 				foodUrl: "",
 				mapUrl: "",
-				report: false,
-				bonAppetit: false
+				report: 0,
+				bonAppetit: 0
 			    }
 			});
 

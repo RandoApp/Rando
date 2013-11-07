@@ -5,7 +5,7 @@ var logger = require("../log/logger");
 var Food = mongoose.model("food", new mongoose.Schema({
     user: String,
     location: Number,
-    creation: Date,
+    creation: Number,
     foodId: String,
     foodUrl: String,
     mapUrl: String 
