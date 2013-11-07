@@ -61,7 +61,7 @@ app.post('/food', function (req, res, next) {
 app.post('/report/:id', function (req, res) {
     logger.data("POST /report/:id", req);
     var userId = req.session.passport.user;
-    comment.report(req.query.email, req.params.id, function (err) {
+    comment.report(userId, req.params.id, function (err) {
 	if (err) {
 	    var response = Errors.toReponse(err);
 	    res.status(response.status);
@@ -76,7 +76,7 @@ app.post('/report/:id', function (req, res) {
 app.post('/bonappetit/:id', function (req, res) {
     logger.data("POST /bonappetit/:id", req);
     var userId = req.session.passport.user;
-    comment.bonAppetit(req.query.email, req.params.id, function (err) {
+    comment.bonAppetit(userId, req.params.id, function (err) {
 	if (err) {
 	    var response = Errors.toReponse(err);
 	    res.status(response.status);

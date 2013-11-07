@@ -8,15 +8,15 @@ var Errors = require("../error/errors");
 //1. userEmail and foodId verification in report and bonAppetit methods.
 //2. Move verifications into the getByEmail (in report and bonAppetit) to Util verification function, because DRY.
 module.exports = {
-    report: function (userEmail, foodId, callback) {
-	userModel.getByEmail(userEmail, function (err, user) {
+    report: function (userId, foodId, callback) {
+	userModel.getById(userId, function (err, user) {
 	    if (err) {
-		logger.warn("Can't find user by email: ", userEmail);
+		logger.warn("Can't find user by id: ", userId);
 		callback(Errors.System(err));
 		return;
 	    }
 	    if (!user) {
-		logger.warn("User not found: ", userEmail);
+		logger.warn("User not found: ", userId);
 		callback(Errors.UserForReportNotFound());
 		return;
 	    }
@@ -38,17 +38,17 @@ module.exports = {
 	    });
 	});
     },
-    bonAppetit: function (userEmail, foodId, callback) {
+    bonAppetit: function (userId, foodId, callback) {
 	async.waterfall([
 	    function (waterfall) {
-		userModel.getByEmail(userEmail, function (err, user) {
+		userModel.getById(userId, function (err, user) {
 		    if (err) {
-			logger.warn("Can't find user by email: ", userEmail);
+			logger.warn("Can't find user by id: ", userId);
 			waterfall(Errors.System(err));
 			return;
 		    }
 		    if (!user) {
-			logger.warn("User not found: ", userEmail);
+			logger.warn("User not found: ", userId);
 			waterfall(Errors.UserForBonAppetitNotFound());
 			return;
 		    }
@@ -61,7 +61,7 @@ module.exports = {
 			if (food.stranger && food.stranger.food == foodId) {
 			    food.stranger.bonAppetit = true;
 			    userModel.update(user);
-			    waterfall(null, food.stranger.email, foodId);
+			    waterfall(null, food.stranger.strangerId, foodId);
 			}
 			done();
 		    }, function (err) {
@@ -71,15 +71,15 @@ module.exports = {
 		    });
 		});
 	    },
-	    function (strangerEmail, foodId, waterfall) {
-		userModel.getByEmail(strangerEmail, function (err, user) {
+	    function (strangerId, foodId, waterfall) {
+		userModel.getById(strangerId, function (err, user) {
 		    if (err) {
-			logger.warn("Can't find user by email: ", userEmail);
+			logger.warn("Can't find user by id: ", strangerId);
 			waterfall(Errors.System(err));
 			return;
 		    }
 		    if (!user) {
-			logger.warn("User not found: ", userEmail);
+			logger.warn("User not found: ", strangerId);
 			waterfall(Errors.UserForBonAppetitNotFound());
 			return;
 		    }
