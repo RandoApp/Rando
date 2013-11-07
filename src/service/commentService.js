@@ -30,7 +30,7 @@ module.exports = {
 	    async.each(user.foods, function (food, done) {
 		logger.debug("[commentService.report, ", userId, "] Next iterate over foods food.stranger.foodId[", food.stranger.foodId, "] == foodId[", foodId, "]");
 		if (food.stranger && food.stranger.foodId == foodId) {
-		    food.stranger.report = true;
+		    food.stranger.report = 1;
 		    logger.debug("[commentService.report, ", userId, "] Report food: ", foodId);
 		    userModel.update(user);
 		    callback();
@@ -71,7 +71,7 @@ module.exports = {
 
 			if (food.stranger && food.stranger.foodId == foodId) {
 			    logger.debug("[commentService.bonAppetit, ", userId, "] Found food: ", food.stranger);
-			    food.stranger.bonAppetit = true;
+			    food.stranger.bonAppetit = 1;
 			    userModel.update(user);
 			    logger.debug("[commentService.bonAppetit, ", userId, "]  Call waterfall");
 			    waterfall(null, food.stranger.strangerId, foodId);

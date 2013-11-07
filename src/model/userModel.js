@@ -12,9 +12,9 @@ var User = mongoose.model("user", new mongoose.Schema({
 	    location: String,
 	    foodId: String,
 	    foodUrl: String,
-	    creation: Date,
+	    creation: Number,
 	    mapUrl: String,
-	    bonAppetit: Boolean
+	    bonAppetit: Number
 	},
 	stranger: {
 	    strangerId: String,
@@ -22,8 +22,8 @@ var User = mongoose.model("user", new mongoose.Schema({
 	    foodId: String,
 	    foodUrl: String,
 	    mapUrl: String,
-	    report: Boolean,
-	    bonAppetit: Boolean
+	    report: Number,
+	    bonAppetit: Number
 	}
     }] 
 }));
