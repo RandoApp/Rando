@@ -8,25 +8,30 @@ var Errors = require("../error/errors");
 //1. userEmail and foodId verification in report and bonAppetit methods.
 //2. Move verifications into the getByEmail (in report and bonAppetit) to Util verification function, because DRY.
 module.exports = {
-    report: function (userEmail, foodId, callback) {
-	userModel.getByEmail(userEmail, function (err, user) {
+    report: function (userId, foodId, callback) {
+	logger.debug("[commentService.report, ", userId, "] Start report for food: ", foodId);
+	userModel.getById(userId, function (err, user) {
 	    if (err) {
-		logger.warn("Can't find user by email: ", userEmail);
+		logger.warn("[commentService.report, ", userId, "] Can't find user by id: ", userId);
 		callback(Errors.System(err));
 		return;
 	    }
 	    if (!user) {
-		logger.warn("User not found: ", userEmail);
+		logger.warn("[commentService.report, ", userId, "] User not found");
 		callback(Errors.UserForReportNotFound());
 		return;
 	    }
 	    if (!user.foods || user.foods.length == 0) {
+		logger.warn("[commentService.report, ", userId, "] Food not found");
 		callback(Errors.FoodForReportNotFound());
+		return;
 	    }
 
 	    async.each(user.foods, function (food, done) {
-		if (food.stranger && food.stranger.food == foodId) {
+		logger.debug("[commentService.report, ", userId, "] Next iterate over foods food.stranger.foodId[", food.stranger.foodId, "] == foodId[", foodId, "]");
+		if (food.stranger && food.stranger.foodId == foodId) {
 		    food.stranger.report = true;
+		    logger.debug("[commentService.report, ", userId, "] Report food: ", foodId);
 		    userModel.update(user);
 		    callback();
 		}
@@ -34,21 +39,23 @@ module.exports = {
 	    }, function (err) {
 		if (err) {
 		    logger.warn("Error when async iterate over foods: ", user.foods);
+		    callback(err);
 		}
 	    });
 	});
     },
-    bonAppetit: function (userEmail, foodId, callback) {
+    bonAppetit: function (userId, foodId, callback) {
+	logger.debug("[commentService.bonAppetit, ", userId, "] start with foodId: ", foodId);
 	async.waterfall([
 	    function (waterfall) {
-		userModel.getByEmail(userEmail, function (err, user) {
+		userModel.getById(userId, function (err, user) {
 		    if (err) {
-			logger.warn("Can't find user by email: ", userEmail);
+			logger.warn("[commentService.bonAppetit, ", userId, "] Can't find user by id: ", userId);
 			waterfall(Errors.System(err));
 			return;
 		    }
 		    if (!user) {
-			logger.warn("User not found: ", userEmail);
+			logger.warn("[commentService.bonAppetit, ", userId, "] User not found: ", userId);
 			waterfall(Errors.UserForBonAppetitNotFound());
 			return;
 		    }
@@ -56,13 +63,20 @@ module.exports = {
 			waterfall(Errors.FoodForBonAppetitNotFound());
 		    }
 
+		    logger.debug("[commentService.bonAppetit, ", userId, "] Found user: ", user);
+
 		    //TODO: What if each function done and waterfall callback is not called?
 		    async.each(user.foods, function (food, done) {
-			if (food.stranger && food.stranger.food == foodId) {
+			logger.debug("[commentService.bonAppetit, ", userId, "] Next over iterate each food, food.stranger[", food.stranger.foodId, "] == foodId[", foodId ,"]"); 
+
+			if (food.stranger && food.stranger.foodId == foodId) {
+			    logger.debug("[commentService.bonAppetit, ", userId, "] Found food: ", food.stranger);
 			    food.stranger.bonAppetit = true;
 			    userModel.update(user);
-			    waterfall(null, food.stranger.email, foodId);
+			    logger.debug("[commentService.bonAppetit, ", userId, "]  Call waterfall");
+			    waterfall(null, food.stranger.strangerId, foodId);
 			}
+			logger.debug("[commentService.bonAppetit, ", userId, "]  Call async.each done");
 			done();
 		    }, function (err) {
 			if (err) {
@@ -71,15 +85,15 @@ module.exports = {
 		    });
 		});
 	    },
-	    function (strangerEmail, foodId, waterfall) {
-		userModel.getByEmail(strangerEmail, function (err, user) {
+	    function (strangerId, foodId, waterfall) {
+		userModel.getById(strangerId, function (err, user) {
 		    if (err) {
-			logger.warn("Can't find user by email: ", userEmail);
+			logger.warn("[commentService.bonAppetit, ", strangerId, "] Can't find user by id: ", strangerId);
 			waterfall(Errors.System(err));
 			return;
 		    }
 		    if (!user) {
-			logger.warn("User not found: ", userEmail);
+			logger.warn("[commentService.bonAppetit, ", strangerId, "] User not found.");
 			waterfall(Errors.UserForBonAppetitNotFound());
 			return;
 		    }
@@ -87,11 +101,15 @@ module.exports = {
 			waterfall(Errors.FoodForBonAppetitNotFound());
 		    }
 
+		    logger.debug("[commentService.bonAppetit, ", strangerId, "] Found user: ", user);
+
 		    //TODO: What if each function done and waterfall callback is not called?
 		    async.each(user.foods, function (food, done) {
-			if (food.user && food.user.food == foodId) {
-			    food.bonAppetit = true;
+			logger.debug("[commentService.bonAppetit, ", strangerId, "] Next over iterate each food, food.stranger[", food.user.foodId, "] == foodId[", foodId ,"]"); 
+			if (food.user && food.user.foodId == foodId) {
+			    food.user.bonAppetit = true;
 			    userModel.update(user);
+			    logger.debug("[commentService.bonAppetit, ", strangerId, "] Update bon appetit for user: ", food.user.userId);
 			    waterfall(null);
 			}
 			done();

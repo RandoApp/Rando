@@ -1,6 +1,10 @@
 app:
+    url: http://api.foodex.com
     port: 8888
     secret: Secret #This is a stub. 
+    fb:
+        id: 123456789 #This is a stub
+        secret: abcd12345efg #This is a stub
     log:
         file: foodex.log
         handleException: true

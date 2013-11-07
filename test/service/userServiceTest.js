@@ -277,20 +277,12 @@ describe('User service.', function () {
 		    email: "user@mail.com",
 		    foods: [{
 			user: {
-			    location: {
-				lat: "3333",
-				long: "4444"
-			    },
 			    createion: "24324234",
 			    food: "435345.png",
 			    map: "32432432.png",
 			    bonAppetit: false
 			},
 			stranger: {
-			    location: {
-				lat: "4333",
-				long: "5444"
-			    },
 			    createion: "54324234",
 			    food: "635345.png",
 			    map: "52432432.png",
@@ -299,10 +291,6 @@ describe('User service.', function () {
 		    },
 		    {
 			user: {
-			    location: {
-				lat: "3333",
-				long: "4444"
-			    },
 			    createion: "34324234",
 			    food: "935345.png",
 			    map: "32432432.png",

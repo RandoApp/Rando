@@ -36,7 +36,7 @@ describe('Util.', function () {
 		util.generateUniqueName.restore();
 	    });
 
-	    util.generateFoodName(function (err, fullPath) {
+	    util.generateFoodName(function (err, foodId, fullPath) {
 		should.exist(err);
 		err.should.have.property("message", error);
 		done();
@@ -44,8 +44,9 @@ describe('Util.', function () {
 	});
 
 	it('Full path is correct', function (done) {
-	    util.generateFoodName(function (err, fullPath) {
+	    util.generateFoodName(function (err, foodId, fullPath) {
 		should.not.exist(err);
+		should.exist(foodId);
 		fullPath.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.png$/);
 		done();
 	    });

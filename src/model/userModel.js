@@ -10,16 +10,18 @@ var User = mongoose.model("user", new mongoose.Schema({
 	user: {
 	    userId: String,
 	    location: String,
-	    food: String,
+	    foodId: String,
+	    foodUrl: String,
 	    creation: Date,
-	    map: String,
+	    mapUrl: String,
 	    bonAppetit: Boolean
 	},
 	stranger: {
 	    strangerId: String,
 	    location: String,
-	    food: String,
-	    map: String,
+	    foodId: String,
+	    foodUrl: String,
+	    mapUrl: String,
 	    report: Boolean,
 	    bonAppetit: Boolean
 	}

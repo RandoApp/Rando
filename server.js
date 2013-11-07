@@ -47,7 +47,7 @@ app.post('/food', function (req, res, next) {
     var userId = req.session.passport.user;
     food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err) {
 	if (err) {
-	    var response = Errors.toReponse(err);
+	    var response = Errors.toResponse(err);
 	    res.status(response.status);
 	    res.send(response);
 	    return;
@@ -61,9 +61,10 @@ app.post('/food', function (req, res, next) {
 app.post('/report/:id', function (req, res) {
     logger.data("POST /report/:id", req);
     var userId = req.session.passport.user;
-    comment.report(req.query.email, req.params.id, function (err) {
+    logger.debug("REPORT");
+    comment.report(userId, req.params.id, function (err) {
 	if (err) {
-	    var response = Errors.toReponse(err);
+	    var response = Errors.toResponse(err);
 	    res.status(response.status);
 	    res.send(response);
 	    return;
@@ -76,9 +77,9 @@ app.post('/report/:id', function (req, res) {
 app.post('/bonappetit/:id', function (req, res) {
     logger.data("POST /bonappetit/:id", req);
     var userId = req.session.passport.user;
-    comment.bonAppetit(req.query.email, req.params.id, function (err) {
+    comment.bonAppetit(userId, req.params.id, function (err) {
 	if (err) {
-	    var response = Errors.toReponse(err);
+	    var response = Errors.toResponse(err);
 	    res.status(response.status);
 	    res.send(response);
 	    return;
@@ -95,7 +96,7 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 app.post('/user', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
 	if (err) {
-	    var response = Errors.toReponse(err);
+	    var response = Errors.toResponse(err);
 	    res.status(response.status);
 	    res.send(response);
 	    return;
@@ -106,7 +107,7 @@ app.post('/user', function(req, res, next) {
 	}
 	req.logIn(user, function(err) {
 	    if (err) {
-		var response = Errors.toReponse(err);
+		var response = Errors.toResponse(err);
 		res.status(response.status);
 		res.send(response);
 		return;
@@ -120,7 +121,7 @@ app.get('/user', function (req, res) {
     var userId = req.session.passport.user;
     user.getUser(userId, function (err, user) {
 	if (err) {
-	    var response = Errors.toReponse(err);
+	    var response = Errors.toResponse(err);
 	    res.status(response.status);
 	    res.send(response);
 	    return;

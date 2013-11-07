@@ -14,6 +14,7 @@ module.exports = {
 		logger.warn("[userService.getUser, ", userId, "] Can't userModel.getById, because: ", err);
 		callback(Errors.System(err));
 		return;
+
 	    }
 	    if (!user) {
 		logger.debug("[userService.getUser, ", userId, "] User not found. Return Error.");
@@ -30,6 +31,8 @@ module.exports = {
 			logger.debug("[userService.getUser, ", userId, "] Remove food.user.userId and food.stranger.strangerId in food: ", food);
 			delete food.user.userId;
 			delete food.stranger.strangerId;
+			delete food.user.location;
+			delete food.stranger.location;
 			userJSON.foods.push(food);
 		    }
 		    done();

@@ -26,16 +26,20 @@ module.exports = {
 		    foods: [{
 			user: {
 			    email: email,
+			    userId: "524ea2324a590391a3e8b516",
 			    localtion: "1111.1111, 1111.1111",
-			    food: "3333",
-			    map: "4444",
+			    foodId: "3333",
+			    foodUrl: "http://api.foodex.com/food/3333",
+			    mapUrl: "http://api.foodex.com/food/4444",
 			    bonAppetit: false
 			},
 			stranger: {
 			    email: "stranger@mail.com",
 			    localtion: "2222.2222, 2222.2222",
-			    food: "3333",
-			    map: "4444",
+			    userId: "724ea2324a590391a3e8b516",
+			    foodId: "3333",
+			    foodUrl: "http://api.foodex.com/food/3333",
+			    mapUrl: "http://api.foodex.com/map/444",
 			    report: false,
 			    bonAppetit: false
 			}

@@ -13,16 +13,16 @@ module.exports = {
 		var fullPath = config.app.static.folder.food + "/" + folderName + "/" + name + "." + config.app.static.file.ext;
 
 		logger.debug("fullPath: ", fullPath);
-		done(null, fullPath);
+		done(null, name, fullPath);
 	    }],
-	    function (err, fullPath) {
+	    function (err, name, fullPath) {
 		if (err) {
 		    logger.warn("genereFoodName fail with error: ", err);
 		    callback(err);
 		    return;
 		}
 
-		callback(null, fullPath);
+		callback(null, name, fullPath);
 	    });
     },
     generateUniqueName: function (callback) {
