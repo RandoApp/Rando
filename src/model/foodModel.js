@@ -6,8 +6,9 @@ var Food = mongoose.model("food", new mongoose.Schema({
     user: String,
     location: Number,
     creation: Date,
-    name: String,
-    map: String 
+    foodId: String,
+    foodUrl: String,
+    mapUrl: String 
 }));
 
 module.exports = {

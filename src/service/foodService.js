@@ -80,15 +80,17 @@ module.exports =  {
 			    user: {
 				userId: id,
 				location: location,
-				food: name,
-				map: "",
+				foodId: name,
+				foodUrl: name,
+				mapUrl: "",
 				bonAppetit: false
 			    },
 			    stranger: {
 				strangerId: "",
 				location: "",
-				food: "",
-				map: "",
+				foodId: "",
+				foodUrl: "",
+				mapUrl: "",
 				report: false,
 				bonAppetit: false
 			    }
