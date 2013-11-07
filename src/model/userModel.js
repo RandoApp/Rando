@@ -19,6 +19,7 @@ var User = mongoose.model("user", new mongoose.Schema({
 	stranger: {
 	    strangerId: String,
 	    location: String,
+	    foodId: String,
 	    foodUrl: String,
 	    mapUrl: String,
 	    report: Boolean,
