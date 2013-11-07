@@ -12,16 +12,16 @@ var Food = mongoose.model("food", new mongoose.Schema({
 }));
 
 module.exports = {
-    add: function (userId, location, creation, name, callback) {
-	logger.data("Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", name: ", name);
+    add: function (userId, location, creation, foodId, foodUrl, callback) {
+	logger.data("Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl);
 
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
-		    logger.warn("Can't add food! User: %s, location: %s, creation: %s, name: %s, map: %s", userId, location, creation, name, map);
-		    return;
+		    logger.warn("Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: null");
+ 		    return;
 		}
-		logger.debug("Food added. User: %s, location: %s, creation: %s, name: %s, map: %s", userId, location, creation, name, map);
+		logger.debug("Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, "mapUrl: null");
 	    }
 	}
 
@@ -29,8 +29,9 @@ module.exports = {
 	    user: userId,
 	    location: location,
 	    creation: creation,
-	    name: name,
-	    map: null
+	    foodId: foodId,
+	    foodUrl: foodUrl,
+	    mapUrl: null
 	});
 
 	food.save(callback);
@@ -45,7 +46,7 @@ module.exports = {
 		    logger.warn("Can't remove food! %j", food); 
 		    return;
 		}
-		logger.debug("Food removed. User: %s, location: %s, creation: %s, name: %s, map: %s", food.user, food.location, food.creation, food.name, food.map);
+		logger.debug("Food removed. User: ", food.user, " location: ", food.location, "creation: ", food.user.creation, " foodId: ", food.foodId, " foodUrl: ", food.foodUrl, "mapUrl: ", mapUrl);
 	    });
 	}
     }

@@ -1,4 +1,5 @@
 var logger = require("../log/logger");
+var config = require("config");
 var async = require("async");
 var check = require("validator").check;
 var util = require("../util/util");
@@ -21,25 +22,30 @@ module.exports =  {
 		done(null);
 	    },
 	    function (done) {
-		util.generateFoodName(function (err, name) {
+		util.generateFoodName(function (err, foodId, newFoodPath) {
 		    if (err) {
 			logger.warn("[foodService.saveFood, ", userId, "] Can't generateFoodName, because: ", err);
 			done(Errors.System(err));
 			return;
 		    }
-		    done(null, name);
+		    done(null, foodId, newFoodPath);
 		});
 	    },
-	    function (name, done) {
-		logger.data("[foodService.saveFood, ", userId, "] move: ", foodPath, " --> ", name);
-		mv(foodPath, name, {mkdirp: true}, function (err) {
+	    function (foodId, newFoodPath, done) {
+		logger.data("[foodService.saveFood, ", userId, "] move: ", foodPath, " --> ", newFoodPath);
+		mv(foodPath, newFoodPath, {mkdirp: true}, function (err) {
 		    if (err) {
-			logger.warn("[foodService.saveFood, ", userId, "] Can't move  ", foodPath, " to ", name, " because: ", err);
+			logger.warn("[foodService.saveFood, ", userId, "] Can't move  ", foodPath, " to ", newFoodPath, " because: ", err);
 			done(Errors.System(err));
 			return;
 		    }
-		    done(null, userId, name, location);
+		    done(null, userId, foodId, newFoodPath, location);
 		});
+	    },
+	    function (userId, foodId, newFoodPath, location, done) {
+		logger.debug("Generate foodUrl");
+		var foodUrl = config.app.url + config.app.static.folder.food + newFoodPath;
+		done(null, userId, foodId, foodUrl, location);
 	    },
 	    this.updateFood
 	], function (err) {
@@ -53,11 +59,11 @@ module.exports =  {
 	    callback();
 	});
     },
-    updateFood: function (userId, name, location, callback) {
-	logger.debug("[foodService.updateFood, ", userId, "] Try update food for: ", userId, " location: ", location, " name: ", name);
+    updateFood: function (userId, foodId, foodUrl, location, callback) {
+	logger.debug("[foodService.updateFood, ", userId, "] Try update food for: ", userId, " location: ", location, " foodId: ", foodId, " and url: ", foodUrl);
 	async.parallel({
 		addFood: function (done) {
-		    foodModel.add(userId, location, Date.now(), name, function (err) {
+		    foodModel.add(userId, location, Date.now(), foodId, foodUrl, function (err) {
 			if (err) {
 			    logger.warn("[foodService.updateFood.addFood, ", userId, "] Can't add food because: ", err);
 			    done(Errors.System(err));
@@ -67,7 +73,8 @@ module.exports =  {
 		})},
 		updateUser: function (done) {
 		    var id = userId;
-		    var name = name;
+		    var foodId = foodId;
+		    var foodUrl = foodUrl;
 		    var location = location;
 		    userModel.getById(userId, function (err, user) {
 			if (err)  {
@@ -80,8 +87,8 @@ module.exports =  {
 			    user: {
 				userId: id,
 				location: location,
-				foodId: name,
-				foodUrl: name,
+				foodId: foodId,
+				foodUrl: foodUrl,
 				mapUrl: "",
 				bonAppetit: false
 			    },

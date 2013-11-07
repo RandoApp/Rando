@@ -14,6 +14,7 @@ module.exports = {
 		logger.warn("[userService.getUser, ", userId, "] Can't userModel.getById, because: ", err);
 		callback(Errors.System(err));
 		return;
+
 	    }
 	    if (!user) {
 		logger.debug("[userService.getUser, ", userId, "] User not found. Return Error.");
