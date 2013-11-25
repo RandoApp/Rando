@@ -48,7 +48,7 @@ module.exports =  {
 		done(null, userId, foodId, foodUrl, location);
 	    },
 	    this.updateFood
-	], function (err) {
+	], function (err, foodUrl) {
 	    if (err) {
 		logger.warn("[foodService.saveFood, ", userId, "] Can't save food, because: ", err);
 		callback(err);
@@ -56,7 +56,7 @@ module.exports =  {
 	    }
 
 	    logger.debug("[foodService.saveFood, ", userId, "] save done");
-	    callback();
+	    callback(null, foodUrl);
 	});
     },
     updateFood: function (userId, foodId, foodUrl, location, callback) {
@@ -72,10 +72,6 @@ module.exports =  {
 			done(null);
 		})},
 		updateUser: function (done) {
-		    var id = userId;
-		    var foodId = foodId;
-		    var foodUrl = foodUrl;
-		    var location = location;
 		    userModel.getById(userId, function (err, user) {
 			if (err)  {
 			    logger.warn("[foodService.updateFood.updateUser, ", userId, "] Can't find user: ", userId, " because: ", err);
@@ -85,7 +81,7 @@ module.exports =  {
 
 			user.foods.push({
 			    user: {
-				userId: id,
+				userId: userId,
 				location: location,
 				foodId: foodId,
 				foodUrl: foodUrl,
@@ -93,7 +89,6 @@ module.exports =  {
 				bonAppetit: 0
 			    },
 			    stranger: {
-				strangerId: "",
 				location: "",
 				foodId: "",
 				foodUrl: "",
@@ -105,17 +100,17 @@ module.exports =  {
 
 			logger.data("[foodService.updateFood.updateUser, ", userId, "] Try update user");
 			userModel.update(user);
-			done(null);
+			done(null, foodUrl);
 		    });
 		}
 	    },
-	    function (err) {
+	    function (err, res) {
 		if (err) {
 		    logger.debug("[foodService.updateFood, ", userId, "] asyn parallel get error: ", err);
 		    callback(err);
 		    return;
 		}
-		callback(null);
+		callback(null, res.updateUser);
 	    }
 	);
     }

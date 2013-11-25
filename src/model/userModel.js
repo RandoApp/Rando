@@ -5,6 +5,7 @@ var logger = require("../log/logger");
 var User = mongoose.model("user", new mongoose.Schema({
     email: String,
     facebookId: String,
+    anonymousId: String,
     password: String,
     foods: [{
 	user: {

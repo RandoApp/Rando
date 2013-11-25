@@ -2,9 +2,12 @@ app:
     url: http://api.foodex.com
     port: 8888
     secret: Secret #This is a stub. 
+    anonymousEmailPosftix: foodex.com
     fb:
         id: 123456789 #This is a stub
         secret: abcd12345efg #This is a stub
+        host: graph.facebook.com
+        port: 443
     log:
         file: foodex.log
         handleException: true

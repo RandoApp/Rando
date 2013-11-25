@@ -45,7 +45,7 @@ app.use(passport.initialize());
 
 app.post('/food', function (req, res, next) {
     var userId = req.session.passport.user;
-    food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err) {
+    food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err, foodUrl) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -54,7 +54,7 @@ app.post('/food', function (req, res, next) {
 	}
 
 	res.status(200);
-	res.send("Ok");
+	res.send('{"url": "' + foodUrl + '"}')
     });
 });
 
@@ -128,6 +128,44 @@ app.get('/user', function (req, res) {
 	}
 	res.send(user);
     });
+});
+
+app.post('/anonymous', function (req, res) {
+    user.findOrCreateAnonymous(req.body.id, function (err, user) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	req.session.passport = {user: user};
+
+	res.status(200);
+	res.send("Ok");
+    });
+});
+
+app.post('/facebook', function (req, res) {
+    user.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, function (err, user) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	req.session.passport = {user: user};
+
+	res.status(200);
+	res.send("Ok");
+    });
+});
+
+app.post('/logout', function (req, res) {
+    req.session.destroy();
+    res.status(200);
+    res.send("Ok");
 });
 
 app.listen(config.app.port, function () {

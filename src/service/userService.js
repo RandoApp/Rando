@@ -49,6 +49,7 @@ module.exports = {
     },
     findOrCreateByLoginAndPassword: function (email, password, callback) {
 	logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
+
 	if (!email || !password) {
 	    logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
 	    callback(Errors.LoginAndPasswordIncorrectArgs());
@@ -99,6 +100,64 @@ module.exports = {
     isPasswordCorrect: function (password, user) {
 	logger.data("[userService.isPasswordCorrect, ", user, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
 	return user.password == this.generateHashForPassword(user.email, password);
+    },
+    findOrCreateAnonymous: function (id, callback) {
+	if (!id) {
+	    callback(Errors.IncorrectAnonymousId());
+	    return;
+	}
+
+	var email =  id + "@" + config.app.anonymousEmailPosftix;
+	userModel.getByEmail(email, function(err, user) {
+	    if (err) {
+		callback(Errors.System(err));
+		return;
+	    }
+
+	    if (user) {
+		logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
+		callback(null, user.id);
+	    } else {
+		logger.debug("[userService.findOrCreateAnonymous, ", email, " User not exist. Try create him");
+		var user = {
+		    anonymousId: id,
+		    email: email
+		}
+		userModel.create(user, function (err, user) {
+		    if (err) {
+			logger.warn("[userService.findOrCreateAnonymous, ", user.id, "] Can't create user because: ", err);
+			callback(Errors.System(err));
+			return;
+		    }
+		    logger.data("[userService.findOrCreateAnonymous, ", user.id, "] User created: ", user);
+		    callback(null, user.id);
+		});
+	    }
+	});
+    },
+    verifyFacebookAndFindOrCreateUser: function (id, email, token, callback) {
+	logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Start");
+
+	var self = this;
+	require("https").get({
+	    host: config.app.fb.host,
+	    port: config.app.fb.port,
+	    path: '/' + id + '?fields=id,email&access_token=' + token
+	}, function(resp) {
+	    resp.on('data', function(chunk) {
+		var json = JSON.parse(chunk.toString("utf8"));
+		logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Recive json: ", json);
+		if (json.email == email) {
+		    logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is equals");
+		    self.findOrCreateByFBData({email: email, id: id}, callback);
+		} else {
+		    callback(Errors.FBIncorrectArgs());
+		}
+	    }).on("error", function(e){
+		logger.warn("[userService, ", id, " - ", email, "] Error in communication with Facebook: ", e);
+		callback(Errors.FacebookError());
+	    });
+	});
     },
     findOrCreateByFBData: function (data, callback) {
 	logger.data("[userService.findOrCreateByFBData, ", data, "] Try find or create.");
