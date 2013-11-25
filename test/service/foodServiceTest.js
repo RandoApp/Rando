@@ -109,10 +109,11 @@ describe('Food service.', function () {
 		callback(null);
 	    });
 
-	    foodService.saveFood("524ebb7dcb9da8ab5b000002", "/tmp/some-food.png", {lat: "32", long: "23"}, function (err) {
+	    foodService.saveFood("524ebb7dcb9da8ab5b000002", "/tmp/some-food.png", {lat: "32", long: "23"}, function (err, foodUrl) {
 		mkDirCalled.should.be.true;
 		renameCalled.should.be.true;
 		should.not.exist(err);
+		should.exist(foodUrl);
 
 		mongooseMock.restore();
 		done();

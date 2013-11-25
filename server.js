@@ -45,7 +45,7 @@ app.use(passport.initialize());
 
 app.post('/food', function (req, res, next) {
     var userId = req.session.passport.user;
-    food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err) {
+    food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err, foodUrl) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -54,7 +54,7 @@ app.post('/food', function (req, res, next) {
 	}
 
 	res.status(200);
-	res.send("Ok");
+	res.send('{"url": "' + foodUrl + '"}')
     });
 });
 
