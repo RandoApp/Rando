@@ -130,6 +130,44 @@ app.get('/user', function (req, res) {
     });
 });
 
+app.post('/anonymous', function (req, res) {
+    user.findOrCreateAnonymous(req.body.id, function (err, user) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	req.session.passport = {user: user};
+
+	res.status(200);
+	res.send("Ok");
+    });
+});
+
+app.post('/facebook', function (req, res) {
+    user.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, function (err, user) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	req.session.passport = {user: user};
+
+	res.status(200);
+	res.send("Ok");
+    });
+});
+
+app.post('/logout', function (req, res) {
+    req.session.destroy();
+    res.status(200);
+    res.send("Ok");
+});
+
 app.listen(config.app.port, function () {
     logger.info('Express server listening on port ' + config.app.port);
 });

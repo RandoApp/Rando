@@ -305,4 +305,61 @@ describe('User service.', function () {
 	    });
 	});
     });
+    describe('Find Or Create Anonymouse.', function () {
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    done();
+	});
+
+	it('Not defined id should return error', function (done) {
+	    userService.findOrCreateAnonymous(null, function(err, user) {
+		should.exist(err);
+		err.should.have.property("message", "Id is not correct");
+		done();
+	    });
+	});
+
+	it('Error in database should return system error', function (done) {
+	    var error = "Database error";
+	    mongooseMock.stubFindOne(function(err, callback) {
+		callback(new Error(error));
+	    });
+
+	    userService.findOrCreateAnonymous("efab3c3", function(err, user) {
+		should.exist(err);
+		err.should.have.property("message", error);
+		done();
+	    });
+	});
+
+	it('Anonymous user already exists', function (done) {
+	    mongooseMock.stubFindOne();
+
+	    userService.findOrCreateAnonymous("efab3c3", function(err, user) {
+		should.not.exist(err);
+		should.exist(user);
+		user.should.be.eql("524ea2324a590391a3e8b516");
+		done();
+	    });
+	});
+	
+	it('Anonymous should be created in database if not found', function (done) {
+	    mongooseMock.stubFindOneWithNotFoundUser().stubSave(function (callback) {
+		this._id = "524ea2324a590391a3e8b516";
+
+		this.should.have.property("email", "efab3c3@foodex.com");
+		this.should.have.property("anonymousId", "efab3c3");
+		callback(null, this);
+	    });
+
+	    userService.findOrCreateAnonymous("efab3c3", function(err, userId) {
+		should.not.exist(err);
+		should.exist(userId);
+		userId.should.be.eql("524ea2324a590391a3e8b516");
+		done();
+	    });
+
+	});
+    });
+
 });

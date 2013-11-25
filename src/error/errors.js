@@ -81,12 +81,31 @@ module.exports =  {
 	}
 	return error;
     },
+    IncorrectAnonymousId: function () {
+	var error = new Error("Id is not correct");
+	error.foodex = {
+	    status: 400,
+	    code: 409,
+	    message: "Id is not correct",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#user"
+	}
+	return error;
+    },
     System: function (err) {
 	err.foodex = {
 	    status: 500,
 	    code: 501,
 	    message: "Internal Server Error",
 	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+	}
+	return  err;
+    },
+    FacebookError: function (err) {
+	err.foodex = {
+	    status: 500,
+	    code: 502,
+	    message: "Facebook Server Error",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#facebook"
 	}
 	return  err;
     },
