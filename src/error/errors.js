@@ -1,6 +1,16 @@
 var logger = require("../log/logger");
 
 module.exports =  {
+    Unauthorized: function () {
+	var error = new Error("Unauthorized");
+	error.foodex = {
+	    status: 401,
+	    code: 400,
+	    message: "Unauthorized",
+	    description: "You are not authorized. See https://github.com/dimhold/foodex/wiki/Errors/#unauthorized"
+	}
+	return error;
+    },
     IncorrectFoodArgs: function () {
 	var error = new Error("Incorrect args");
 	error.foodex = {

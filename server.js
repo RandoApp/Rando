@@ -44,6 +44,11 @@ app.use(express.session({
 app.use(passport.initialize());
 
 app.post('/food', function (req, res, next) {
+    logger.data("POST /food");
+    if (isNotAuthorized(req, res)) {
+	return;
+    }
+
     var userId = req.session.passport.user;
     food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err, foodUrl) {
 	if (err) {
@@ -60,6 +65,10 @@ app.post('/food', function (req, res, next) {
 
 app.post('/report/:id', function (req, res) {
     logger.data("POST /report/:id", req);
+    if (isNotAuthorized(req, res)) {
+	return;
+    }
+
     var userId = req.session.passport.user;
     logger.debug("REPORT");
     comment.report(userId, req.params.id, function (err) {
@@ -76,6 +85,10 @@ app.post('/report/:id', function (req, res) {
 
 app.post('/bonappetit/:id', function (req, res) {
     logger.data("POST /bonappetit/:id", req);
+    if (isNotAuthorized(req, res)) {
+	return;
+    }
+
     var userId = req.session.passport.user;
     comment.bonAppetit(userId, req.params.id, function (err) {
 	if (err) {
@@ -118,6 +131,10 @@ app.post('/user', function(req, res, next) {
 });
 
 app.get('/user', function (req, res) {
+    if (isNotAuthorized(req, res)) {
+	return;
+    }
+
     var userId = req.session.passport.user;
     user.getUser(userId, function (err, user) {
 	if (err) {
@@ -167,6 +184,21 @@ app.post('/logout', function (req, res) {
     res.status(200);
     res.send("Ok");
 });
+
+function isNotAuthorized (req, res) {
+    logger.debug("Check authorisation");
+    if (req.session.passport && req.session.passport.user) {
+	logger.debug("User authorized: " + req.session.passport.user);
+	return false;
+    }
+
+    logger.debug("Session or user is empty. Send Unauthorized error.");
+    var response = Errors.toResponse(Errors.Unauthorized());
+    res.status(response.status);
+    res.send(response);
+    return true;
+}
+module.exports = isNotAuthorized;
 
 app.listen(config.app.port, function () {
     logger.info('Express server listening on port ' + config.app.port);
