@@ -198,6 +198,7 @@ function isNotAuthorized (req, res) {
     res.send(response);
     return true;
 }
+module.exports = isNotAuthorized;
 
 app.listen(config.app.port, function () {
     logger.info('Express server listening on port ' + config.app.port);
