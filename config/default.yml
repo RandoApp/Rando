@@ -3,6 +3,9 @@ app:
     port: 8888
     secret: Secret #This is a stub. 
     anonymousEmailPosftix: foodex.com
+    demon:
+        wakeup: 20000
+        foodTimeout: 300000
     fb:
         id: 123456789 #This is a stub
         secret: abcd12345efg #This is a stub
