@@ -34,45 +34,49 @@ module.exports = {
 			logger.debug("Ignore one food, because is all foods is odd");
 			foodsForPairs.pop();
 		    }
-		    self.connectFoods(foodsForPairs);
+		    self.findAndPairFoods(foodsForPairs);
 		}
 	    });
 	});
     },
-    connectFoods: function (foods) {
-	logger.debug("Connect Foods: ", foods.length);
-	for (var i = 0; i < foods.length; i+=2) {
-	    var food1 = foods[i];
-	    var food2 = foods[i+1];
-
-	    userModel.getById(food1.user, function (err, user) {
-		logger.debug("Find user: ", user.id);
-		for (var j = 0; j < user.foods.length; j++) {
-		    if (!user.foods[j].stranger.user) {
-			logger.debug("Food for pairing fount");
-			user.foods[j].stranger = food2;
-			userModel.update(user);
-			foodModel.remove(food2);
-			return;
-		    }
-		}
-	    });
-
-	    userModel.getById(food2.user, function (err, user) {
-		logger.debug("-----------------2 Find user: ", user.email);
-		for (var j = 0; j < user.foods.length; j++) {
-		    logger.debug("-----------------2 This is a paired food: ", user.id);
-		    if (!user.foods[j].stranger.user) {
-			logger.debug("-----------------2 YAHO. NOT PAIRED FOOD FIND. ");
-			user.foods[j].stranger = food1;
-			logger.debug("-----------------2 Ok. Try update user and remove food.");
-			userModel.update(user);
-			foodModel.remove(food1);
-			return;
-		    }
-		}
-	    });
+    findAndPairFoods: function (foods) {
+	logger.debug("Start findAndPairFoods with foods: ", foods);
+	for (var i = 0; i < foods.length; i++) {
+	    var food = this.findFoodForUser(foods[i], foods);
+	    logger.debug("findAndPairFoods. Get food: ", food, " and foods now look as: ", foods);
+	    if (food) {
+		this.connectFoods(food[i], food);
+	    }
 	}
+    },
+    findFoodForUser: function (food, foods) {
+	logger.debug("Start findFoodForUser");
+	for (var i = 0; i < foods.length; i++) {
+	    if (food.user != foods[i].user) {
+		logger.debug("Stop findFoodForUser. return food[", i "]: ", foods[i]);
+		return foods.splice[i, 1];
+	    }
+	}
+	logger.debug("Stop findFoodForUser. return null");
+	return null;
+    },
+    connectFoods: function (food1, food2) {
+	this.processFoodForUser(food1.user, food2);
+	this.processFoodForUser(food2.user, food1);
+    },
+    processFoodForUser: function (userId, food) {
+	userModel.getById(userId, function (err, user) {
+	    logger.debug("Find user: ", user.id);
+	    for (var i = 0; i < user.foods.length; i++) {
+		if (!user.foods[i].stranger.user) {
+		    logger.debug("Food for pairing fount");
+		    user.foods[i].stranger = food;
+		    userModel.update(user);
+		    foodModel.remove(food);
+		    return;
+		}
+	    }
+	});
     },
     startPairFoodsDemon: function () {
 	logger.info("Start pair foods demon with interval wakeup: ", config.app.demon.wakeup);
