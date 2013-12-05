@@ -53,9 +53,10 @@ module.exports = {
     findFoodForUser: function (food, foods) {
 	logger.debug("Start findFoodForUser");
 	for (var i = 0; i < foods.length; i++) {
+	    logger.debug("Compare users: ", food.user, " == ", foods[i].user);
 	    if (food.user != foods[i].user) {
 		logger.debug("Stop findFoodForUser. return food[", i, "]: ", foods[i]);
-		return foods.splice(i, 1);
+		return foods.splice(i, 1)[0];
 	    }
 	}
 	logger.debug("Stop findFoodForUser. return null");
