@@ -9,7 +9,7 @@ var User = mongoose.model("user", new mongoose.Schema({
     password: String,
     foods: [{
 	user: {
-	    userId: String,
+	    user: String,
 	    location: String,
 	    foodId: String,
 	    foodUrl: String,
@@ -18,11 +18,12 @@ var User = mongoose.model("user", new mongoose.Schema({
 	    bonAppetit: Number
 	},
 	stranger: {
-	    strangerId: String,
+	    user: String,
 	    location: String,
 	    foodId: String,
 	    foodUrl: String,
 	    mapUrl: String,
+	    creation: Number,
 	    report: Number,
 	    bonAppetit: Number
 	}

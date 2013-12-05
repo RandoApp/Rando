@@ -1,17 +1,14 @@
 var should = require("should");
 var sinon = require("sinon");
-var pairFoodsService = require("../../src/service/pairFoodService");
+var pairFoodsService = require("../../src/service/pairFoodsService");
 var mongooseMock = require("../util/mongooseMock");
 
 describe('Pair Foods Service.', function () {
     describe('Pair Foods.', function () {
-	afterEach(function (done) {
-	    mongooseMock.restore();
-	    done();
-	});
-
-	it('Map', function (done) {
+	it('PairFoods', function (done) {
 	    pairFoodsService.pairFoods();
+	    //TODO: Implement test
+	    done();
 	});
     });
 });
