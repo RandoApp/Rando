@@ -14,11 +14,17 @@ module.exports = {
 		return;
 	    }
 
-	    async.map(foods, function (food, callback) {
+	    async.filter(foods, function (food, callback) {
 		if (food.creation) {
+		    callback(true);
+		    return;
 		}
-	    }, function (err, result) {
+		callback(false);
+	    }, function (result) {
+		
 	    });
+
+	    
 	});
     },
     startPairFoodsDemon: function () {
