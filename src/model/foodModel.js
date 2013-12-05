@@ -8,7 +8,9 @@ var Food = mongoose.model("food", new mongoose.Schema({
     creation: Number,
     foodId: String,
     foodUrl: String,
-    mapUrl: String 
+    mapUrl: String,
+    report: Number,
+    bonAppetit: Number
 }));
 
 module.exports = {
@@ -30,6 +32,8 @@ module.exports = {
 	    location: location,
 	    creation: creation,
 	    foodId: foodId,
+	    bonAppetit: 0,
+	    report: 0,
 	    foodUrl: foodUrl,
 	    mapUrl: null
 	});

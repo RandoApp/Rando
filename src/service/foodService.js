@@ -30,8 +30,7 @@ module.exports =  {
 		    }
 		    done(null, foodId, newFoodPath);
 		});
-	    }
-	    ,
+	    },
 	    function (foodId, newFoodPath, done) {
 		logger.data("[foodService.saveFood, ", userId, "] move: ", foodPath, " --> ", newFoodPath);
 		mv(foodPath, newFoodPath, {mkdirp: true}, function (err) {

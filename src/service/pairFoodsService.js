@@ -40,19 +40,17 @@ module.exports = {
 	});
     },
     connectFoods: function (foods) {
-	logger.debug("----------------- Connect Foods: ", foods.length);
+	logger.debug("Connect Foods: ", foods.length);
 	for (var i = 0; i < foods.length; i+=2) {
 	    var food1 = foods[i];
 	    var food2 = foods[i+1];
 
 	    userModel.getById(food1.user, function (err, user) {
-		logger.debug("-----------------1 Find user: ", user.id);
+		logger.debug("Find user: ", user.id);
 		for (var j = 0; j < user.foods.length; j++) {
-		    logger.debug("-----------------1 This is a paired food: ", user.email);
 		    if (!user.foods[j].stranger.user) {
-			logger.debug("-----------------1 YAHO. NOT PAIRED FOOD FIND. ");
+			logger.debug("Food for pairing fount");
 			user.foods[j].stranger = food2;
-			logger.debug("-----------------1 Ok. Try update user and remove food.");
 			userModel.update(user);
 			foodModel.remove(food2);
 			return;
