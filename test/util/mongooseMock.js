@@ -54,6 +54,45 @@ module.exports = {
 	sinon.stub(mongoose.Model, "findOne", stub);
 	return this;
     },
+    stubFindUserWithNotPairedFood: function (stub) {
+	if (!stub) {
+	    stub = function (email, callback) {
+		var user = {
+		    id: "524ea2324a590391a3e8b516",
+		    email: email,
+		    facebookId: "111111",
+		    foods: [{
+			user: {
+			    email: email,
+			    userId: "524ea2324a590391a3e8b516",
+			    localtion: "1111.1111, 1111.1111",
+			    foodId: "3333",
+			    foodUrl: "http://api.foodex.com/food/3333",
+			    creation: 123456789,
+			    mapUrl: "http://api.foodex.com/food/4444",
+			    bonAppetit: false
+			},
+			stranger: {
+			    email: "",
+			    localtion: "",
+			    userId: "",
+			    foodId: "",
+			    foodUrl: "",
+			    mapUrl: "",
+			    report: false,
+			    bonAppetit: false
+			}
+		    }]
+		};
+
+		user.__proto__ = mongoose.model("user").prototype;
+
+		callback(null, user);
+	    };
+	}
+	sinon.stub(mongoose.Model, "findOne", stub);
+	return this;
+    },
     stubFindOneWithEmptyUser: function (stub) {
 	if (!stub) {
 	    stub = function (email, callback) {

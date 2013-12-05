@@ -30,7 +30,8 @@ module.exports =  {
 		    }
 		    done(null, foodId, newFoodPath);
 		});
-	    },
+	    }
+	    ,
 	    function (foodId, newFoodPath, done) {
 		logger.data("[foodService.saveFood, ", userId, "] move: ", foodPath, " --> ", newFoodPath);
 		mv(foodPath, newFoodPath, {mkdirp: true}, function (err) {
@@ -79,20 +80,24 @@ module.exports =  {
 			    return;
 			}
 
+			//TODO: Date.now in updateUser and addFood is differents. Use one time.
 			user.foods.push({
 			    user: {
-				userId: userId,
+				user: userId,
 				location: location,
 				foodId: foodId,
 				foodUrl: foodUrl,
 				mapUrl: "",
+				creation: Date.now(),
 				bonAppetit: 0
 			    },
 			    stranger: {
+				user: "",
 				location: "",
 				foodId: "",
 				foodUrl: "",
 				mapUrl: "",
+				creation: 0,
 				report: 0,
 				bonAppetit: 0
 			    }

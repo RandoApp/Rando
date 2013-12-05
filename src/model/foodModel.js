@@ -4,7 +4,7 @@ var logger = require("../log/logger");
 
 var Food = mongoose.model("food", new mongoose.Schema({
     user: String,
-    location: Number,
+    location: String,
     creation: Number,
     foodId: String,
     foodUrl: String,
@@ -46,7 +46,7 @@ module.exports = {
 		    logger.warn("Can't remove food! %j", food); 
 		    return;
 		}
-		logger.debug("Food removed. User: ", food.user, " location: ", food.location, "creation: ", food.user.creation, " foodId: ", food.foodId, " foodUrl: ", food.foodUrl, "mapUrl: ", mapUrl);
+		logger.debug("Food removed. User: ", food.user, " location: ", food.location, "creation: ", food.user.creation, " foodId: ", food.foodId, " foodUrl: ", food.foodUrl, "mapUrl: ", food.mapUrl);
 	    });
 	}
     }

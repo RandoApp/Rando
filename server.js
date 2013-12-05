@@ -10,7 +10,10 @@ var LocalStrategy = require('passport-local').Strategy;
 var MongoStore = require('connect-mongo')(express);
 var mongodbConnection = require("./src/model/db").establishConnection();
 var Errors = require("./src/error/errors");
+var pairFoodsService = require("./src/service/pairFoodsService");
 var app = express();
+
+pairFoodsService.startPairFoodsDemon();
 
 passport.use(new FacebookStrategy({
     clientID: config.app.fb.id,
@@ -50,7 +53,7 @@ app.post('/food', function (req, res, next) {
     }
 
     var userId = req.session.passport.user;
-    food.saveFood(userId, req.files.image.path, {lat: req.quiery.latitude, long: req.quire.longitude},  function (err, foodUrl) {
+    food.saveFood(userId, req.files.image.path, {lat: req.body.latitude, long: req.body.longitude},  function (err, foodUrl) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -59,7 +62,8 @@ app.post('/food', function (req, res, next) {
 	}
 
 	res.status(200);
-	res.send('{"url": "' + foodUrl + '"}')
+	//TODO: Orginize response into the service, not in the controller - server.js
+	res.send('{"foodUrl": "' + foodUrl + '", "creation":"' + Date.now() + '"}')
     });
 });
 
