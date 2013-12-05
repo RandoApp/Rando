@@ -35,7 +35,7 @@ module.exports = {
 	    bonAppetit: 0,
 	    report: 0,
 	    foodUrl: foodUrl,
-	    mapUrl: null
+	    mapUrl: "http://foodex-webtools.rhcloud.com/map/minskmap.png" //TODO: remove this stub
 	});
 
 	food.save(callback);
