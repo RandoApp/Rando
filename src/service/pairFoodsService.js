@@ -29,13 +29,7 @@ module.exports = {
 		callback(false);
 	    }, function (foodsForPairs) {
 		logger.debug("----------- filter END: ", foodsForPairs, " and oldFood: ", oldFood);
-		if (foodsForPairs.length > 1) {
-		    if (foodsForPairs.length % 2 != 0) {
-			logger.debug("Ignore one food, because is all foods is odd");
-			foodsForPairs.pop();
-		    }
-		    self.findAndPairFoods(foodsForPairs);
-		}
+		self.findAndPairFoods(foodsForPairs);
 	    });
 	});
     },
