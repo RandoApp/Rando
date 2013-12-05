@@ -66,7 +66,12 @@ module.exports = {
     },
     processFoodForUser: function (userId, food) {
 	userModel.getById(userId, function (err, user) {
-	    logger.debug("Find user: ", user.id);
+	    if (err) {
+		logger.warn("Data base error when getById: ", userId);
+		return;
+	    }
+
+	    logger.debug("Find user: ", user);
 	    for (var i = 0; i < user.foods.length; i++) {
 		if (!user.foods[i].stranger.user) {
 		    logger.debug("Food for pairing fount");
