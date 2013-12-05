@@ -40,12 +40,25 @@ module.exports = {
 	});
     },
     findAndPairFoods: function (foods) {
+	logger.debug("Start findAndPairFoods with foods: ", foods);
 	for (var i = 0; i < foods.length; i++) {
 	    var food = this.findFoodForUser(foods[i], foods);
+	    logger.debug("findAndPairFoods. Get food: ", food, " and foods now look as: ", foods);
 	    if (food) {
 		this.connectFoods(food[i], food);
 	    }
 	}
+    },
+    findFoodForUser: function (food, foods) {
+	logger.debug("Start findFoodForUser");
+	for (var i = 0; i < foods.length; i++) {
+	    if (food.user != foods[i].user) {
+		logger.debug("Stop findFoodForUser. return food[", i "]: ", foods[i]);
+		return foods.splice[i, 1];
+	    }
+	}
+	logger.debug("Stop findFoodForUser. return null");
+	return null;
     },
     connectFoods: function (food1, food2) {
 	this.processFoodForUser(food1.user, food2);
@@ -64,14 +77,6 @@ module.exports = {
 		}
 	    }
 	});
-    },
-    findFoodForUser: function (food, foods) {
-	for (var i = 0; i < foods.length; i++) {
-	    if (food.user != foods[i].user) {
-		return foods.splice[i, 1];
-	    }
-	}
-	return null;
     },
     startPairFoodsDemon: function () {
 	logger.info("Start pair foods demon with interval wakeup: ", config.app.demon.wakeup);
