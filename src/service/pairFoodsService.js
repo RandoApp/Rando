@@ -53,7 +53,7 @@ module.exports = {
 	logger.debug("Start findFoodForUser");
 	for (var i = 0; i < foods.length; i++) {
 	    if (food.user != foods[i].user) {
-		logger.debug("Stop findFoodForUser. return food[", i "]: ", foods[i]);
+		logger.debug("Stop findFoodForUser. return food[", i, "]: ", foods[i]);
 		return foods.splice[i, 1];
 	    }
 	}
