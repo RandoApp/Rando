@@ -42,10 +42,11 @@ module.exports = {
     findAndPairFoods: function (foods) {
 	logger.debug("Start findAndPairFoods with foods: ", foods);
 	for (var i = 0; i < foods.length; i++) {
-	    var food = this.findFoodForUser(foods[i], foods);
+	    var currentFood = foods[i];
+	    var food = this.findFoodForUser(currentFood, foods);
 	    logger.debug("findAndPairFoods. Get food: ", food, " and foods now look as: ", foods);
 	    if (food) {
-		this.connectFoods(food[i], food);
+		this.connectFoods(currentFood, food);
 	    }
 	}
     },
@@ -61,13 +62,20 @@ module.exports = {
 	return null;
     },
     connectFoods: function (food1, food2) {
+	logger.debug("Start connectFoods with food1: ", food1, "and food2:  ", food2);
 	this.processFoodForUser(food1.user, food2);
 	this.processFoodForUser(food2.user, food1);
     },
     processFoodForUser: function (userId, food) {
+	logger.debug("Try find user by id: ", userId);
 	userModel.getById(userId, function (err, user) {
 	    if (err) {
 		logger.warn("Data base error when getById: ", userId);
+		return;
+	    }
+
+	    if (!user) {
+		logger.warn("User not fount: ", userId);
 		return;
 	    }
 
