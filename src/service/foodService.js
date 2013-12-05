@@ -45,7 +45,8 @@ module.exports =  {
 	    },
 	    function (userId, foodId, newFoodPath, location, done) {
 		logger.debug("Generate foodUrl");
-		var foodUrl = config.app.url + config.app.static.folder.food + newFoodPath;
+		//TODO: Fix newFoodPath. It should not contains static/ preofix  
+		var foodUrl = config.app.url + newFoodPath.replace(url.replace("static\/", "");
 		done(null, userId, foodId, foodUrl, location);
 	    },
 	    this.updateFood
