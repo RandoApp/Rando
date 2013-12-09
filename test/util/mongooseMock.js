@@ -135,7 +135,12 @@ module.exports = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: "user@mail.com",
 		    facebookId: "111111",
-		    foods: []
+		    foods: [],
+		    save: function (callback) {
+			if (callback) {
+			    callback(null);
+			}
+		    }
 		};
 		callback(null, user);
 	    };
@@ -143,10 +148,17 @@ module.exports = {
 	sinon.stub(mongoose.Model, "findById", stub);
 	return this;
     },
+    stubRemove: function (stub) {
+	if (!stub) {
+	    throw new Error("You should specify stub");
+	}
+	sinon.stub(mongoose.Model.prototype, "remove", stub);
+    },
     restore: function () {
 	this.restoreSave();
 	this.restoreFindOnce();
 	this.restoreFindById();
+	this.restoreRemove();
 	return this;
     },
 
@@ -165,6 +177,12 @@ module.exports = {
     restoreFindById: function () {
 	if (mongoose.Model.findById.restore) {
 	    mongoose.Model.findById.restore();
+	}
+	return this;
+    },
+    restoreRemove: function () {
+	if (mongoose.Model.prototype.remove.restore) {
+	    mongoose.Model.prototype.remove.restore();
 	}
 	return this;
     }

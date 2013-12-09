@@ -70,15 +70,16 @@ module.exports = {
 	    }
 
 	    if (!user) {
-		logger.warn("User not fount: ", userId);
+		logger.warn("User not found: ", userId);
 		return;
 	    }
 
 	    logger.debug("Find user: ", user);
 	    for (var i = 0; i < user.foods.length; i++) {
 		if (!user.foods[i].stranger.user) {
-		    logger.debug("Food for pairing fount");
+		    logger.debug("Food for pairing found");
 		    user.foods[i].stranger = food;
+		    logger.warn(">>>>>>>>>>>>>>>>>>>>>>>>>>> ", user);
 		    userModel.update(user);
 		    foodModel.remove(food);
 		    return;
