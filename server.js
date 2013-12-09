@@ -13,7 +13,7 @@ var Errors = require("./src/error/errors");
 var pairFoodsService = require("./src/service/pairFoodsService");
 var app = express();
 
-pairFoodsService.startPairFoodsDemon();
+pairFoodsService.startDemon();
 
 passport.use(new FacebookStrategy({
     clientID: config.app.fb.id,

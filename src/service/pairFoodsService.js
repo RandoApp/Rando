@@ -6,7 +6,7 @@ var Errors = require("../error/errors");
 var async = require("async");
 
 module.exports = {
-    pairFoodDemonTimer: null,
+    timer: null,
     pairFoods: function () {
 	logger.debug("Pair Foods Demon start work");
 	var self = this;
@@ -86,16 +86,18 @@ module.exports = {
 	    }
 	});
     },
-    startPairFoodsDemon: function () {
+    startDemon: function () {
 	logger.info("Start pair foods demon with interval wakeup: ", config.app.demon.wakeup);
 	var self = this;
-	this.pairFoodDemonTimer = setInterval(function () { self.pairFoods(); }, config.app.demon.wakeup);
+	this.timer = setInterval(function () {
+	    self.pairFoods();
+	}, config.app.demon.wakeup);
     },
-    stopPairFoodsDemon: function () {
-	if (this.pairFoodDemonTimer) {
+    stopDemon: function () {
+	if (this.timer) {
 	    logger.info("Stop pair foods demon");
-	    clearInterval(this.pairFoodDemonTimer);
-	    this.pairFoodDemonTimer = null;
+	    clearInterval(this.timer);
+	    this.timer = null;
 	}
     }
 };
