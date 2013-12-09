@@ -59,6 +59,7 @@ describe('User service.', function () {
 
 	    mongooseMock.stubFindOne(function (email, callback) {
 		callback(new Error(error));
+
 	    });
 
 	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err) {
@@ -231,23 +232,23 @@ describe('User service.', function () {
 		    facebookId: "111111",
 		    foods: [{
 			user: {
-			    userId: "524ea2324a590391a3e8b516",
+			    user: "524ea2324a590391a3e8b516",
 			    location: {
 				lat: "3333",
 				long: "4444"
 			    },
-			    createion: "24324234",
+			    creation: "24324234",
 			    food: "435345.png",
 			    map: "32432432.png",
 			    bonAppetit: false
 			},
 			stranger: {
-			    strangerId: "624ea2324a590391a3e8b516",
+			    user: "624ea2324a590391a3e8b516",
 			    location: {
 				lat: "4333",
 				long: "5444"
 			    },
-			    createion: "54324234",
+			    creation: "54324234",
 			    food: "635345.png",
 			    map: "52432432.png",
 			    bonAppetit: false
@@ -255,12 +256,12 @@ describe('User service.', function () {
 		    },
 		    {
 			user: {
-			    userId: "524ea2324a590391a3e8b516",
+			    user: "524ea2324a590391a3e8b516",
 			    location: {
 				lat: "3333",
 				long: "4444"
 			    },
-			    createion: "34324234",
+			    creation: "34324234",
 			    food: "935345.png",
 			    map: "32432432.png",
 			    bonAppetit: false
@@ -277,13 +278,13 @@ describe('User service.', function () {
 		    email: "user@mail.com",
 		    foods: [{
 			user: {
-			    createion: "24324234",
+			    creation: "24324234",
 			    food: "435345.png",
 			    map: "32432432.png",
 			    bonAppetit: false
 			},
 			stranger: {
-			    createion: "54324234",
+			    creation: "54324234",
 			    food: "635345.png",
 			    map: "52432432.png",
 			    bonAppetit: false
@@ -291,7 +292,7 @@ describe('User service.', function () {
 		    },
 		    {
 			user: {
-			    createion: "34324234",
+			    creation: "34324234",
 			    food: "935345.png",
 			    map: "32432432.png",
 			    bonAppetit: false
