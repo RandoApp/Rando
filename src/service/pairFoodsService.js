@@ -34,14 +34,20 @@ module.exports = {
 		callback(false);
 	    }, function (foodsForPairs) {
 		logger.debug("filter end: ", foodsForPairs, " and oldFood: ", oldFood);
-		self.findAndPairFoods(foodsForPairs);
+		var foods = self.findAndPairFoods(foodsForPairs);
+
+		if (foods.length >= 1 && oldFood && (Date.now() - foods[0].creation) >= config.app.demon.foodTimeout) {
+		    foods.push(oldFood);
+		    foods.sort(function (food1, food2) {if (food1 > food2) return -1; else return 1;});
+		    self.findAndPairFoods(foods);
+		}
 	    });
 	});
     },
     findAndPairFoods: function (foods) {
 	logger.debug("Start findAndPairFoods with foods: ", foods);
 	if (!foods) {
-	    return;
+	    return [];
 	}
 
 	for (var i = 0; i < foods.length; i++) {
@@ -52,6 +58,8 @@ module.exports = {
 		this.connectFoods(currentFood, food);
 	    }
 	}
+
+	return foods;
     },
     findFoodForUser: function (food, foods) {
 	logger.debug("Start findFoodForUser");

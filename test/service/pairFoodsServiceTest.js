@@ -15,6 +15,133 @@ describe('Pair Foods Service.', function () {
 	    if (pairFoodsService.findAndPairFoods.restore) {
 		pairFoodsService.findAndPairFoods.restore();
 	    }
+	    if (pairFoodsService.connectFoods.restore) {
+		pairFoodsService.connectFoods.restore();
+	    }
+	    if (pairFoodsService.findFoodForUser.restore) {
+		pairFoodsService.findFoodForUser.restore();
+	    }
+	    if (pairFoodsService.processFoodForUser.restore) {
+		pairFoodsService.processFoodForUser.restore();
+	    }
+	    done();
+	});
+
+	it('connectFoods should trigger processFoodForUser with userId and food as args', function (done) {
+	    sinon.stub(pairFoodsService, "processFoodForUser", function (userId, food) {
+		if (userId == 12345) {
+		    food.should.be.eql({user: 56789});
+		    return;
+		}
+
+		if (userId == 56789) {
+		    food.should.be.eql({user: 12345});
+		    return;
+		}
+
+		throw new Error("Unknown userId: " + userId + " in processFoodForUser function - force fail test");
+	    });
+
+	    pairFoodsService.connectFoods({user: 12345}, {user: 56789});
+
+	    done();
+	});
+
+	it('pairFoods should pair old food if foodTimeout', function (done) {
+	    var foodsStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, foodsStub);
+	    });
+
+	    var findAndPairFoods = false;
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		if (foods.length != 2) {
+		    return [{creation: 12345}];
+		}
+
+		foods.should.be.eql([{creation: 0}, {creation: 12345}]);
+		done();
+		return [];
+	    });
+
+	    pairFoodsService.pairFoods();
+	});
+
+	it('pairFoods should NOT pair old food if NOT foodTimeout', function (done) {
+	    var time = Date.now();
+	    var foodsStub = [{creation: time}, {creation: 0}, {creation: time}, {creation: time}];
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, foodsStub);
+	    });
+
+	    var findAndPairFoods = false;
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		if (foods.length != 2) {
+		    done();
+		    return [{creation: time}];
+		}
+
+		throw new Error("pairFoodsService called twice. Force fail test");
+	    });
+
+	    pairFoodsService.pairFoods();
+	});
+
+	it('pairFoods should NOT pair old food if oldFood not exist', function (done) {
+	    var time = Date.now();
+	    var foodsStub = [{creation: 53433}, {creation: 12345}, {creation: 48483}, {creation: 32323}];
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, foodsStub);
+	    });
+
+	    var findAndPairFoods = false;
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		if (foods.length != 2) {
+		    done();
+		    return [{creation: 12345}];
+		}
+
+		throw new Error("pairFoodsService called twice. Force fail test");
+	    });
+
+	    pairFoodsService.pairFoods();
+	});
+
+	it('pairFoods should not pair old food if findAndPairFoods return empty array', function (done) {
+	    var foodsStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, foodsStub);
+	    });
+
+	    var findAndPairFoods = false;
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		if (foods.length != 2) {
+		    return [];
+		}
+
+		throw new Error("pairFoodsService called twice. Force fail test");
+	    });
+
+	    pairFoodsService.pairFoods();
+	    done();
+	});
+
+	it('pairFoods should not pair old food if findAndPairFoods return not zero array', function (done) {
+	    var foodsStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, foodsStub);
+	    });
+
+	    var findAndPairFoods = false;
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		if (foods.length != 2) {
+		    return [];
+		}
+
+		throw new Error("pairFoodsService called twice. Force fail test");
+	    });
+
+	    pairFoodsService.pairFoods();
 	    done();
 	});
 
@@ -44,6 +171,7 @@ describe('Pair Foods Service.', function () {
 	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
 		foods.should.be.eql(foodsStub);
 		done();
+		return [];
 	    });
 
 	    pairFoodsService.pairFoods();
@@ -58,6 +186,7 @@ describe('Pair Foods Service.', function () {
 	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
 		foods.should.be.eql([{creation: 12345}, {creation: 23456}]);
 		done();
+		return [];
 	    });
 
 	    pairFoodsService.pairFoods();
@@ -72,6 +201,7 @@ describe('Pair Foods Service.', function () {
 	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
 		foods.should.be.empty;
 		done();
+		return [];
 	    });
 
 	    pairFoodsService.pairFoods();
@@ -85,6 +215,7 @@ describe('Pair Foods Service.', function () {
 	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
 		foods.should.be.empty;
 		done();
+		return [];
 	    });
 
 	    pairFoodsService.pairFoods();
@@ -98,6 +229,7 @@ describe('Pair Foods Service.', function () {
 	    var findAndPairFoods = false;
 	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
 		findAndPairFoods = true;
+		return [];
 	    });
 
 	    pairFoodsService.pairFoods();
@@ -117,7 +249,6 @@ describe('Pair Foods Service.', function () {
 
 	    connectFoodsCalled.should.be.true;
 
-	    pairFoodsService.connectFoods.restore();
 	    done();
 	});
 
@@ -139,8 +270,6 @@ describe('Pair Foods Service.', function () {
 	    connectFoodsCalled.should.be.false;
 	    findFoodForUserCalled.should.be.false;
 
-	    pairFoodsService.connectFoods.restore();
-	    pairFoodsService.findFoodForUser.restore();
 	    done();
 	});
 
@@ -162,9 +291,6 @@ describe('Pair Foods Service.', function () {
 
 	    findFoodForUserCalled.should.be.true;
 	    connectFoodsCalled.should.be.false;
-
-	    pairFoodsService.connectFoods.restore();
-	    pairFoodsService.findFoodForUser.restore();
 	    done();
 	});
 
@@ -186,8 +312,6 @@ describe('Pair Foods Service.', function () {
 	    findFoodForUserCalled.should.be.false;
 	    connectFoodsCalled.should.be.false;
 
-	    pairFoodsService.connectFoods.restore();
-	    pairFoodsService.findFoodForUser.restore();
 	    done();
 	});
 
