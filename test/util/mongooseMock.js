@@ -16,6 +16,11 @@ module.exports = {
 	sinon.stub(mongoose.Model.prototype, "save", stub);
 	return this;
     },
+    stubFind: function (stub) {
+	if (!stub) throw new Error("You forgot about stub");
+	sinon.stub(mongoose.Model, "find", stub);
+	return this;
+    },
     stubFindOne: function (stub) {
 	if (!stub) {
 	    stub = function (email, callback) {
@@ -156,6 +161,7 @@ module.exports = {
     },
     restore: function () {
 	this.restoreSave();
+	this.restoreFind();
 	this.restoreFindOnce();
 	this.restoreFindById();
 	this.restoreRemove();
@@ -165,6 +171,12 @@ module.exports = {
     restoreSave: function () {
 	if (mongoose.Model.prototype.save.restore) {
 	    mongoose.Model.prototype.save.restore();
+	}
+	return this;
+    },
+    restoreFind: function () {
+	if (mongoose.Model.find.restore) {
+	    mongoose.Model.find.restore();
 	}
 	return this;
     },

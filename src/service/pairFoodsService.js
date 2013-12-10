@@ -16,7 +16,12 @@ module.exports = {
 		return;
 	    }
 
-	    logger.debug("----------- ALL FOODS: ", foods.length); 
+	    if (!foods) {
+		logger.warn("[pairFoodsService.pairFoods] Foods not found");
+		return;
+	    }
+
+	    logger.debug("all foods: ", foods.length); 
 
 	    var oldFood = null;
 	    async.filter(foods, function (food, callback) {
@@ -28,7 +33,7 @@ module.exports = {
 		} 
 		callback(false);
 	    }, function (foodsForPairs) {
-		logger.debug("----------- filter END: ", foodsForPairs, " and oldFood: ", oldFood);
+		logger.debug("filter end: ", foodsForPairs, " and oldFood: ", oldFood);
 		self.findAndPairFoods(foodsForPairs);
 	    });
 	});

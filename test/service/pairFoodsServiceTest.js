@@ -12,6 +12,96 @@ describe('Pair Foods Service.', function () {
 
 	afterEach(function (done) {
 	    mongooseMock.restore();
+	    if (pairFoodsService.findAndPairFoods.restore) {
+		pairFoodsService.findAndPairFoods.restore();
+	    }
+	    done();
+	});
+
+	it('pairFoods should do nothing if data base error', function (done) {
+	    var error = "Database error";
+	    mongooseMock.stubFind(function (callback) {
+		callback(new Error(error));
+	    });
+
+	    var findAndPairFoods = false;
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		findAndPairFoods = true;
+	    });
+
+	    pairFoodsService.pairFoods();
+
+	    findAndPairFoods.should.be.false;
+	    done();
+	});
+
+	it('pairFoods should pass all foods with correct creation', function (done) {
+	    var foodsStub = [{creation: 12345}, {creation: 12345}, {creation: 12345}];
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, foodsStub);
+	    });
+
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		foods.should.be.eql(foodsStub);
+		done();
+	    });
+
+	    pairFoodsService.pairFoods();
+	});
+
+	it('pairFoods should ignore foods without creation', function (done) {
+	    var foodsStub = [{creation: 12345}, {creation: 0}, {creation: 23456}];
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, foodsStub);
+	    });
+
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		foods.should.be.eql([{creation: 12345}, {creation: 23456}]);
+		done();
+	    });
+
+	    pairFoodsService.pairFoods();
+	});
+
+	it('pairFoods should ignore foods with bad creation', function (done) {
+	    var foodsStub = [{creation: 0}, {creation: null}, {}];
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, foodsStub);
+	    });
+
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		foods.should.be.empty;
+		done();
+	    });
+
+	    pairFoodsService.pairFoods();
+	});
+
+	it('pairFoods should ignore empty foods', function (done) {
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, []);
+	    });
+
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		foods.should.be.empty;
+		done();
+	    });
+
+	    pairFoodsService.pairFoods();
+	});
+
+	it('pairFoods should do nothing if foods not found', function (done) {
+	    mongooseMock.stubFind(function (callback) {
+		callback(null, null);
+	    });
+
+	    var findAndPairFoods = false;
+	    sinon.stub(pairFoodsService, "findAndPairFoods", function (foods) {
+		findAndPairFoods = true;
+	    });
+
+	    pairFoodsService.pairFoods();
+	    findAndPairFoods.should.be.false;
 	    done();
 	});
 
