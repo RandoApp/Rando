@@ -15,6 +15,36 @@ describe('Pair Foods Service.', function () {
 	    if (pairFoodsService.findAndPairFoods.restore) {
 		pairFoodsService.findAndPairFoods.restore();
 	    }
+	    if (pairFoodsService.connectFoods.restore) {
+		pairFoodsService.connectFoods.restore();
+	    }
+	    if (pairFoodsService.findFoodForUser.restore) {
+		pairFoodsService.findFoodForUser.restore();
+	    }
+	    if (pairFoodsService.processFoodForUser.restore) {
+		pairFoodsService.processFoodForUser.restore();
+	    }
+	    done();
+	});
+
+	it('connectFoods should trigger processFoodForUser with userId and food as args', function (done) {
+
+	    sinon.stub(pairFoodsService, "processFoodForUser", function (userId, food) {
+		if (userId == 12345) {
+		    food.should.be.eql({user: 56789});
+		    return;
+		}
+
+		if (userId == 56789) {
+		    food.should.be.eql({user: 12345});
+		    return;
+		}
+
+		throw new Error("Unknown userId: " + userId + " in processFoodForUser function - force fail test");
+	    });
+
+	    pairFoodsService.connectFoods({user: 12345}, {user: 56789});
+
 	    done();
 	});
 
@@ -117,7 +147,6 @@ describe('Pair Foods Service.', function () {
 
 	    connectFoodsCalled.should.be.true;
 
-	    pairFoodsService.connectFoods.restore();
 	    done();
 	});
 
@@ -139,8 +168,6 @@ describe('Pair Foods Service.', function () {
 	    connectFoodsCalled.should.be.false;
 	    findFoodForUserCalled.should.be.false;
 
-	    pairFoodsService.connectFoods.restore();
-	    pairFoodsService.findFoodForUser.restore();
 	    done();
 	});
 
@@ -162,9 +189,6 @@ describe('Pair Foods Service.', function () {
 
 	    findFoodForUserCalled.should.be.true;
 	    connectFoodsCalled.should.be.false;
-
-	    pairFoodsService.connectFoods.restore();
-	    pairFoodsService.findFoodForUser.restore();
 	    done();
 	});
 
@@ -186,8 +210,6 @@ describe('Pair Foods Service.', function () {
 	    findFoodForUserCalled.should.be.false;
 	    connectFoodsCalled.should.be.false;
 
-	    pairFoodsService.connectFoods.restore();
-	    pairFoodsService.findFoodForUser.restore();
 	    done();
 	});
 
