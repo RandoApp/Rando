@@ -35,6 +35,10 @@ module.exports = {
     },
     findAndPairFoods: function (foods) {
 	logger.debug("Start findAndPairFoods with foods: ", foods);
+	if (!foods) {
+	    return;
+	}
+
 	for (var i = 0; i < foods.length; i++) {
 	    var currentFood = foods[i];
 	    var food = this.findFoodForUser(currentFood, foods);

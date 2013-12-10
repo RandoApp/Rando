@@ -15,6 +15,92 @@ describe('Pair Foods Service.', function () {
 	    done();
 	});
 
+	it('FindAndPairFoods should call connectFoods if pairs exists', function (done) {
+	    var connectFoodsCalled = false;
+	    sinon.stub(pairFoodsService, "connectFoods", function (food1, food2) {
+		connectFoodsCalled = true;
+	    });
+
+	    var foods = [{user: 12345}, {user: 12345}, {user: 45678}, {user: 56789}];
+
+	    pairFoodsService.findAndPairFoods(foods);
+
+	    connectFoodsCalled.should.be.true;
+
+	    pairFoodsService.connectFoods.restore();
+	    done();
+	});
+
+	it('FindAndPairFoods should do nothing if foods is emapty array', function (done) {
+	    var connectFoodsCalled = false;
+	    sinon.stub(pairFoodsService, "connectFoods", function (food1, food2) {
+		connectFoodsCalled = true;
+	    });
+
+	    var findFoodForUserCalled = false;
+	    sinon.stub(pairFoodsService, "findFoodForUser", function (currentFood, foods) {
+		findFoodForUserCalled = true;
+	    });
+
+	    var foods = [];
+
+	    pairFoodsService.findAndPairFoods(foods);
+
+	    connectFoodsCalled.should.be.false;
+	    findFoodForUserCalled.should.be.false;
+
+	    pairFoodsService.connectFoods.restore();
+	    pairFoodsService.findFoodForUser.restore();
+	    done();
+	});
+
+	it('FindAndPairFoods should do nothing if findFoodForUser return not food', function (done) {
+	    var findFoodForUserCalled = false;
+	    sinon.stub(pairFoodsService, "findFoodForUser", function (currentFood, foods) {
+		findFoodForUserCalled = true;
+		return null;
+	    });
+
+	    var connectFoodsCalled = false;
+	    sinon.stub(pairFoodsService, "connectFoods", function (food1, food2) {
+		connectFoodsCalled = true;
+	    });
+
+	    var foods = [{user: 12345}, {user: 12345}, {user: 45678}, {user: 56789}];
+
+	    pairFoodsService.findAndPairFoods(foods);
+
+	    findFoodForUserCalled.should.be.true;
+	    connectFoodsCalled.should.be.false;
+
+	    pairFoodsService.connectFoods.restore();
+	    pairFoodsService.findFoodForUser.restore();
+	    done();
+	});
+
+	it('FindAndPairFoods should do nothing if input array is bad', function (done) {
+	    var findFoodForUserCalled = false;
+	    sinon.stub(pairFoodsService, "findFoodForUser", function (currentFood, foods) {
+		findFoodForUserCalled = true;
+	    });
+
+	    var connectFoodsCalled = false;
+	    sinon.stub(pairFoodsService, "connectFoods", function (food1, food2) {
+		connectFoodsCalled = true;
+	    });
+
+	    var foods = undefined;
+
+	    pairFoodsService.findAndPairFoods(foods);
+
+	    findFoodForUserCalled.should.be.false;
+	    connectFoodsCalled.should.be.false;
+
+	    pairFoodsService.connectFoods.restore();
+	    pairFoodsService.findFoodForUser.restore();
+	    done();
+	});
+
 	it('FindFoodForUser should find first other user and update initial foods array', function (done) {
 	    var foods = [{user: 12345}, {user: 12345}, {user: 45678}, {user: 56789}];
 	    var food = {user: 12345};
