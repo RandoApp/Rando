@@ -79,7 +79,6 @@ module.exports = {
 		if (!user.foods[i].stranger.user) {
 		    logger.debug("Food for pairing found");
 		    user.foods[i].stranger = food;
-		    logger.warn(">>>>>>>>>>>>>>>>>>>>>>>>>>> ", user);
 		    userModel.update(user);
 		    foodModel.remove(food);
 		    return;

@@ -15,12 +15,66 @@ describe('Pair Foods Service.', function () {
 	    done();
 	});
 
+	it('FindFoodForUser should find first other user and update initial foods array', function (done) {
+	    var foods = [{user: 12345}, {user: 12345}, {user: 45678}, {user: 56789}];
+	    var food = {user: 12345};
+
+	    var actual = pairFoodsService.findFoodForUser(food, foods);
+
+	    actual.should.be.eql({user: 45678});
+	    foods.should.have.length(3);
+	    
+	    done();
+	});
+
+	it('FindFoodForUser empty foods array should return null', function (done) {
+	    var foods = [];
+	    var food = {user: 12345};
+
+	    var actual = pairFoodsService.findFoodForUser(food, foods);
+
+	    (actual === null).should.be.true;
+	    foods.should.have.length(0);
+	    
+	    done();
+	});
+
+	it('FindFoodForUser should return null if user for pairing not found', function (done) {
+	    var foods = [{user: 12345}, {user: 12345}, {user: 12345}];
+	    var food = {user: 12345};
+
+	    var actual = pairFoodsService.findFoodForUser(food, foods);
+
+	    (actual === null).should.be.true;
+	    foods.should.have.length(3);
+	    
+	    done();
+	});
+
 	it('Database error shuld return processFoodForUser without any action', function (done) {
 	    var error = "Data base error";
 	    var userUpdateCalled = false;
 	    var foodRemoveCalled = false;
 	    mongooseMock.stubFindById(function (userId, callback) {
 		callback(new Error(error));
+	    }).stubSave(function () {
+		updateCalled = true;
+	    }).stubRemove(function () {
+		foodRemoveCalled = true;
+	    });
+	    pairFoodsService.processFoodForUser("1234", {});
+
+	    userUpdateCalled.should.be.false;
+	    foodRemoveCalled.should.be.false;
+
+	    done();
+	});
+
+	it('Process Food For User should do nothing if user not found ', function (done) {
+	    var userUpdateCalled = false;
+	    var foodRemoveCalled = false;
+	    mongooseMock.stubFindById(function (userId, callback) {
+		callback(null, null);
 	    }).stubSave(function () {
 		updateCalled = true;
 	    }).stubRemove(function () {
