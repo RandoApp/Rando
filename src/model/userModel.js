@@ -58,22 +58,20 @@ module.exports = {
 	user.save(callback);
     },
     update: function (user, callback) {
-	if (user && user instanceof mongoose.Model) {
-	    logger.data("Update user: Email: ", user.email, ". New user: ", user);
+	logger.data("Update user: Email: ", user.email, ". New user: ", user);
 
-	    if (!callback) {
-		callback = function (err) {
-		    if (err) {
-			logger.warn("Can't upadate user! Email: ", user.email);
-			return;
-		    }
+	if (!callback) {
+	    callback = function (err) {
+		if (err) {
+		    logger.warn("Can't upadate user! Email: ", user.email);
+		    return;
+		}
 
-		    logger.debug("User updated. Email: ", user.email);
-		};
-	    }
-
-	    user.save(callback);
+		logger.debug("User updated. Email: ", user.email);
+	    };
 	}
+
+	user.save(callback);
     },
     getByEmail: function (email, callback) {
 	logger.data("Try find user by email: ", email);

@@ -6,7 +6,7 @@ var Errors = require("../error/errors");
 var async = require("async");
 
 module.exports = {
-    pairFoodDemonTimer: null,
+    timer: null,
     pairFoods: function () {
 	logger.debug("Pair Foods Demon start work");
 	var self = this;
@@ -16,7 +16,12 @@ module.exports = {
 		return;
 	    }
 
-	    logger.debug("----------- ALL FOODS: ", foods.length); 
+	    if (!foods) {
+		logger.warn("[pairFoodsService.pairFoods] Foods not found");
+		return;
+	    }
+
+	    logger.debug("all foods: ", foods.length); 
 
 	    var oldFood = null;
 	    async.filter(foods, function (food, callback) {
@@ -28,13 +33,17 @@ module.exports = {
 		} 
 		callback(false);
 	    }, function (foodsForPairs) {
-		logger.debug("----------- filter END: ", foodsForPairs, " and oldFood: ", oldFood);
+		logger.debug("filter end: ", foodsForPairs, " and oldFood: ", oldFood);
 		self.findAndPairFoods(foodsForPairs);
 	    });
 	});
     },
     findAndPairFoods: function (foods) {
 	logger.debug("Start findAndPairFoods with foods: ", foods);
+	if (!foods) {
+	    return;
+	}
+
 	for (var i = 0; i < foods.length; i++) {
 	    var currentFood = foods[i];
 	    var food = this.findFoodForUser(currentFood, foods);
@@ -70,14 +79,14 @@ module.exports = {
 	    }
 
 	    if (!user) {
-		logger.warn("User not fount: ", userId);
+		logger.warn("User not found: ", userId);
 		return;
 	    }
 
 	    logger.debug("Find user: ", user);
 	    for (var i = 0; i < user.foods.length; i++) {
 		if (!user.foods[i].stranger.user) {
-		    logger.debug("Food for pairing fount");
+		    logger.debug("Food for pairing found");
 		    user.foods[i].stranger = food;
 		    userModel.update(user);
 		    foodModel.remove(food);
@@ -86,16 +95,18 @@ module.exports = {
 	    }
 	});
     },
-    startPairFoodsDemon: function () {
+    startDemon: function () {
 	logger.info("Start pair foods demon with interval wakeup: ", config.app.demon.wakeup);
 	var self = this;
-	this.pairFoodDemonTimer = setInterval(function () { self.pairFoods(); }, config.app.demon.wakeup);
+	this.timer = setInterval(function () {
+	    self.pairFoods();
+	}, config.app.demon.wakeup);
     },
-    stopPairFoodsDemon: function () {
-	if (this.pairFoodDemonTimer) {
+    stopDemon: function () {
+	if (this.timer) {
 	    logger.info("Stop pair foods demon");
-	    clearInterval(this.pairFoodDemonTimer);
-	    this.pairFoodDemonTimer = null;
+	    clearInterval(this.timer);
+	    this.timer = null;
 	}
     }
 };

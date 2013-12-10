@@ -7,6 +7,16 @@ var mongooseMock = require("../util/mongooseMock");
 
 describe('Food service.', function () {
     describe('Save food.', function () {
+	beforeEach(function (done) {
+	    mongooseMock.restore();
+	    done();
+	});
+
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    done();
+	});
+
 	it('Undefined userId', function (done) {
 	    foodService.saveFood(null, null, null, function (err) {
 		should.exist(err);
@@ -96,8 +106,8 @@ describe('Food service.', function () {
 
 	it('Successful save food', function (done) {
 	    mongooseMock.stubSave().stubFindById();
-	    mkDirCalled = false;
-	    renameCalled = false;
+	    var mkDirCalled = false;
+	    var renameCalled = false;
 	    sinon.stub(fs, "mkdir", function (p, mode, callback) {
 		mkDirCalled = true;
 		fs.mkdir.restore();

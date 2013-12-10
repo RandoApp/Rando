@@ -44,14 +44,12 @@ module.exports = {
 	Food.find(callback);
     },
     remove: function (food) {
-	if (food && food instanceof mongoose.Model) {
-	    food.remove(function (err) {
-		if (err) {
-		    logger.warn("Can't remove food! %j", food); 
-		    return;
-		}
-		logger.debug("Food removed. User: ", food.user, " location: ", food.location, "creation: ", food.user.creation, " foodId: ", food.foodId, " foodUrl: ", food.foodUrl, "mapUrl: ", food.mapUrl);
-	    });
-	}
+	food.remove(function (err) {
+	    if (err) {
+		logger.warn("Can't remove food! %j", food); 
+		return;
+	    }
+	    logger.debug("Food removed. User: ", food.user, " location: ", food.location, "creation: ", food.user.creation, " foodId: ", food.foodId, " foodUrl: ", food.foodUrl, "mapUrl: ", food.mapUrl);
+	});
     }
 }
