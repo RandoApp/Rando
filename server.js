@@ -36,7 +36,7 @@ passport.deserializeUser(function(id, done) {
     done(null, id);
 });
 
-app.use(express.static(__dirname + '/static'));
+app.use(express.static(__dirname + '/static', {maxAge: config.app.cacheControl}));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.cookieParser());
