@@ -1,6 +1,7 @@
 app:
     url: http://api.foodex.com
     port: 8888
+    cacheControl: 31557600000
     secret: Secret #This is a stub. 
     anonymousEmailPosftix: foodex.com
     demon:
