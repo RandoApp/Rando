@@ -87,7 +87,7 @@ module.exports =  {
 				location: location,
 				foodId: foodId,
 				foodUrl: foodUrl,
-				mapUrl: "http://foodex-webtools.rhcloud.com/map/minskmap.png", //TODO: Remove this stub!
+				mapUrl: config.app.mapStub, //TODO: Remove this stub!
 				creation: Date.now(),
 				bonAppetit: 0
 			    },
@@ -96,7 +96,7 @@ module.exports =  {
 				location: "",
 				foodId: "",
 				foodUrl: "",
-				mapUrl: "http://foodex-webtools.rhcloud.com/map/minskmap.png", //TODO: Remove this stub!
+				mapUrl: config.app.mapStub, //TODO: Remove this stub!
 				creation: 0,
 				report: 0,
 				bonAppetit: 0

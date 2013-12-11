@@ -1,9 +1,10 @@
 app:
-    url: http://api.foodex.com
+    url: http://95.85.19.94/
     port: 8888
     cacheControl: 31557600000
     secret: Secret #This is a stub. 
     anonymousEmailPosftix: foodex.com
+    mapStub: http://95.85.19.94/map/minskmap.png
     demon:
         wakeup: 20000
         foodTimeout: 300000
