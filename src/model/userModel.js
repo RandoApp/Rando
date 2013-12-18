@@ -33,52 +33,52 @@ var User = mongoose.model("user", new mongoose.Schema({
 module.exports = {
     create: function (user, callback) {
 	if (!user) {
-	    logger.warn("Hey, programmer! You forgot pass user arg to userModel.create! or passed user arg is undefined!");
+	    logger.warn("[userModel.create] Hey, programmer! You forgot pass user arg to userModel.create! or passed user arg is undefined!");
 	    return;
 	}
 
 	if (!user.email) {
-	    logger.warn("Hey, programmer! userModel.create must contains email value in arg object!");
+	    logger.warn("[userModel.create] Hey, programmer! userModel.create must contains email value in arg object!");
 	    return;
 	}
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
-		    logger.warn("Can't create user! Email: ", email);
+		    logger.warn("[userModel.create] Can't create user! Email: ", email, " because: ", err);
 		    return;
 		}
 
-		logger.debug("User created: ", user);
+		logger.debug("[userModel.create] User created: ", user);
 	    };
 	}
 
-	logger.data("Create user: Email: ", user);
+	logger.data("[userModel.create] Create user: Email: ", user);
 
 	var user = new User(user);
 	user.save(callback);
     },
     update: function (user, callback) {
-	logger.data("Update user: Email: ", user.email, ". New user: ", user);
+	logger.data("[userModel.update] Update user with  Email: ", user.email, ". New user: ", user);
 
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
-		    logger.warn("Can't upadate user! Email: ", user.email);
+		    logger.warn("[userModel.update] Can't update user with email: ", user.email, " because: ", err);
 		    return;
 		}
 
-		logger.debug("User updated. Email: ", user.email);
+		logger.debug("[userModel.update] User updated. Email: ", user.email);
 	    };
 	}
 
 	user.save(callback);
     },
     getByEmail: function (email, callback) {
-	logger.data("Try find user by email: ", email);
+	logger.data("[userModel.getByEmail] Try find user by email: ", email);
 	User.findOne({email: email}, callback);
     },
     getById: function (id, callback) {
-	logger.data("Try find user by id: ", id);
+	logger.data("[userMode.getById] Try find user by id: ", id);
 	User.findById(id, callback);
     }
 };
