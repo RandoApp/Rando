@@ -15,15 +15,15 @@ var Food = mongoose.model("food", new mongoose.Schema({
 
 module.exports = {
     add: function (userId, location, creation, foodId, foodUrl, callback) {
-	logger.data("Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl);
+	logger.data("[foodModel.add] Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl);
 
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
-		    logger.warn("Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: null");
+		    logger.warn("[foodModel.add] Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: null", " because: ", err);
  		    return;
 		}
-		logger.debug("Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, "mapUrl: null");
+		logger.debug("[foodModel.add] Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, "mapUrl: null");
 	    }
 	}
 
@@ -41,15 +41,17 @@ module.exports = {
 	food.save(callback);
     },
     getAll: function (callback) {
+	logger.data("[foodModel.getAll]");
 	Food.find(callback);
     },
     remove: function (food) {
+	logger.data("[foodModel.remove] Remove food: ", food);
 	food.remove(function (err) {
 	    if (err) {
-		logger.warn("Can't remove food! %j", food); 
+		logger.warn("[foodModel.remove] Can't remove food, because: ", err); 
 		return;
 	    }
-	    logger.debug("Food removed. User: ", food.user, " location: ", food.location, "creation: ", food.user.creation, " foodId: ", food.foodId, " foodUrl: ", food.foodUrl, "mapUrl: ", food.mapUrl);
+	    logger.debug("[foodModel.remove] Food removed. User: ", food.user, " location: ", food.location, "creation: ", food.user.creation, " foodId: ", food.foodId, " foodUrl: ", food.foodUrl, "mapUrl: ", food.mapUrl);
 	});
     }
 }
