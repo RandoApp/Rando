@@ -107,7 +107,7 @@ module.exports = {
 		    async.each(user.foods, function (food, done) {
 			logger.debug("[commentService.bonAppetit, ", strangerId, "] Next over iterate each food, food.stranger[", food.user.foodId, "] == foodId[", foodId ,"]"); 
 			if (food.user && food.user.foodId == foodId) {
-			    food.user.bonAppetit = true;
+			    food.user.bonAppetit = 1;
 			    userModel.update(user);
 			    logger.debug("[commentService.bonAppetit, ", strangerId, "] Update bon appetit for user: ", food.user.user);
 			    waterfall(null);
