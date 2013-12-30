@@ -30,23 +30,22 @@ module.exports = {
 		    facebookId: "111111",
 		    foods: [{
 			user: {
-			    email: email,
-			    userId: "524ea2324a590391a3e8b516",
+			    user: "524ea2324a590391a3e8b516",
 			    localtion: "1111.1111, 1111.1111",
 			    foodId: "3333",
 			    foodUrl: "http://api.foodex.com/food/3333",
 			    mapUrl: "http://api.foodex.com/food/4444",
-			    bonAppetit: false
+			    report: 0,
+			    bonAppetit: 0
 			},
 			stranger: {
-			    email: "stranger@mail.com",
 			    localtion: "2222.2222, 2222.2222",
-			    userId: "724ea2324a590391a3e8b516",
+			    user: "724ea2324a590391a3e8b516",
 			    foodId: "3333",
 			    foodUrl: "http://api.foodex.com/food/3333",
 			    mapUrl: "http://api.foodex.com/map/444",
-			    report: false,
-			    bonAppetit: false
+			    report: 0,
+			    bonAppetit: 0 
 			}
 		    }]
 		};
@@ -68,24 +67,23 @@ module.exports = {
 		    facebookId: "111111",
 		    foods: [{
 			user: {
-			    email: email,
-			    userId: "524ea2324a590391a3e8b516",
+			    user: "524ea2324a590391a3e8b516",
 			    localtion: "1111.1111, 1111.1111",
 			    foodId: "3333",
 			    foodUrl: "http://api.foodex.com/food/3333",
 			    creation: 123456789,
 			    mapUrl: "http://api.foodex.com/food/4444",
+			    report: 0,
 			    bonAppetit: false
 			},
 			stranger: {
-			    email: "",
 			    localtion: "",
-			    userId: "",
+			    user: "",
 			    foodId: "",
 			    foodUrl: "",
 			    mapUrl: "",
-			    report: false,
-			    bonAppetit: false
+			    report: 0,
+			    bonAppetit: 0 
 			}
 		    }]
 		};
@@ -138,9 +136,47 @@ module.exports = {
 	    stub = function (id, callback) {
 		var user = {
 		    id: "524ea2324a590391a3e8b516",
-		    email: "user@mail.com",
+		    email: "user@mail.ru",
 		    facebookId: "111111",
-		    foods: [],
+		    foods: [{
+			user: {
+			    user: "524ea2324a590391a3e8b516",
+			    localtion: "1111.1111, 1111.1111",
+			    foodId: "3333",
+			    foodUrl: "http://api.foodex.com/food/3333",
+			    mapUrl: "http://api.foodex.com/food/4444",
+			    report: 0,
+			    bonAppetit: 0
+			},
+			stranger: {
+			    localtion: "2222.2222, 2222.2222",
+			    user: "724ea2324a590391a3e8b516",
+			    foodId: "3333",
+			    foodUrl: "http://api.foodex.com/food/3333",
+			    mapUrl: "http://api.foodex.com/map/444",
+			    report: 0,
+			    bonAppetit: 0 
+			}
+		    }, {
+			user: {
+			    user: "524ea2324a590391a3e8b516",
+			    localtion: "1111.1111, 1111.1111",
+			    foodId: "8888",
+			    foodUrl: "http://api.foodex.com/food/8888",
+			    mapUrl: "http://api.foodex.com/food/4444",
+			    report: 0,
+			    bonAppetit: 0
+			},
+			stranger: {
+			    localtion: "2222.2222, 2222.2222",
+			    user: "724ea2324a590391a3e8b516",
+			    foodId: "9999",
+			    foodUrl: "http://api.foodex.com/food/9999",
+			    mapUrl: "http://api.foodex.com/map/444",
+			    report: 0,
+			    bonAppetit: 0 
+			}
+		    }],
 		    save: function (callback) {
 			if (callback) {
 			    callback(null);
@@ -150,6 +186,7 @@ module.exports = {
 		callback(null, user);
 	    };
 	}
+
 	sinon.stub(mongoose.Model, "findById", stub);
 	return this;
     },

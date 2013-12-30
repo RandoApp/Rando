@@ -7,6 +7,8 @@ var Errors = require("../error/errors");
 module.exports = {
     report: function (userId, foodId, callback) {
 	logger.debug("[commentService.report, ", userId, "] Start report for food: ", foodId);
+	var self = this;
+
 	async.waterfall([
 	    function (done) {
 		self.updateFood(userId, foodId, function (food) {
@@ -34,6 +36,7 @@ module.exports = {
     bonAppetit: function (userId, foodId, callback) {
 	logger.debug("[commentService.bonAppetit, ", userId, "] Start bonAppetit for food: ", foodId);
 	var self = this;
+
 	async.waterfall([
 	    function (done) {
 		self.updateFood(userId, foodId, function (food) {
@@ -61,18 +64,14 @@ module.exports = {
     updateFood: function (userId, foodId, updater, callback) {
 	this.findUserWithFood(userId, foodId, function (err, user, food) {
 	    if (err) {
-		logger.debug("[commentService.updateFood, ", userId, "] Error, when run findUserWithFood. userId: ", userId, " foodId: ", foodId, " error: ", err);
+		logger.warn("[commentService.updateFood, ", userId, "] Error, when run findUserWithFood. userId: ", userId, " foodId: ", foodId, " error: ", err);
 		callback(err);
 		return;
 	    }
 
-	    if (!user) {
-		logger.warn("[commentService.updateFood, ", userId, "] User not found");
-		callback(Errors.UserForReportNotFound());
-		return;
-	    }
-
 	    logger.debug("[commentService.updateFood, ", userId, "] Trigger updater with food with id: ", foodId);
+
+
 	    updater(food);
 
 	    userModel.update(user);
@@ -85,14 +84,11 @@ module.exports = {
 		logger.warn("[commentService.findUserWithFood, ", userId, "] Can't find user by id: ", userId);
 		callback(Errors.System(err));
 		return;
-	    }
-	    if (!user) {
-		logger.warn("[commentService.findUserWithFood, ", userId, "] User not found: ", userId);
+	    } else if (!user) {
+		logger.debug("[commentService.findUserWithFood, ", userId, "] User not found: ", userId);
 		callback(Errors.UserForCommentNotFound());
 		return;
-	    }
-	    if (!user.foods || user.foods.length == 0) {
-		//TODO: change error
+	    } else if (!user.foods || user.foods.length == 0) {
 		logger.debug("[commentService.findUserWithFood, ", userId, "] User does not have food");
 		callback(Errors.FoodForCommentNotFound());
 		return;
@@ -100,23 +96,12 @@ module.exports = {
 
 	    logger.debug("[commentService.findUserWithFood, ", userId, "] Found user: ", user);
 
-	    async.each(user.foods, function (food, done) {
-		logger.debug("[commentService.findUserWithFood, ", userId, "] Next over iterate each food, food.stranger[", food.stranger.foodId, "] == foodId[", foodId ,"]"); 
-
-		if (food.stranger && food.stranger.foodId == foodId) {
-		    logger.debug("[commentService.findUserWithFood, ", userId, "] Found food: ", food.stranger);
-		    callback(null, user);
-
-		}
-		logger.debug("[commentService.findUserWithFood, ", userId, "] Call async.each done");
-		done();
-	    }, function (err) {
-		if (err) {
-		    callback(Errors.System(err));
-		    return;
-		}
-
-		callback(null, null);
+	    async.filter(user.foods, function (food, done) {
+		logger.debug("[commentService.findUserWithFood, ", userId, "] Filter food: ", food.foodId, " == ", foodId);
+		done(food.stranger.foodId == foodId);
+	    }, function (result) {
+		logger.debug("[commentService.findUserWithFood, ", userId, "] Found food: ", result);
+		callback(null, user, result[0]);
 	    });
 	});
     }
