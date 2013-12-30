@@ -33,6 +33,9 @@ module.exports = {
 			delete food.stranger.user;
 			delete food.user.location;
 			delete food.stranger.location;
+			if (food.stranger.report) {
+			    food.stranger.foodUrl = config.app.reportedFoodStub; 
+			}
 			userJSON.foods.push(food);
 		    }
 		    done();
