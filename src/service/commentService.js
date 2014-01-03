@@ -67,6 +67,8 @@ module.exports = {
 		logger.warn("[commentService.updateFood, ", userId, "] Error, when run findUserWithFood. userId: ", userId, " foodId: ", foodId, " error: ", err);
 		callback(err);
 		return;
+	    } else if (!food) {
+		callback(Errors.FoodForCommentNotFound());
 	    }
 
 	    logger.debug("[commentService.updateFood, ", userId, "] Trigger updater with food with id: ", foodId);
@@ -97,7 +99,7 @@ module.exports = {
 	    logger.debug("[commentService.findUserWithFood, ", userId, "] Found user: ", user);
 
 	    async.filter(user.foods, function (food, done) {
-		logger.debug("[commentService.findUserWithFood, ", userId, "] Filter food: ", food.foodId, " == ", foodId);
+		logger.debug("[commentService.findUserWithFood, ", userId, "] Filter food: ", food.stranger.foodId, " == ", foodId);
 		done(food.stranger.foodId == foodId);
 	    }, function (result) {
 		logger.debug("[commentService.findUserWithFood, ", userId, "] Found food: ", result);
