@@ -102,7 +102,8 @@ module.exports = {
 
 	    async.filter(user.foods, function (food, done) {
 		logger.debug("[commentService.findUserWithFood, ", userId, "] Filter food: ", food.stranger.foodId, " == ", foodId);
-		done(food.stranger.foodId == foodId);
+		//TODO: think about correction this predicate:
+		done(food.stranger.foodId == foodId || food.user.foodId == foodId);
 	    }, function (result) {
 		logger.debug("[commentService.findUserWithFood, ", userId, "] Found food: ", result);
 		callback(null, user, result[0]);
