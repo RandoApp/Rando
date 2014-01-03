@@ -68,7 +68,9 @@ module.exports = {
 		callback(err);
 		return;
 	    } else if (!food) {
+		logger.warn("[commentService.updateFood, ", userId, "] Food is not exist, after run findUserWithFood. userId: ", userId, " foodId: ", foodId);
 		callback(Errors.FoodForCommentNotFound());
+		return;
 	    }
 
 	    logger.debug("[commentService.updateFood, ", userId, "] Trigger updater with food with id: ", foodId);
