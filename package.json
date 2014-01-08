@@ -21,7 +21,7 @@
     "passport-local": "0.1.x",
     "passport-facebook": "1.0.x",
     "async": "0.2.x",
-    "validator": "2.0.x",
+    "validator": "2.1.x",
     "mv": "1.0.x"
   },
   "devDependencies": {
