@@ -4,55 +4,130 @@ var commentService = require("../../src/service/commentService");
 var mongooseMock = require("../util/mongooseMock");
 
 describe('Comment service.', function () {
-    describe('Report.', function () {
+    describe('FindUserWithFood.', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
 	    done();
 	});
 
-	it('Successful report', function (done) {
-	    var saveCalled = false;
-	    mongooseMock.stubFindOne().stubSave(function (callback) {
-		saveCalled = true;
-		callback(null);
-	    });
+	it('Should find user and food', function (done) {
+	    mongooseMock.stubFindById();
 
-	    commentService.report("user@mail.com", "3333", function (err) {
+	    commentService.findUserWithFood("55af543ad25434", "3333", function (err, user, food) {
 		should.not.exist(err);
-		saveCalled.should.be.true;
+		should.exist(user);
+		food.should.be.eql({
+		    user: {
+			user: "524ea2324a590391a3e8b516",
+			localtion: "1111.1111, 1111.1111",
+			foodId: "3333",
+			foodUrl: "http://api.foodex.com/food/3333",
+			mapUrl: "http://api.foodex.com/food/4444",
+			report: 0,
+			bonAppetit: 0
+		    },
+		    stranger: {
+			localtion: "2222.2222, 2222.2222",
+			user: "724ea2324a590391a3e8b516",
+			foodId: "3333",
+			foodUrl: "http://api.foodex.com/food/3333",
+			mapUrl: "http://api.foodex.com/map/444",
+			report: 0,
+			bonAppetit: 0 
+		    }
+		});
+
 		done();
 	    });
 	});
 
-	it('Can not find user by email', function (done) {
-	    var error = "Data base connection error";
-	    mongooseMock.stubFindOne(function (email, callback) {
+	it('Should return foodNotFound error if foods not exist or empty', function (done) {
+	    mongooseMock.stubFindById(function (id, callback) {
+		callback(null, {foods:[]});
+	    });
+
+	    commentService.findUserWithFood("55af543ad25434", "3333", function (err, user, food) {
+		should.exist(err);
+		err.foodex.should.be.eql({
+		    status: 400,
+		    code: 403,
+		    message: "Food not found",
+		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#comment"
+		});
+		done();
+	    });
+	});
+
+	it('Should return system error, when data base return error', function (done) {
+	    var error = "Database error";
+	    mongooseMock.stubFindById(function (id, callback) {
 		callback(new Error(error));
 	    });
 
-	    commentService.report("user@mail.com", "3333", function (err) {
+	    commentService.findUserWithFood("55af543ad25434", "3333", function (err, user, food) {
 		should.exist(err);
-		err.should.have.property("message", error);
+		err.foodex.should.be.eql({
+		    status: 500,
+		    code: 501,
+		    message: "Internal Server Error",
+		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+		});
 		done();
 	    });
 	});
 
-	it('User not found', function (done) {
-	    mongooseMock.stubFindOneWithNotFoundUser();
+	it('Should return userNotFound error, when user not exist', function (done) {
+	    mongooseMock.stubFindByIdWithNotFoundUser();
 
-	    commentService.report("user@mail.com", "3333", function (err) {
+	    commentService.findUserWithFood("55af543ad25434", "3333", function (err, user, food) {
 		should.exist(err);
-		err.should.have.property("message", "User not found");
+		err.foodex.should.be.eql({
+		    status: 400,
+		    code: 402,
+		    message: "User not found",
+		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#comment"
+		});
+		done();
+	    });
+	});
+    });
+
+    describe('UpdateFood.', function () {
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    done();
+	});
+
+	it('Updater should be called', function (done) {
+	    var updaterCalled = false;
+	    mongooseMock.stubFindById();
+
+	    commentService.updateFood("55af543ad25434", "3333", function (food) {
+		updaterCalled = true;
+	    }, function (err, food) {
+		should.not.exist(err);
+		updaterCalled.should.be.true;
 		done();
 	    });
 	});
 
-	it('Food not found', function (done) {
-	    mongooseMock.stubFindOneWithEmptyUser();
+	it('Should return system error, if database error', function (done) {
+	    var updaterCalled = false;
+	    mongooseMock.stubFindById(function(id, callback) {
+		callback(new Error("db error"));
+	    });
 
-	    commentService.report("user@mail.com", "3333", function (err) {
+	    commentService.updateFood("55af543ad25434", "3333", function (food) {
+		updaterCalled = true;
+	    }, function (err, food) {
+		updaterCalled.should.be.false;
 		should.exist(err);
-		err.should.have.property("message", "Food not found");
+		err.foodex.should.be.eql({
+		    status: 500,
+		    code: 501,
+		    message: "Internal Server Error",
+		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+		});
 		done();
 	    });
 	});
@@ -65,48 +140,78 @@ describe('Comment service.', function () {
 	});
 
 	it('Successful bon appetit', function (done) {
-	    var saveCalled = false;
-	    mongooseMock.stubFindOne().stubSave(function (callback) {
-		saveCalled = true;
-		callback(null);
+	    var user = {
+		id: "54dwf245d41",
+		foods:[{
+		    user: {
+			user: "524ea2324a590391a3e8b516",
+			foodId: "3333",
+			bonAppetit: 0
+		    },
+		    stranger: {
+			user: "724ea2324a590391a3e8b516",
+			foodId: "3333",
+			bonAppetit: 0 
+		    }
+		}],
+		save: function (callback) {
+		    if (callback) {
+			callback(null);
+		    }
+		}
+	    }
+
+	    mongooseMock.stubFindById(function(id, callback) {
+		callback(null, user);
 	    });
 
-	    commentService.bonAppetit("user@mail.com", "3333", function (err) {
+	    commentService.bonAppetit("54dwf245d41", "3333", function (err) {
 		should.not.exist(err);
-		saveCalled.should.be.true;
+		user.foods[0].stranger.bonAppetit.should.be.equal(1);
+		//findById stub return self user:
+		user.foods[0].user.bonAppetit.should.be.equal(1);
 		done();
 	    });
 	});
+    });
 
-	it('Can not find user by email', function (done) {
-	    var error = "Data base connection error";
-	    mongooseMock.stubFindOne(function (email, callback) {
-		callback(new Error(error));
-	    });
-
-	    commentService.bonAppetit("user@mail.com", "3333", function (err) {
-		should.exist(err);
-		err.should.have.property("message", error);
-		done();
-	    });
+    describe('Report.', function () {
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    done();
 	});
 
-	it('User not found', function (done) {
-	    mongooseMock.stubFindOneWithNotFoundUser();
+	it('Successful report', function (done) {
+	    var user = {
+		id: "54dwf245d41",
+		foods:[{
+		    user: {
+			user: "524ea2324a590391a3e8b516",
+			foodId: "3333",
+			report: 0
+		    },
+		    stranger: {
+			user: "724ea2324a590391a3e8b516",
+			foodId: "3333",
+			report: 0
+		    }
+		}],
+		save: function (callback) {
+		    if (callback) {
+			callback(null);
+		    }
+		}
+	    }
 
-	    commentService.bonAppetit("user@mail.com", "3333", function (err) {
-		should.exist(err);
-		err.should.have.property("message", "User not found");
-		done();
+	    mongooseMock.stubFindById(function(id, callback) {
+		callback(null, user);
 	    });
-	});
 
-	it('Food not found', function (done) {
-	    mongooseMock.stubFindOneWithEmptyUser();
-
-	    commentService.bonAppetit("user@mail.com", "3333", function (err) {
-		should.exist(err);
-		err.should.have.property("message", "Food not found");
+	    commentService.report("54dwf245d41", "3333", function (err) {
+		should.not.exist(err);
+		user.foods[0].stranger.report.should.be.equal(1);
+		//findById stub return self user:
+		user.foods[0].user.report.should.be.equal(1);
 		done();
 	    });
 	});

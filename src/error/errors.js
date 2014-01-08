@@ -21,43 +21,23 @@ module.exports =  {
 	}
 	return error;
     },
-    UserForReportNotFound: function () {
+    UserForCommentNotFound: function () {
 	var error = new Error("User not found");
 	error.foodex = {
 	    status: 400,
 	    code: 402,
 	    message: "User not found",
-	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#report"
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#comment"
 	}
 	return error;
     },
-    FoodForReportNotFound: function () {
+    FoodForCommentNotFound: function () {
 	var error = new Error("Food not found");
 	error.foodex = {
 	    status: 400,
 	    code: 403,
 	    message: "Food not found",
-	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#report"
-	}
-	return error;
-    },
-    UserForBonAppetitNotFound: function () {
-	var error = new Error("User not found");
-	error.foodex = {
-	    status: 400,
-	    code: 404,
-	    message: "User not found",
-	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#bon-appetit"
-	}
-	return error;
-    },
-    FoodForBonAppetitNotFound: function () {
-	var error = new Error("Food not found");
-	error.foodex = {
-	    status: 400,
-	    code: 405,
-	    message: "Food not found",
-	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#bon-appetit"
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#comment"
 	}
 	return error;
     },

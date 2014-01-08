@@ -89,6 +89,7 @@ module.exports =  {
 				foodUrl: foodUrl,
 				mapUrl: config.app.mapStub, //TODO: Remove this stub!
 				creation: Date.now(),
+				report: 0,
 				bonAppetit: 0
 			    },
 			    stranger: {
