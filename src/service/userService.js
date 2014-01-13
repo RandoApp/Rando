@@ -11,7 +11,7 @@ module.exports = {
 	userModel.getByToken(token, function (err, user) {
 	    //TODO: implement
 	});
-    });
+    },
     destroyAuthToken: function (user, callback) {
 	//TODO: implement
 	callback();

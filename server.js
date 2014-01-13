@@ -100,7 +100,7 @@ app.post('/user', function(req, res) {
 	}
 
 	return res.send(response);
-    }));
+    });
 });
 
 app.get('/user/:token', function (req, res) {
