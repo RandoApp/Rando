@@ -7,6 +7,15 @@ var config = require("config");
 var Errors = require("../error/errors");
 
 module.exports = {
+    forUserWithToken: function (token, callback) {
+	userModel.getByToken(token, function (err, user) {
+	    //TODO: implement
+	});
+    });
+    destroyAuthToken: function (user, callback) {
+	//TODO: implement
+	callback();
+    },
     getUser: function (userId, callback) {
 	logger.debug("[userService.getUser, ", userId, "] Try get user");
 	userModel.getById(userId, function(err, user) {

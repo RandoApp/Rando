@@ -81,5 +81,8 @@ module.exports = {
     getById: function (id, callback) {
 	logger.data("[userMode.getById] Try find user by id: ", id);
 	User.findById(id, callback);
+    },
+    getByToken: function (token, callback) {
+	User.findOne({authToken: token}, callback);
     }
 };
