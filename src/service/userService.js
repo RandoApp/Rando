@@ -28,47 +28,32 @@ module.exports = {
 	user.update();
 	callback(null, {command: "logout", result: "done"});
     },
-    getUser: function (userId, callback) {
-	logger.debug("[userService.getUser, ", userId, "] Try get user");
-	userModel.getById(userId, function(err, user) {
+    getUser: function (user, callback) {
+	logger.debug("[userService.getUser, ", user.email, "] Try get user");
+	var userJSON = {
+	    email: user.email,
+	    foods: []
+	}
+	async.each(user.foods, function (food, done) {
+	    if (food) {
+		logger.debug("[userService.getUser, ", user.email, "] Remove food.user.userId and food.stranger.strangerId in food");
+		delete food.user.user;
+		delete food.stranger.user;
+		delete food.user.location;
+		delete food.stranger.location;
+		if (food.stranger.report) {
+		    food.stranger.foodUrl = config.app.reportedFoodStub; 
+		}
+		userJSON.foods.push(food);
+	    }
+	    done();
+	}, function (err) {
 	    if (err) {
-		logger.warn("[userService.getUser, ", userId, "] Can't userModel.getById, because: ", err);
+		logger.warn("[userService.getUser, ", userId, "] Error when each foods for: ", user);
 		callback(Errors.System(err));
 		return;
-
 	    }
-	    if (!user) {
-		logger.debug("[userService.getUser, ", userId, "] User not found. Return Error.");
-		callback(Errors.UserForGetNotFound());
-		return;
-	    } else {
-		logger.debug("[userService.getUser, ", userId, "] User found: ", user, " Try process him.");
-		var userJSON = {
-		    email: user.email,
-		    foods: []
-		}
-		async.each(user.foods, function (food, done) {
-		    if (food) {
-			logger.debug("[userService.getUser, ", userId, "] Remove food.user.userId and food.stranger.strangerId in food: ", food);
-			delete food.user.user;
-			delete food.stranger.user;
-			delete food.user.location;
-			delete food.stranger.location;
-			if (food.stranger.report) {
-			    food.stranger.foodUrl = config.app.reportedFoodStub; 
-			}
-			userJSON.foods.push(food);
-		    }
-		    done();
-		}, function (err) {
-		    if (err) {
-			logger.warn("[userService.getUser, ", userId, "] Error when each foods for: ", user);
-			callback(Errors.System(err));
-			return;
-		    }
-		    callback(null, userJSON);
-		});
-	    }
+	    callback(null, userJSON);
 	});
     },
     findOrCreateByLoginAndPassword: function (email, password, callback) {
@@ -90,7 +75,15 @@ module.exports = {
 	    if (user) {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist: ", user);
 		if (self.isPasswordCorrect(password, user)) {
-		    callback(null, user.id);
+		    user.authToken = crypto.randomBytes(41).toString('hex');
+		    user.update(function (err) {
+			if (err) {
+			    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
+			    callback(Errors.System(err));
+			    return;
+			}
+			callback(null, {token: user.authToken});
+		    });
 		} else {
 		    logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "] user: ", email, " type incorrect password");
 		    callback(Errors.LoginAndPasswordIncorrectArgs());
@@ -98,11 +91,12 @@ module.exports = {
 	    } else {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] user not exist. Try create him");
 		var user = {
+		    authToken: crypto.randomBytes(41).toString('hex'),
 		    email: email,
 		    password: self.generateHashForPassword(email, password)
 		}
 
-		logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user: ", user);
+		logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
 		userModel.create(user, function (err, user) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't create user, because: ", err);
@@ -110,7 +104,7 @@ module.exports = {
 		    }
 
 		    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] User created.");
-		    callback(null, user.id);
+		    callback(null, {token: user.authToken});
 		});
 	    }
 	});
@@ -140,10 +134,19 @@ module.exports = {
 
 	    if (user) {
 		logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
-		callback(null, user.id);
+		user.authToken = crypto.randomBytes(41).toString('hex');
+		user.update(function (err) {
+		    if (err) {
+			logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
+			callback(Errors.System(err));
+			return;
+		    }
+		    callback(null, {token: user.authToken});
+		});
 	    } else {
 		logger.debug("[userService.findOrCreateAnonymous, ", email, " User not exist. Try create him");
 		var user = {
+		    authToken: crypto.randomBytes(41).toString('hex'),
 		    anonymousId: id,
 		    email: email
 		}
@@ -153,8 +156,8 @@ module.exports = {
 			callback(Errors.System(err));
 			return;
 		    }
-		    logger.data("[userService.findOrCreateAnonymous, ", user.id, "] User created: ", user);
-		    callback(null, user.id);
+		    logger.data("[userService.findOrCreateAnonymous, ", user.id, "] Anonymous user created.");
+		    callback(null, {token: user.authToken});
 		});
 	    }
 	});
@@ -185,6 +188,7 @@ module.exports = {
     },
     findOrCreateByFBData: function (data, callback) {
 	logger.data("[userService.findOrCreateByFBData, ", data, "] Try find or create.");
+
 	if (!data || !data.email) {
 	    logger.data("[userService.findOrCreateByFBData, ", data, "] Data or data.email is incorrect. Return error.");
 	    callback(Errors.FBIncorrectArgs());
@@ -197,23 +201,36 @@ module.exports = {
 		callback(Errors.System(err));
 		return;
 	    }
+
 	    if (user) {
 		logger.warn("[userService.findOrCreateByFBData, ", user.id, "] User ", data.email, " exist");
-		callback(null, user.id);
+		user.authToken = crypto.randomBytes(41).toString('hex');
+		user.update(function (err) {
+		    if (err) {
+			logger.warn("[userService.findOrCreateByFBData, ", email, "] Can't update user with new authToken, because: ", err);
+			callback(Errors.System(err));
+			return;
+		    }
+		    callback(null, {token: user.authToken});
+		});
 	    } else {
 		logger.debug("[userService.findOrCreateByFBData, ", data.email, " User not exist. Try create him");
+
 		var user = {
+		    authToken: crypto.randomBytes(41).toString('hex'), 
 		    facebookId: data.id,
 		    email: data.email,
 		}
+
 		userModel.create(user, function (err, user) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByFBData, ", user.id, "] Can't create user because: ", err);
 			callback(Errors.System(err));
 			return;
-		    };
+		    }
+
 		    logger.data("[userService.findOrCreateByFBData, ", user.id, "] User created: ", user);
-		    callback(null, user.id);
+		    callback(null, {token: user.authToken});
 		});
 	    }
 	});

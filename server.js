@@ -97,7 +97,7 @@ app.post('/user', function(req, res) {
 	    return;
 	}
 
-	return res.send(response);
+	res.send(response);
     });
 });
 
