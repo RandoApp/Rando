@@ -9,7 +9,18 @@ var Errors = require("../error/errors");
 module.exports = {
     forUserWithToken: function (token, callback) {
 	userModel.getByToken(token, function (err, user) {
-	    //TODO: implement
+	    if (err) {
+		logger.warn("[userService.forUserWithToekn, ", token, "] Can't find user by token, because: ", err);
+		callback(Errors.System(err));
+		return;
+	    } else if (!user) {
+		logger.warn("[userService.forUserWithToekn, ", token, "] Can't find user by token because user from db is empty");
+		callback(Errors.Unauthorized());
+		return;
+	    }
+		
+	    logger.debug("[userService.forUserWithToekn, ", token, "] Return user.");
+	    callback(null, user);
 	});
     },
     destroyAuthToken: function (user, callback) {
