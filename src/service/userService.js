@@ -24,8 +24,9 @@ module.exports = {
 	});
     },
     destroyAuthToken: function (user, callback) {
-	//TODO: implement
-	callback();
+	user.authToken = "";
+	user.update();
+	callback(null, {command: "logout", result: "done"});
     },
     getUser: function (userId, callback) {
 	logger.debug("[userService.getUser, ", userId, "] Try get user");
