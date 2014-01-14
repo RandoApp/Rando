@@ -36,8 +36,6 @@ app.post('/food/:token', function (req, res, next) {
 	    }
 
 	    res.status(200);
-	    //TODO: Orginize response into the service, not in the controller - server.js
-//	    res.send('{"foodUrl": "' + foodUrl + '", "creation":"' + Date.now() + '"}')
 	    res.send(response);
 	});
     });
