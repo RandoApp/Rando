@@ -2,6 +2,39 @@ var mongoose = require("mongoose");
 var sinon = require("sinon");
 
 module.exports = {
+    user: function () {
+	return {
+		id: "524ea2324a590391a3e8b516",
+		email: "user@mail.com",
+		facebookId: "111111",
+		authToken: "12345fajiwjfoe2523ijof",
+		foods: [{
+		    user: {
+			user: "524ea2324a590391a3e8b516",
+			localtion: "1111.1111, 1111.1111",
+			foodId: "3333",
+			foodUrl: "http://api.foodex.com/food/3333",
+			mapUrl: "http://api.foodex.com/food/4444",
+			report: 0,
+			bonAppetit: 0
+		    },
+		    stranger: {
+			localtion: "2222.2222, 2222.2222",
+			user: "724ea2324a590391a3e8b516",
+			foodId: "3333",
+			foodUrl: "http://api.foodex.com/food/3333",
+			mapUrl: "http://api.foodex.com/map/444",
+			report: 0,
+			bonAppetit: 0 
+		    }
+		}],
+		save: function (callback) {
+		    if (callback) {
+			callback(null);
+		    }
+		}
+	    }
+    },
     stubSave: function (stub) {
 	if (!stub) {
 	    stub = function (callback) {

@@ -17,16 +17,8 @@ describe('Food service.', function () {
 	    done();
 	});
 
-	it('Undefined userId', function (done) {
-	    foodService.saveFood(null, null, null, function (err) {
-		should.exist(err);
-		err.should.have.property("message", "Incorrect args");
-		done();
-	    });
-	});
-
 	it('Undefined food path', function (done) {
-	    foodService.saveFood("userid", null, {lat: "32", long: "23"}, function (err) {
+	    foodService.saveFood(mongooseMock.user(), null, {lat: "32", long: "23"}, function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 		done();
@@ -34,7 +26,7 @@ describe('Food service.', function () {
 	});
 
 	it('Food path is not exist', function (done) {
-	    foodService.saveFood("userid", "tmp/not-exists-food.jpg", {lat: "32", long: "23"}, function (err) {
+	    foodService.saveFood(mongooseMock.user(), "tmp/not-exists-food.jpg", {lat: "32", long: "23"}, function (err) {
 		should.exist(err);
 		err.should.have.property("errno", 34);
 		done();
@@ -50,7 +42,7 @@ describe('Food service.', function () {
 		callback(new Error(error));
 	    });
 
-	    foodService.saveFood("userid", "/tmp/some-food.png", {lat: "32", long: "23"}, function (err) {
+	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {lat: "32", long: "23"}, function (err) {
 		called.should.be.true;
 		should.exist(err);
 		err.should.have.property("message", error);
@@ -72,7 +64,7 @@ describe('Food service.', function () {
 		callback(null);
 	    });
 
-	    foodService.saveFood("524ebb7dcb9da8ab5b000002", "/tmp/some-food.png", {lat: "32", long: "23"}, function (err) {
+	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {lat: "32", long: "23"}, function (err) {
 		should.exist(err);
 		err.should.have.property("message", error);
 
@@ -95,7 +87,7 @@ describe('Food service.', function () {
 		callback(null);
 	    });
 
-	    foodService.saveFood("524ebb7dcb9da8ab5b000002", "/tmp/some-food.png", {lat: "32", long: "23"}, function (err) {
+	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {lat: "32", long: "23"}, function (err) {
 		should.exist(err);
 		err.should.have.property("message", error);
 
@@ -119,7 +111,7 @@ describe('Food service.', function () {
 		callback(null);
 	    });
 
-	    foodService.saveFood("524ebb7dcb9da8ab5b000002", "/tmp/some-food.png", {lat: "32", long: "23"}, function (err, foodUrl) {
+	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {lat: "32", long: "23"}, function (err, foodUrl) {
 		mkDirCalled.should.be.true;
 		renameCalled.should.be.true;
 		should.not.exist(err);

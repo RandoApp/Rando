@@ -10,11 +10,11 @@ var Errors = require("../error/errors");
 
 module.exports =  {
     saveFood: function (user, foodPath, location, callback) {
-	logger.debug("[foodService.saveFood, ", user.email, "] Try save food from: ", foodPath, " for: ", userId, " location: ", location);
+	logger.debug("[foodService.saveFood, ", user.email, "] Try save food from: ", foodPath, " for: ", user.email, " location: ", location);
 
 	async.waterfall([
 	    function (done) {
-		if (!user || !foodPath || !check(foodPath).notEmpty() || !location) {
+		if (!foodPath || !check(foodPath).notEmpty() || !location) {
 		    logger.warn("[foodService.saveFood, ", user.email, "] Incorect args. user: ", user.email, "; foodPath: ", foodPath, "; location: " , location);
 		    done(Errors.IncorrectFoodArgs());
 		    return;
@@ -76,7 +76,7 @@ module.exports =  {
 		    //TODO: Date.now in updateUser and addFood is differents. Use one time.
 		    user.foods.push({
 			user: {
-			    user: userId,
+			    user: user.id,
 			    location: location,
 			    foodId: foodId,
 			    foodUrl: foodUrl,
