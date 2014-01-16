@@ -134,13 +134,16 @@ module.exports = {
 
 	    if (user) {
 		logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
+		logger.debug(user);
 		user.authToken = crypto.randomBytes(41).toString('hex');
+		logger.debug(user.update);
 		user.update(function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
 			callback(Errors.System(err));
 			return;
 		    }
+		    logger.debug("ANSWER: ", user);
 		    callback(null, {token: user.authToken});
 		});
 	    } else {

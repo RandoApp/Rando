@@ -41,6 +41,7 @@ module.exports = {
 		callback(null, {
 		    id: "524ea2324a590391a3e8b516",
 		    email: "user@mail.com",
+		    authToken: "fwiojf23j424",
 		    facebookId: "111111",
 		    foods: []
 		});
@@ -61,6 +62,7 @@ module.exports = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
 		    facebookId: "111111",
+		    authToken: "4kjafojif32oij4o32ij4o",
 		    foods: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -80,7 +82,12 @@ module.exports = {
 			    report: 0,
 			    bonAppetit: 0 
 			}
-		    }]
+		    }],
+		    update: function (callback) {
+			if (callback) {
+			    callback(null);
+			};
+		    }
 		};
 
 		user.__proto__ = mongoose.model("user").prototype;
@@ -98,6 +105,7 @@ module.exports = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
 		    facebookId: "111111",
+		    authToken: "4kjafojif32oij4o32ij4o",
 		    foods: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -135,6 +143,7 @@ module.exports = {
 		var user = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
+		    authToken: "fiowmifj32432ojfe",
 		    facebookId: "111111",
 		    foods: []
 		};
@@ -170,6 +179,7 @@ module.exports = {
 		var user = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: "user@mail.ru",
+		    authToken: "4kjafojif32oij4o32ij4o",
 		    facebookId: "111111",
 		    foods: [{
 			user: {
