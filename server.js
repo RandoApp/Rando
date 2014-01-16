@@ -17,7 +17,7 @@ app.use(express.bodyParser());
 app.use(express.cookieParser());
 
 app.post('/food/:token', function (req, res, next) {
-    logger.data("POST /food");
+    logger.data("Start process user request. POST /food. Token: ", req.params.token);
 
     userService.forUserWithToken(req.params.token, function (err, user) {
 	if (err) {
@@ -42,7 +42,7 @@ app.post('/food/:token', function (req, res, next) {
 });
 
 app.post('/report/:id/:token', function (req, res) {
-    logger.data("POST /report/:id");
+    logger.data("Start process user request. POST /report. Id:", req.params.id ," Token: ", req.params.token);
 
     userService.forUserWithToken(req.params.token, function (err, user) {
 	if (err) {
@@ -66,7 +66,7 @@ app.post('/report/:id/:token', function (req, res) {
 });
 
 app.post('/bonappetit/:id/:token', function (req, res) {
-    logger.data("POST /bonappetit/:id");
+    logger.data("Start process user request. POST /bonappetit. Id:", req.params.id ," Token: ", req.params.token);
 
     userService.forUserWithToken(req.params.token, function (err, user) {
 	if (err) {
@@ -89,6 +89,8 @@ app.post('/bonappetit/:id/:token', function (req, res) {
 });
 
 app.post('/user', function(req, res) {
+    logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
+    
     userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, function(err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
@@ -102,6 +104,8 @@ app.post('/user', function(req, res) {
 });
 
 app.get('/user/:token', function (req, res) {
+    logger.data("Start process user request. GET /user. Token: ", req.params.token);
+    
     userService.forUserWithToken(req.params.token, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
@@ -123,6 +127,8 @@ app.get('/user/:token', function (req, res) {
 });
 
 app.post('/anonymous', function (req, res) {
+    logger.data("Start process user request. POST /anonymous. id: ", req.body.id);
+
     userService.findOrCreateAnonymous(req.body.id, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
@@ -137,6 +143,8 @@ app.post('/anonymous', function (req, res) {
 });
 
 app.post('/facebook', function (req, res) {
+    logger.data("Start process user request. POST /facebook. Id:", req.body.id ," Email: ", req.body.email, " FB Token length: ", req.body.token.length);
+
     userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, function (err, reponse) {
 	if (err) {
 	    var response = Errors.toResponse(err);
@@ -151,6 +159,8 @@ app.post('/facebook', function (req, res) {
 });
 
 app.post('/logout/:token', function (req, res) {
+    logger.data("Start process user request. POST /logout. Token: ", req.params.token);
+
     userService.forUserWithToken(req.params.token, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);

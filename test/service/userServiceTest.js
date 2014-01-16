@@ -94,7 +94,7 @@ describe('User service.', function () {
 		    email: "user@mail.com",
 		    password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5", //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
 		    authToken: "",
-		    update: function (callback) {
+		    save: function (callback) {
 			if (callback) {
 			    callback(null);
 			}

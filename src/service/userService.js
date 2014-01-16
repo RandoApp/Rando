@@ -25,7 +25,7 @@ module.exports = {
     },
     destroyAuthToken: function (user, callback) {
 	user.authToken = "";
-	user.update();
+	user.save();
 	callback(null, {command: "logout", result: "done"});
     },
     getUser: function (user, callback) {
@@ -75,8 +75,8 @@ module.exports = {
 	    if (user) {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist: ", user);
 		if (self.isPasswordCorrect(password, user)) {
-		    user.authToken = crypto.randomBytes(41).toString('hex');
-		    user.update(function (err) {
+		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		    user.save(function (err) {
 			if (err) {
 			    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
 			    callback(Errors.System(err));
@@ -91,7 +91,7 @@ module.exports = {
 	    } else {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] user not exist. Try create him");
 		var user = {
-		    authToken: crypto.randomBytes(41).toString('hex'),
+		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    email: email,
 		    password: self.generateHashForPassword(email, password)
 		}
@@ -134,22 +134,20 @@ module.exports = {
 
 	    if (user) {
 		logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
-		logger.debug(user);
-		user.authToken = crypto.randomBytes(41).toString('hex');
-		logger.debug(user.update);
-		user.update(function (err) {
+		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		user.save(function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
 			callback(Errors.System(err));
 			return;
 		    }
-		    logger.debug("ANSWER: ", user);
+		    logger.debug("[userService.findOrCreateAnonymous, ", email, "] User authToken updated in db: ", user.authToken);
 		    callback(null, {token: user.authToken});
 		});
 	    } else {
 		logger.debug("[userService.findOrCreateAnonymous, ", email, " User not exist. Try create him");
 		var user = {
-		    authToken: crypto.randomBytes(41).toString('hex'),
+		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    anonymousId: id,
 		    email: email
 		}
@@ -207,8 +205,8 @@ module.exports = {
 
 	    if (user) {
 		logger.warn("[userService.findOrCreateByFBData, ", user.id, "] User ", data.email, " exist");
-		user.authToken = crypto.randomBytes(41).toString('hex');
-		user.update(function (err) {
+		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		user.save(function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByFBData, ", email, "] Can't update user with new authToken, because: ", err);
 			callback(Errors.System(err));
@@ -220,7 +218,7 @@ module.exports = {
 		logger.debug("[userService.findOrCreateByFBData, ", data.email, " User not exist. Try create him");
 
 		var user = {
-		    authToken: crypto.randomBytes(41).toString('hex'), 
+		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
 		    facebookId: data.id,
 		    email: data.email,
 		}
