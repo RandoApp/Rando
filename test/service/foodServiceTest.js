@@ -73,28 +73,6 @@ describe('Food service.', function () {
 	    });
 	});
 
-	it('Error when update user', function (done) {
-	    var error = "Data base error";
-	    mongooseMock.stubFindById(function(id, callback) {
-		callback(new Error(error));
-	    });
-	    sinon.stub(fs, "mkdir", function (p, mode, callback) {
-		fs.mkdir.restore();
-		callback(null);
-	    });
-	    sinon.stub(fs, "rename", function (source, dest, callback) {
-		fs.rename.restore();
-		callback(null);
-	    });
-
-	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {lat: "32", long: "23"}, function (err) {
-		should.exist(err);
-		err.should.have.property("message", error);
-
-		mongooseMock.restore();
-		done();
-	    });
-	});
 
 	it('Successful save food', function (done) {
 	    mongooseMock.stubSave().stubFindById();

@@ -92,23 +92,31 @@ describe('User service.', function () {
 		callback(null, {
 		    id: "123456789",
 		    email: "user@mail.com",
-		    password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5" //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+		    password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5", //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+		    authToken: "",
+		    update: function (callback) {
+			if (callback) {
+			    callback(null);
+			}
+		    }
 		});
 	    });
 
-	    userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", function (err, userId) {
+	    userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", function (err, response) {
 		should.not.exist(err);
-		userId.should.be.equal("123456789");
+		response.should.have.property("token");
+		response.token.should.not.be.empty;
 		done();
 	    });
 	});
 
-	it('New user should be created in data base and return user', function (done) {
+	it('New user should be created in data base and return token', function (done) {
 	    mongooseMock.stubFindOneWithNotFoundUser().stubSave();
 
-	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err, userId) {
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err, response) {
 		should.not.exist(err);
-		userId.should.be.equal("524ea2324a590391a3e8b516"); //this id from mongooseMock.stubSave
+		response.should.have.property("token");
+		response.token.should.not.be.empty;
 		done();
 	    });
 	});
@@ -353,10 +361,10 @@ describe('User service.', function () {
 		callback(null, this);
 	    });
 
-	    userService.findOrCreateAnonymous("efab3c3", function(err, userId) {
+	    userService.findOrCreateAnonymous("efab3c3", function(err, response) {
 		should.not.exist(err);
-		should.exist(userId);
-		userId.should.be.eql("524ea2324a590391a3e8b516");
+		response.should.have.property("token");
+		response.token.should.not.be.empty;
 		done();
 	    });
 
