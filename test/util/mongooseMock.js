@@ -2,12 +2,46 @@ var mongoose = require("mongoose");
 var sinon = require("sinon");
 
 module.exports = {
+    user: function () {
+	return {
+		id: "524ea2324a590391a3e8b516",
+		email: "user@mail.com",
+		facebookId: "111111",
+		authToken: "12345fajiwjfoe2523ijof",
+		foods: [{
+		    user: {
+			user: "524ea2324a590391a3e8b516",
+			localtion: "1111.1111, 1111.1111",
+			foodId: "3333",
+			foodUrl: "http://api.foodex.com/food/3333",
+			mapUrl: "http://api.foodex.com/food/4444",
+			report: 0,
+			bonAppetit: 0
+		    },
+		    stranger: {
+			localtion: "2222.2222, 2222.2222",
+			user: "724ea2324a590391a3e8b516",
+			foodId: "3333",
+			foodUrl: "http://api.foodex.com/food/3333",
+			mapUrl: "http://api.foodex.com/map/444",
+			report: 0,
+			bonAppetit: 0 
+		    }
+		}],
+		save: function (callback) {
+		    if (callback) {
+			callback(null);
+		    }
+		}
+	    }
+    },
     stubSave: function (stub) {
 	if (!stub) {
 	    stub = function (callback) {
 		callback(null, {
 		    id: "524ea2324a590391a3e8b516",
 		    email: "user@mail.com",
+		    authToken: "fwiojf23j424",
 		    facebookId: "111111",
 		    foods: []
 		});
@@ -27,7 +61,7 @@ module.exports = {
 		var user = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
-		    facebookId: "111111",
+		    facebookId: "111111", authToken: "4kjafojif32oij4o32ij4o",
 		    foods: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -47,7 +81,12 @@ module.exports = {
 			    report: 0,
 			    bonAppetit: 0 
 			}
-		    }]
+		    }],
+		    save: function (callback) {
+			if (callback) {
+			    callback(null);
+			};
+		    }
 		};
 
 		user.__proto__ = mongoose.model("user").prototype;
@@ -65,6 +104,7 @@ module.exports = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
 		    facebookId: "111111",
+		    authToken: "4kjafojif32oij4o32ij4o",
 		    foods: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -102,6 +142,7 @@ module.exports = {
 		var user = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
+		    authToken: "fiowmifj32432ojfe",
 		    facebookId: "111111",
 		    foods: []
 		};
@@ -137,6 +178,7 @@ module.exports = {
 		var user = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: "user@mail.ru",
+		    authToken: "4kjafojif32oij4o32ij4o",
 		    facebookId: "111111",
 		    foods: [{
 			user: {

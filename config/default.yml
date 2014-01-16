@@ -6,6 +6,7 @@ app:
     anonymousEmailPosftix: foodex.com
     mapStub: http://95.85.19.94/map/minskmap.png
     reportedFoodStub: http://95.85.19.94/food/food-reported-stub.png
+    tokenLength: 21
     demon:
         wakeup: 20000
         foodTimeout: 300000

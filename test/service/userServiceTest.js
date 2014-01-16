@@ -92,23 +92,31 @@ describe('User service.', function () {
 		callback(null, {
 		    id: "123456789",
 		    email: "user@mail.com",
-		    password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5" //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+		    password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5", //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+		    authToken: "",
+		    save: function (callback) {
+			if (callback) {
+			    callback(null);
+			}
+		    }
 		});
 	    });
 
-	    userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", function (err, userId) {
+	    userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", function (err, response) {
 		should.not.exist(err);
-		userId.should.be.equal("123456789");
+		response.should.have.property("token");
+		response.token.should.not.be.empty;
 		done();
 	    });
 	});
 
-	it('New user should be created in data base and return user', function (done) {
+	it('New user should be created in data base and return token', function (done) {
 	    mongooseMock.stubFindOneWithNotFoundUser().stubSave();
 
-	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err, userId) {
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err, response) {
 		should.not.exist(err);
-		userId.should.be.equal("524ea2324a590391a3e8b516"); //this id from mongooseMock.stubSave
+		response.should.have.property("token");
+		response.token.should.not.be.empty;
 		done();
 	    });
 	});
@@ -202,106 +210,13 @@ describe('User service.', function () {
 	    done();
 	});
 
-	it('Data base error should return error', function (done) {
-	    var error = "Data base error";
-	    mongooseMock.stubFindById(function (userId, callback) {
-		callback(new Error(error));
-	    });
-
-	    userService.getUser("32423432", function(err, user) {
-		should.exist(err);
-		err.should.have.property("message", error);
-		done();
-	    });
-	});
-
-	it('User not found should return error', function (done) {
-	    mongooseMock.stubFindByIdWithNotFoundUser();
-	    userService.getUser("32423432", function(err, user) {
-		should.exist(err);
-		err.should.have.property("message", "User not found");
-		done();
-	    });
-	});
-
 	it('Get user successfully', function (done) {
-	    mongooseMock.stubFindById(function (id, callback) {
-		callback(null, {
-		    id: "524ea2324a590391a3e8b516",
-		    email: "user@mail.com",
-		    facebookId: "111111",
-		    foods: [{
-			user: {
-			    user: "524ea2324a590391a3e8b516",
-			    location: {
-				lat: "3333",
-				long: "4444"
-			    },
-			    creation: "24324234",
-			    food: "435345.png",
-			    map: "32432432.png",
-			    bonAppetit: false
-			},
-			stranger: {
-			    user: "624ea2324a590391a3e8b516",
-			    location: {
-				lat: "4333",
-				long: "5444"
-			    },
-			    creation: "54324234",
-			    food: "635345.png",
-			    map: "52432432.png",
-			    bonAppetit: false
-			}
-		    },
-		    {
-			user: {
-			    user: "524ea2324a590391a3e8b516",
-			    location: {
-				lat: "3333",
-				long: "4444"
-			    },
-			    creation: "34324234",
-			    food: "935345.png",
-			    map: "32432432.png",
-			    bonAppetit: false
-			},
-			stranger: {
-			}
-		    }]
-		});
-	    });
-
-	    userService.getUser("524ea2324a590391a3e8b516", function (err, user) {
+	    userService.getUser(mongooseMock.user(), function (err, user) {
 		should.not.exist(err);
-		user.should.be.eql({
-		    email: "user@mail.com",
-		    foods: [{
-			user: {
-			    creation: "24324234",
-			    food: "435345.png",
-			    map: "32432432.png",
-			    bonAppetit: false
-			},
-			stranger: {
-			    creation: "54324234",
-			    food: "635345.png",
-			    map: "52432432.png",
-			    bonAppetit: false
-			}
-		    },
-		    {
-			user: {
-			    creation: "34324234",
-			    food: "935345.png",
-			    map: "32432432.png",
-			    bonAppetit: false
-			},
-			stranger: {
-			}
-		    }]
-		});
-
+		should.exist(user);
+		//TODO: make assertion more strongly;
+		user.should.have.property("email", "user@mail.com");
+		user.foods.should.not.be.empty;
 		done();
 	    });
 	});
@@ -313,7 +228,7 @@ describe('User service.', function () {
 	});
 
 	it('Not defined id should return error', function (done) {
-	    userService.findOrCreateAnonymous(null, function(err, user) {
+	    userService.findOrCreateAnonymous(null, function (err, response) {
 		should.exist(err);
 		err.should.have.property("message", "Id is not correct");
 		done();
@@ -326,7 +241,7 @@ describe('User service.', function () {
 		callback(new Error(error));
 	    });
 
-	    userService.findOrCreateAnonymous("efab3c3", function(err, user) {
+	    userService.findOrCreateAnonymous("efab3c3", function(err, response) {
 		should.exist(err);
 		err.should.have.property("message", error);
 		done();
@@ -336,10 +251,10 @@ describe('User service.', function () {
 	it('Anonymous user already exists', function (done) {
 	    mongooseMock.stubFindOne();
 
-	    userService.findOrCreateAnonymous("efab3c3", function(err, user) {
+	    userService.findOrCreateAnonymous("efab3c3", function(err, response) {
 		should.not.exist(err);
-		should.exist(user);
-		user.should.be.eql("524ea2324a590391a3e8b516");
+		response.should.have.property("token");
+		response.token.should.not.be.empty;
 		done();
 	    });
 	});
@@ -353,10 +268,10 @@ describe('User service.', function () {
 		callback(null, this);
 	    });
 
-	    userService.findOrCreateAnonymous("efab3c3", function(err, userId) {
+	    userService.findOrCreateAnonymous("efab3c3", function(err, response) {
 		should.not.exist(err);
-		should.exist(userId);
-		userId.should.be.eql("524ea2324a590391a3e8b516");
+		response.should.have.property("token");
+		response.token.should.not.be.empty;
 		done();
 	    });
 

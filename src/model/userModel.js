@@ -4,6 +4,7 @@ var logger = require("../log/logger");
 
 var User = mongoose.model("user", new mongoose.Schema({
     email: String,
+    authToken: String,
     facebookId: String,
     anonymousId: String,
     password: String,
@@ -36,12 +37,11 @@ module.exports = {
 	if (!user) {
 	    logger.warn("[userModel.create] Hey, programmer! You forgot pass user arg to userModel.create! or passed user arg is undefined!");
 	    return;
-	}
-
-	if (!user.email) {
+	} else if (!user.email) {
 	    logger.warn("[userModel.create] Hey, programmer! userModel.create must contains email value in arg object!");
 	    return;
 	}
+
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
@@ -81,5 +81,9 @@ module.exports = {
     getById: function (id, callback) {
 	logger.data("[userMode.getById] Try find user by id: ", id);
 	User.findById(id, callback);
+    },
+    getByToken: function (token, callback) {
+	logger.data("[userMode.getByToken] Try find user by authToken: ", token);
+	User.findOne({authToken: token}, callback);
     }
 };

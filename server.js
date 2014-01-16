@@ -1,13 +1,9 @@
 var express = require("express");
 var config = require("config");
 var logger = require("./src/log/logger");
-var user = require("./src/service/userService");
-var comment = require("./src/service/commentService");
-var food = require("./src/service/foodService");
-var passport = require("passport");
-var FacebookStrategy = require('passport-facebook').Strategy;
-var LocalStrategy = require('passport-local').Strategy;
-var MongoStore = require('connect-mongo')(express);
+var userService = require("./src/service/userService");
+var commentService = require("./src/service/commentService");
+var foodService = require("./src/service/foodService");
 var mongodbConnection = require("./src/model/db").establishConnection();
 var Errors = require("./src/error/errors");
 var pairFoodsService = require("./src/service/pairFoodsService");
@@ -15,45 +11,15 @@ var app = express();
 
 pairFoodsService.startDemon();
 
-passport.use(new FacebookStrategy({
-    clientID: config.app.fb.id,
-    clientSecret: config.app.fb.secret,
-    callbackURL: "/auth/facebook/callback"
-}, function(accessToken, refreshToken, profile, done) {
-    user.findOrCreateByFBData(profile._json, done);
-}));
-
-passport.use(new LocalStrategy(function(email, password, done) {
-    user.findOrCreateByLoginAndPassword(email, password, done);
-}));
-
-
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
-
-passport.deserializeUser(function(id, done) {
-    done(null, id);
-});
-
 app.use(express.static(__dirname + '/static', {maxAge: config.app.cacheControl}));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.cookieParser());
-app.use(express.session({
-    secret: config.app.secret,
-    store: new MongoStore({mongoose_connection: mongodbConnection})
-}));
-app.use(passport.initialize());
 
-app.post('/food', function (req, res, next) {
-    logger.data("POST /food");
-    if (isNotAuthorized(req, res)) {
-	return;
-    }
+app.post('/food/:token', function (req, res, next) {
+    logger.data("Start process user request. POST /food. Token: ", req.params.token);
 
-    var userId = req.session.passport.user;
-    food.saveFood(userId, req.files.image.path, {lat: req.body.latitude, long: req.body.longitude},  function (err, foodUrl) {
+    userService.forUserWithToken(req.params.token, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -61,98 +27,109 @@ app.post('/food', function (req, res, next) {
 	    return;
 	}
 
-	res.status(200);
-	//TODO: Orginize response into the service, not in the controller - server.js
-	res.send('{"foodUrl": "' + foodUrl + '", "creation":"' + Date.now() + '"}')
-    });
-});
-
-app.post('/report/:id', function (req, res) {
-    logger.data("POST /report/:id", req);
-    if (isNotAuthorized(req, res)) {
-	return;
-    }
-
-    var userId = req.session.passport.user;
-    logger.debug("REPORT");
-    comment.report(userId, req.params.id, function (err) {
-	if (err) {
-	    var response = Errors.toResponse(err);
-	    res.status(response.status);
-	    res.send(response);
-	    return;
-	}
-
-	res.send('Image ' + req.params.id + ' reported');
-    });
-});
-
-app.post('/bonappetit/:id', function (req, res) {
-    logger.data("POST /bonappetit/:id", req);
-    if (isNotAuthorized(req, res)) {
-	return;
-    }
-
-    var userId = req.session.passport.user;
-    comment.bonAppetit(userId, req.params.id, function (err) {
-	if (err) {
-	    var response = Errors.toResponse(err);
-	    res.status(response.status);
-	    res.send(response);
-	    return;
-	}
-	res.send('Bon appetit ' + req.params.id);
-    });
-});
-
-app.get('/auth/facebook', passport.authenticate('facebook'));
-app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), function(req, res) {
-    res.redirect('/');
-});
-
-app.post('/user', function(req, res, next) {
-    passport.authenticate('local', function(err, user, info) {
-	if (err) {
-	    var response = Errors.toResponse(err);
-	    res.status(response.status);
-	    res.send(response);
-	    return;
-	}
-	if (!user) {
-	    req.session.messages = [info.message];
-	    return res.redirect('/login')
-	}
-	req.logIn(user, function(err) {
+	foodService.saveFood(user, req.files.image.path, {lat: req.body.latitude, long: req.body.longitude},  function (err, response) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
 		res.send(response);
 		return;
 	    }
-	    return res.send('OK');
+
+	    res.status(200);
+	    res.send(response);
 	});
-    })(req, res, next);
+    });
 });
 
-app.get('/user', function (req, res) {
-    if (isNotAuthorized(req, res)) {
-	return;
-    }
+app.post('/report/:id/:token', function (req, res) {
+    logger.data("Start process user request. POST /report. Id:", req.params.id ," Token: ", req.params.token);
 
-    var userId = req.session.passport.user;
-    user.getUser(userId, function (err, user) {
+    userService.forUserWithToken(req.params.token, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
 	    res.send(response);
 	    return;
 	}
-	res.send(user);
+
+	commentService.report(user, req.params.id, function (err, response) {
+	    if (err) {
+		var response = Errors.toResponse(err);
+		res.status(response.status);
+		res.send(response);
+		return;
+	    }
+
+	    res.send(response);
+	});
+    });
+});
+
+app.post('/bonappetit/:id/:token', function (req, res) {
+    logger.data("Start process user request. POST /bonappetit. Id:", req.params.id ," Token: ", req.params.token);
+
+    userService.forUserWithToken(req.params.token, function (err, user) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	commentService.bonAppetit(user, req.params.id, function (err, response) {
+	    if (err) {
+		var response = Errors.toResponse(err);
+		res.status(response.status);
+		res.send(response);
+		return;
+	    }
+	    res.send(response);
+	});
+    });
+});
+
+app.post('/user', function(req, res) {
+    logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
+    
+    userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, function(err, response) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	res.send(response);
+    });
+});
+
+app.get('/user/:token', function (req, res) {
+    logger.data("Start process user request. GET /user. Token: ", req.params.token);
+    
+    userService.forUserWithToken(req.params.token, function (err, user) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	userService.getUser(user, function (err, user) {
+	    if (err) {
+		var response = Errors.toResponse(err);
+		res.status(response.status);
+		res.send(response);
+		return;
+	    }
+	    res.send(user);
+	});
     });
 });
 
 app.post('/anonymous', function (req, res) {
-    user.findOrCreateAnonymous(req.body.id, function (err, user) {
+    logger.data("Start process user request. POST /anonymous. id: ", req.body.id);
+
+    userService.findOrCreateAnonymous(req.body.id, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -160,15 +137,15 @@ app.post('/anonymous', function (req, res) {
 	    return;
 	}
 
-	req.session.passport = {user: user};
-
 	res.status(200);
-	res.send("Ok");
+	res.send(response);
     });
 });
 
 app.post('/facebook', function (req, res) {
-    user.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, function (err, user) {
+    logger.data("Start process user request. POST /facebook. Id:", req.body.id ," Email: ", req.body.email, " FB Token length: ", req.body.token.length);
+
+    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, function (err, reponse) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -176,33 +153,34 @@ app.post('/facebook', function (req, res) {
 	    return;
 	}
 
-	req.session.passport = {user: user};
-
 	res.status(200);
-	res.send("Ok");
+	res.send(response);
     });
 });
 
-app.post('/logout', function (req, res) {
-    req.session.destroy();
-    res.status(200);
-    res.send("Ok");
+app.post('/logout/:token', function (req, res) {
+    logger.data("Start process user request. POST /logout. Token: ", req.params.token);
+
+    userService.forUserWithToken(req.params.token, function (err, user) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	userService.destroyAuthToken(user, function (err, response) {
+	    if (err) {
+		var response = Errors.toResponse(err);
+		res.status(response.status);
+		res.send(response);
+		return;
+	    }
+	    res.status(200);
+	    res.send(response);
+	});
+    });
 });
-
-function isNotAuthorized (req, res) {
-    logger.debug("Check authorisation");
-    if (req.session.passport && req.session.passport.user) {
-	logger.debug("User authorized: " + req.session.passport.user);
-	return false;
-    }
-
-    logger.debug("Session or user is empty. Send Unauthorized error.");
-    var response = Errors.toResponse(Errors.Unauthorized());
-    res.status(response.status);
-    res.send(response);
-    return true;
-}
-module.exports = isNotAuthorized;
 
 app.listen(config.app.port, function () {
     logger.info('Express server listening on port ' + config.app.port);
