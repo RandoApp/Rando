@@ -74,9 +74,10 @@ module.exports =  {
 		})},
 		updateUser: function (done) {
 		    //TODO: Date.now in updateUser and addFood is differents. Use one time.
+		    var userId = user.id;
 		    user.foods.push({
 			user: {
-			    user: user.id,
+			    user: userId,
 			    location: location,
 			    foodId: foodId,
 			    foodUrl: foodUrl,
