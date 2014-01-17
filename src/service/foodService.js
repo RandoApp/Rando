@@ -64,7 +64,7 @@ module.exports =  {
 	logger.debug("[foodService.updateFood, ", user.email, "] Try update food for: ", user.email, " location: ", location, " foodId: ", foodId, " and url: ", foodUrl);
 	async.parallel({
 		addFood: function (done) {
-		    foodModel.add(user, location, Date.now(), foodId, foodUrl, function (err) {
+		    foodModel.add(user.id, location, Date.now(), foodId, foodUrl, function (err) {
 			if (err) {
 			    logger.warn("[foodService.updateFood.addFood, ", user.email, "] Can't add food because: ", err);
 			    done(Errors.System(err));
@@ -74,10 +74,9 @@ module.exports =  {
 		})},
 		updateUser: function (done) {
 		    //TODO: Date.now in updateUser and addFood is differents. Use one time.
-		    var userId = user.id;
 		    user.foods.push({
 			user: {
-			    user: userId,
+			    user: user.id,
 			    location: location,
 			    foodId: foodId,
 			    foodUrl: foodUrl,
