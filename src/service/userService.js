@@ -10,22 +10,22 @@ module.exports = {
     forUserWithToken: function (token, callback) {
 	userModel.getByToken(token, function (err, user) {
 	    if (err) {
-		logger.warn("[userService.forUserWithToekn, ", token, "] Can't find user by token, because: ", err);
+		logger.warn("[userService.forUserWithToken, ", token, "] Can't find user by token, because: ", err);
 		callback(Errors.System(err));
 		return;
 	    } else if (!user) {
-		logger.warn("[userService.forUserWithToekn, ", token, "] Can't find user by token because user from db is empty");
+		logger.warn("[userService.forUserWithToken, ", token, "] Can't find user by token because user from db is empty");
 		callback(Errors.Unauthorized());
 		return;
 	    }
 		
-	    logger.debug("[userService.forUserWithToekn, ", token, "] Return user.");
+	    logger.debug("[userService.forUserWithToken, ", token, "] Return user.");
 	    callback(null, user);
 	});
     },
     destroyAuthToken: function (user, callback) {
 	user.authToken = "";
-	user.save();
+	userModel.update(user);
 	callback(null, {command: "logout", result: "done"});
     },
     getUser: function (user, callback) {
@@ -76,7 +76,7 @@ module.exports = {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist: ", user);
 		if (self.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
-		    user.save(function (err) {
+		    userModel.update(user, function (err) {
 			if (err) {
 			    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
 			    callback(Errors.System(err));
@@ -135,7 +135,7 @@ module.exports = {
 	    if (user) {
 		logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
-		user.save(function (err) {
+		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
 			callback(Errors.System(err));
@@ -206,7 +206,7 @@ module.exports = {
 	    if (user) {
 		logger.warn("[userService.findOrCreateByFBData, ", user.id, "] User ", data.email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
-		user.save(function (err) {
+		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByFBData, ", email, "] Can't update user with new authToken, because: ", err);
 			callback(Errors.System(err));
