@@ -179,6 +179,7 @@ module.exports = {
 		    logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is equals");
 		    self.findOrCreateByFBData({email: email, id: id}, callback);
 		} else {
+		    logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is not equals. Return incorrect args");
 		    callback(Errors.FBIncorrectArgs());
 		}
 	    }).on("error", function(e){
@@ -187,7 +188,7 @@ module.exports = {
 	    });
 	});
     },
-    verifyGoogleAndFindOrCreateUser: function (email, token, callback) {
+    verifyGoogleAndFindOrCreateUser: function (email, familyName, token, callback) {
 	logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
 
 	var self = this;
@@ -199,10 +200,11 @@ module.exports = {
 	    resp.on('data', function (chunk) {
 		var json = JSON.parse(chunk.toString("utf8"));
 		logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
-		if (json.email == email) {
+		if (json.family_name = familyName) {
 		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Emails is equals");
 		    self.findOrCreateByGoogleData(json.id, email, callback);
 		} else {
+		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
 		    callback(Errors.GoogleIncorrectArgs());
 		}
 	    }).on("error", function (e) {

@@ -159,9 +159,9 @@ app.post('/facebook', function (req, res) {
 });
 
 app.post('/google', function (req, res) {
-    logger.data("Start process user request. POST /google. Email: ", req.body.email, " Google Token length: ", req.body.token.length);
+    logger.data("Start process user request. POST /google. Email: ", req.body.email, "Family name: ", req.body.family_name, " Google Token length: ", req.body.token.length);
 
-    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.token, function (err, reponse) {
+    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, function (err, reponse) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
