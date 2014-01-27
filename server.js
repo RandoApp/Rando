@@ -158,6 +158,22 @@ app.post('/facebook', function (req, res) {
     });
 });
 
+app.post('/google', function (req, res) {
+    logger.data("Start process user request. POST /google. Email: ", req.body.email, " Google Token length: ", req.body.token.length);
+
+    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.token, function (err, reponse) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    res.send(response);
+	    return;
+	}
+
+	res.status(200);
+	res.send(response);
+    });
+});
+
 app.post('/logout/:token', function (req, res) {
     logger.data("Start process user request. POST /logout. Token: ", req.params.token);
 
