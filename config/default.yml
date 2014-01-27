@@ -15,6 +15,10 @@ app:
         secret: abcd12345efg #This is a stub
         host: graph.facebook.com
         port: 443
+    google:
+        host: googleapis.com
+        path: /oauth2/v1/userinfo?access_token=
+        port: 443
     log:
         file: foodex.log
         handleException: true

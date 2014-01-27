@@ -81,6 +81,16 @@ module.exports =  {
 	}
 	return error;
     },
+    GoogleIncorrectArgs: function () {
+	var error = new Error("Incorrect args");
+	error.foodex = {
+	    status: 400,
+	    code: 410,
+	    message: "Incorrect args",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#user"
+	}
+	return error;
+    },
     System: function (err) {
 	err.foodex = {
 	    status: 500,
@@ -96,6 +106,15 @@ module.exports =  {
 	    code: 502,
 	    message: "Facebook Server Error",
 	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#facebook"
+	}
+	return  err;
+    },
+    GoogleError: function (err) {
+	err.foodex = {
+	    status: 500,
+	    code: 503,
+	    message: "Google Server Error",
+	    description: "See https://github.com/dimhold/foodex/wiki/Errors/#google"
 	}
 	return  err;
     },

@@ -182,8 +182,32 @@ module.exports = {
 		    callback(Errors.FBIncorrectArgs());
 		}
 	    }).on("error", function(e){
-		logger.warn("[userService, ", id, " - ", email, "] Error in communication with Facebook: ", e);
+		logger.warn("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Error in communication with Facebook: ", e);
 		callback(Errors.FacebookError());
+	    });
+	});
+    },
+    verifyGoogleAndFindOrCreateUser: function (email, token, callback) {
+	logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
+
+	var self = this;
+	require("https").get({
+	    host: config.app.google.host,
+	    port: config.app.google.port,
+	    path: config.app.google.path + token
+	}, function(resp) {
+	    resp.on('data', function(chunk) {
+		var json = JSON.parse(chunk.toString("utf8"));
+		logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
+		if (json.email == email) {
+		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Emails is equals");
+		    self.findOrCreateByGoogleData(email, callback);
+		} else {
+		    callback(Errors.GoogleIncorrectArgs());
+		}
+	    }).on("error", function (e){
+		logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
+		callback(Errors.GoogleError());
 	    });
 	});
     },
@@ -231,6 +255,55 @@ module.exports = {
 		    }
 
 		    logger.data("[userService.findOrCreateByFBData, ", user.id, "] User created: ", user);
+		    callback(null, {token: user.authToken});
+		});
+	    }
+	});
+    },
+    findOrCreateByGoogleData: function (email, callback) {
+	logger.data("[userService.findOrCreateByGoogleData, ", email, "] Try find or create.");
+
+	if (!email) {
+	    logger.data("[userService.findOrCreateByGoogleData, ", email, "] Data or data.email is incorrect. Return error.");
+	    callback(Errors.GoogleIncorrectArgs());
+	    return;
+	}
+
+	userModel.getByEmail(email, function (err, user) {
+	    if (err) {
+		logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't get user by email, because: ", err);
+		callback(Errors.System(err));
+		return;
+	    }
+
+	    if (user) {
+		logger.warn("[userService.findOrCreateByGoogleData, ", user.id, "] User ",email, " exist");
+		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		userModel.update(user, function (err) {
+		    if (err) {
+			logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't update user with new authToken, because: ", err);
+			callback(Errors.System(err));
+			return;
+		    }
+		    callback(null, {token: user.authToken});
+		});
+	    } else {
+		logger.debug("[userService.findOrCreateByGoogleData, ", email, " User not exist. Try create him");
+
+		var user = {
+		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
+		    google: "true",
+		    email: data.email,
+		}
+
+		userModel.create(user, function (err, user) {
+		    if (err) {
+			logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't create user because: ", err);
+			callback(Errors.System(err));
+			return;
+		    }
+
+		    logger.data("[userService.findOrCreateByGoogleData, ", email, "] User created: ", user);
 		    callback(null, {token: user.authToken});
 		});
 	    }
