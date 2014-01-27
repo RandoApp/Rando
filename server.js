@@ -162,7 +162,7 @@ app.post('/anonymous', function (req, res) {
 app.post('/facebook', function (req, res) {
     logger.data("Start process user request. POST /facebook. Id:", req.body.id ," Email: ", req.body.email, " FB Token length: ", req.body.token.length);
 
-    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, function (err, reponse) {
+    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -180,7 +180,7 @@ app.post('/facebook', function (req, res) {
 app.post('/google', function (req, res) {
     logger.data("Start process user request. POST /google. Email: ", req.body.email, "Family name: ", req.body.family_name, " Google Token length: ", req.body.token.length);
 
-    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, function (err, reponse) {
+    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
