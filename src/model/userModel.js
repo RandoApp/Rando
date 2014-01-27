@@ -50,11 +50,11 @@ module.exports = {
 		    return;
 		}
 
-		logger.debug("[userModel.create] User created: ", user);
+		logger.debug("[userModel.create] User created with email: ", user.email);
 	    };
 	}
 
-	logger.data("[userModel.create] Create user: Email: ", user);
+	logger.data("[userModel.create] Create user: Email: ", user.email);
 
 	var user = new User(user);
 	user.save(callback);

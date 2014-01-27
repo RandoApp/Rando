@@ -201,7 +201,7 @@ module.exports = {
 		var json = JSON.parse(chunk.toString("utf8"));
 		logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
 		if (json.family_name = familyName) {
-		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Emails is equals");
+		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
 		    self.findOrCreateByGoogleData(json.id, email, callback);
 		} else {
 		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
@@ -281,6 +281,7 @@ module.exports = {
 	    if (user) {
 		logger.warn("[userService.findOrCreateByGoogleData, ", user.id, "] User ",email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		user.googleId = id;
 		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't update user with new authToken, because: ", err);
