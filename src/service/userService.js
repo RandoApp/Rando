@@ -168,7 +168,7 @@ module.exports = {
 
 	var self = this;
 	require("https").get({
-	    host: config.app.fb.host,
+	    hostname: config.app.fb.host,
 	    port: config.app.fb.port,
 	    path: '/' + id + '?fields=id,email&access_token=' + token
 	}, function(resp) {
@@ -192,7 +192,7 @@ module.exports = {
 
 	var self = this;
 	require("https").get({
-	    host: config.app.google.host,
+	    hostname: config.app.google.host,
 	    port: config.app.google.port,
 	    path: config.app.google.path + token
 	}, function(resp) {
