@@ -23,6 +23,7 @@ app.post('/food/:token', function (req, res, next) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop POST /food. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
@@ -31,10 +32,12 @@ app.post('/food/:token', function (req, res, next) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
+		logger.data("Stop POST /food. Response error: ", response);
 		res.send(response);
 		return;
 	    }
 
+	    logger.data("Stop POST /food. Response: ", response);
 	    res.status(200);
 	    res.send(response);
 	});
@@ -48,6 +51,7 @@ app.post('/report/:id/:token', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop POST /report. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
@@ -56,10 +60,12 @@ app.post('/report/:id/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
+		logger.data("Stop POST /report. Response error: ", response);
 		res.send(response);
 		return;
 	    }
 
+	    logger.data("Stop POST /report. Response: ", response);
 	    res.send(response);
 	});
     });
@@ -72,6 +78,7 @@ app.post('/bonappetit/:id/:token', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop POST /bonappetit. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
@@ -80,9 +87,12 @@ app.post('/bonappetit/:id/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
+		logger.data("Stop POST /bonappetit. Response error: ", response);
 		res.send(response);
 		return;
 	    }
+
+	    logger.data("Stop POST /bonAppetit. Response: ", response);
 	    res.send(response);
 	});
     });
@@ -95,10 +105,12 @@ app.post('/user', function(req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop POST /user. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
 
+	logger.data("Stop POST /user. Response: ", response);
 	res.send(response);
     });
 });
@@ -110,6 +122,7 @@ app.get('/user/:token', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop GET /user. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
@@ -118,9 +131,11 @@ app.get('/user/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
+		logger.data("Stop GET /user. Response error: ", response);
 		res.send(response);
 		return;
 	    }
+	    logger.data("Stop GET /user. Response: ", user);
 	    res.send(user);
 	});
     });
@@ -133,10 +148,12 @@ app.post('/anonymous', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop POST /anonymous. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
 
+	logger.data("Stop POST /anonymous. Response: ", response);
 	res.status(200);
 	res.send(response);
     });
@@ -149,10 +166,12 @@ app.post('/facebook', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop POST /facebook. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
 
+	logger.data("Stop POST /facebook. Response: ", response);
 	res.status(200);
 	res.send(response);
     });
@@ -165,10 +184,12 @@ app.post('/google', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop POST /google. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
 
+	logger.data("Stop POST /google. Response: ", response);
 	res.status(200);
 	res.send(response);
     });
@@ -181,6 +202,7 @@ app.post('/logout/:token', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
+	    logger.data("Stop POST /logout. Response error: ", response);
 	    res.send(response);
 	    return;
 	}
@@ -189,9 +211,12 @@ app.post('/logout/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
+		logger.data("Stop POST /logout. Response error: ", response);
 		res.send(response);
 		return;
 	    }
+
+	    logger.data("Stop POST /logout. Response: ", response);
 	    res.status(200);
 	    res.send(response);
 	});

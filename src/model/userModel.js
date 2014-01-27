@@ -60,7 +60,7 @@ module.exports = {
 	user.save(callback);
     },
     update: function (user, callback) {
-	logger.data("[userModel.update] Update user with  Email: ", user.email, ". New user: ", user);
+	logger.data("[userModel.update] Update user with  Email: ", user.email);
 
 	if (!callback) {
 	    callback = function (err) {
