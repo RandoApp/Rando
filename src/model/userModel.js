@@ -6,7 +6,7 @@ var User = mongoose.model("user", new mongoose.Schema({
     email: String,
     authToken: String,
     facebookId: String,
-    google: String,
+    googleId: String,
     anonymousId: String,
     password: String,
     foods: [{

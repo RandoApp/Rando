@@ -196,16 +196,16 @@ module.exports = {
 	    port: config.app.google.port,
 	    path: config.app.google.path + token
 	}, function(resp) {
-	    resp.on('data', function(chunk) {
+	    resp.on('data', function (chunk) {
 		var json = JSON.parse(chunk.toString("utf8"));
 		logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
 		if (json.email == email) {
 		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Emails is equals");
-		    self.findOrCreateByGoogleData(email, callback);
+		    self.findOrCreateByGoogleData(json.id, email, callback);
 		} else {
 		    callback(Errors.GoogleIncorrectArgs());
 		}
-	    }).on("error", function (e){
+	    }).on("error", function (e) {
 		logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
 		callback(Errors.GoogleError());
 	    });
@@ -260,7 +260,7 @@ module.exports = {
 	    }
 	});
     },
-    findOrCreateByGoogleData: function (email, callback) {
+    findOrCreateByGoogleData: function (id, email, callback) {
 	logger.data("[userService.findOrCreateByGoogleData, ", email, "] Try find or create.");
 
 	if (!email) {
@@ -292,8 +292,8 @@ module.exports = {
 
 		var user = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
-		    google: "true",
-		    email: data.email,
+		    googleId: id, 
+		    email: email,
 		}
 
 		userModel.create(user, function (err, user) {
