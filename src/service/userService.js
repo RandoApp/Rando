@@ -8,6 +8,11 @@ var Errors = require("../error/errors");
 
 module.exports = {
     forUserWithToken: function (token, callback) {
+	if (!token) {
+	    callback(Errors.Unauthorized());
+	    return;
+	}
+
 	userModel.getByToken(token, function (err, user) {
 	    if (err) {
 		logger.warn("[userService.forUserWithToken, ", token, "] Can't find user by token, because: ", err);

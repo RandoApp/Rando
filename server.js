@@ -4,6 +4,7 @@ var logger = require("./src/log/logger");
 var userService = require("./src/service/userService");
 var commentService = require("./src/service/commentService");
 var foodService = require("./src/service/foodService");
+var logService = require("./src/service/logService");
 var mongodbConnection = require("./src/model/db").establishConnection();
 var Errors = require("./src/error/errors");
 var pairFoodsService = require("./src/service/pairFoodsService");
@@ -221,6 +222,30 @@ app.post('/logout/:token', function (req, res) {
 	    res.send(response);
 	});
     });
+});
+
+app.post('/log/:token', function (req, res) {
+    logger.data("Start process user request. POST /log. Token: ", req.params.token);
+
+    userService.forUserWithToken(req.params.token, function (err, user) {
+	var email = "anonymous";
+	if (user) {
+	    email = user.email
+	}
+	logService.storeLog(email, req.body, function (err, response) {
+	    if (err) {
+		var response = Errors.toResponse(err);
+		res.status(response.status);
+		logger.data("Stop POST /log. Response error: ", response);
+		res.send(response);
+		return;
+	    }
+
+	    logger.data("Stop POST /log. Response: ", response);
+	    res.status(200);
+	    res.send(response);
+	});
+    }
 });
 
 app.listen(config.app.port, function () {
