@@ -224,6 +224,24 @@ app.post('/logout/:token', function (req, res) {
     });
 });
 
+app.post('/log', function (req, res) {
+    logger.data("Start process user request. POST /log. Token: ", req.params.token);
+    var email = "anonymous";
+    logService.storeLog(email, req.body, function (err, response) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    logger.data("Stop POST /log. Response error: ", response);
+	    res.send(response);
+	    return;
+	}
+
+	logger.data("Stop POST /log. Response: ", response);
+	res.status(200);
+	res.send(response);
+    });
+});
+
 app.post('/log/:token', function (req, res) {
     logger.data("Start process user request. POST /log. Token: ", req.params.token);
 
