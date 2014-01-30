@@ -230,7 +230,7 @@ app.post('/log/:token', function (req, res) {
     userService.forUserWithToken(req.params.token, function (err, user) {
 	var email = "anonymous";
 	if (user) {
-	    email = user.email
+	    email = user.email;
 	}
 	logService.storeLog(email, req.body, function (err, response) {
 	    if (err) {

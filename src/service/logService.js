@@ -16,6 +16,6 @@ module.exports = {
     },
     generateLogName: function (email) {
 	var date = Date.now();
-	return email + date;
+	return email + date + ".log";
     }
 };
