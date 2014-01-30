@@ -7,7 +7,7 @@ var config = require("config");
 module.exports = {
     storeLog: function (email, log, callback) {
 	var logName = this.generateLogName(email);
-	fs.writeFile(logName, log, function (err) {
+	fs.writeFile(logName, JSON.stringify(log), function (err) {
 	    if (err) {
 		callback(Errors.System(err));
 		return;
