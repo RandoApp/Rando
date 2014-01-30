@@ -245,7 +245,7 @@ app.post('/log/:token', function (req, res) {
 	    res.status(200);
 	    res.send(response);
 	});
-    }
+    });
 });
 
 app.listen(config.app.port, function () {
