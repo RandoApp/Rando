@@ -2,6 +2,7 @@ var fs = require("fs");
 var logger = require("../log/logger");
 var async = require("async");
 var Errors = require("../error/errors");
+var crypto = require("crypto");
 var config = require("config");
 
 module.exports = {
@@ -16,7 +17,8 @@ module.exports = {
 	});
     },
     generateLogName: function (email) {
+	var unique = crypto.randomBytes(3).toString('hex');
 	var date = Date.now();
-	return config.app.log.folder + "/" + email + date + ".log";
+	return config.app.log.folder + "/" + email + "_" + date + "_" + unique + ".log";
     }
 };

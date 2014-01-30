@@ -7,13 +7,13 @@ describe('Log service.', function () {
     describe('generate log name.', function () {
 	it('Should generate file name with anonymous prefix and date', function (done) {
 	    var logName = logService.generateLogName("anonymous");
-	    logName.should.match(/^\w+\/anonymous\d+.log$/)
+	    logName.should.match(/^\w+\/anonymous_\d+._[a-z0-9]{6}.log$/)
 	    done();
 	});
 
 	it('Should generate file name with email prefix and date', function (done) {
 	    var logName = logService.generateLogName("user@mail.com");
-	    logName.should.match(/^\w+\/user@mail.com\d+.log$/)
+	    logName.should.match(/^\w+\/user@mail.com_\d+_[a-z0-9]{6}.log$/)
 	    done();
 	});
     });
