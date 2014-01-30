@@ -34,8 +34,9 @@ describe('Log service.', function () {
 		fs.writeFile.restore();
 		callback(null);
 	    });
-	    logService.storeLog("user@mail.com", "some log data", function (err) {
+	    logService.storeLog("user@mail.com", "some log data", function (err, response) {
 		should.not.exist(err);
+		response.should.be.eql({command: "log", result: "done"});
 		done();
 	    });
 	});
