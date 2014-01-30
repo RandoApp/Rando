@@ -20,6 +20,7 @@ app:
         path: /oauth2/v1/userinfo?access_token=
         port: 443
     log:
+        folder: logs
         file: foodex.log
         handleException: true
         level:
