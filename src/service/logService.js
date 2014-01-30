@@ -2,6 +2,7 @@ var fs = require("fs");
 var logger = require("../log/logger");
 var async = require("async");
 var Errors = require("../error/errors");
+var config = require("config");
 
 module.exports = {
     storeLog: function (email, log, callback) {
@@ -16,6 +17,6 @@ module.exports = {
     },
     generateLogName: function (email) {
 	var date = Date.now();
-	return email + date + ".log";
+	return config.app.log.folder + "/" + email + date + ".log";
     }
 };
