@@ -3,12 +3,10 @@ node_js:
   - "0.10"
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get upgrade -qq
-  - sudo apt-get install -y python-software-properties
+  - sudo apt-get install --force-yes python-software-properties
   - sudo add-apt-repository ppa:mapnik/v2.2.0
-  - sudo apt-get update
-  - sudo apt-get install libmapnik libmapnik-dev mapnik-utils python-mapnik
+  - sudo apt-get update -qq
+  - sudo apt-get install --force-yes libmapnik libmapnik-dev mapnik-utils python-mapnik
 
 after_script:
   - npm run-script coveralls
