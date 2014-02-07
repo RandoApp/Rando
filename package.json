@@ -18,7 +18,8 @@
     "winston": "0.7.x",
     "async": "0.2.x",
     "validator": "2.1.x",
-    "mv": "1.0.x"
+    "mv": "1.0.x",
+    "mapnik": "1.2.x"
   },
   "devDependencies": {
     "mocha": "*",
