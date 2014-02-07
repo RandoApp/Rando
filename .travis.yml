@@ -8,6 +8,13 @@ before_install:
   - sudo add-apt-repository -y ppa:mapnik/v2.2.0
   - sudo apt-get update -qq
   - sudo apt-get install --force-yes libmapnik libmapnik-dev mapnik-utils python-mapnik
+  - wget http://protobuf.googlecode.com/files/protobuf-2.5.0.tar.gz
+  - tar xvfz protobuf-2.5.0.tar.gz
+  - cd protobuf-2.5.0
+  - ./configure
+  - make
+  - sudo make install
+  - cd ..
 
 after_script:
   - npm run-script coveralls
