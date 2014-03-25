@@ -1,3 +1,4 @@
+var fs = require("fs");
 var express = require("express");
 var config = require("config");
 var logger = require("./src/log/logger");
@@ -9,6 +10,14 @@ var mongodbConnection = require("./src/model/db").establishConnection();
 var Errors = require("./src/error/errors");
 var pairFoodsService = require("./src/service/pairFoodsService");
 var app = express();
+
+(function checkSources() {
+    if (!fs.existsSync(config.app.citiesJson)) {
+	console.error("File " + config.app.citiesJson + " not found. Did you run src/map/generate_maps.js before start server?\n\nIf not, please, run:\ncd src/map\nnode generateMaps.js");
+	process.exit(1);
+    }
+})();
+
 
 pairFoodsService.startDemon();
 

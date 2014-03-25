@@ -11,3 +11,5 @@ config/runtime.*
 
 #istanbul code coverage
 coverage
+
+src/map/cities.json

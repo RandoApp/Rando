@@ -7,6 +7,7 @@ app:
     mapStub: http://95.85.19.94/map/minskmap.png
     reportedFoodStub: http://95.85.19.94/food/food-reported-stub.png
     tokenLength: 21
+    citiesJson: src/map/cities.json
     demon:
         wakeup: 20000
         foodTimeout: 300000
