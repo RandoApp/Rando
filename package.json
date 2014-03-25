@@ -19,7 +19,10 @@
     "async": "0.2.x",
     "validator": "2.1.x",
     "mv": "1.0.x",
-    "mapnik": "1.2.x"
+    "mapnik": "1.2.x",
+	"tilelive-mapnik": "0.6.x",
+	"sphericalmercator": "1.0.x",
+	"tilelive": "4.5.x"
   },
   "devDependencies": {
     "mocha": "*",
