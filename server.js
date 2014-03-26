@@ -38,7 +38,7 @@ app.post('/food/:token', function (req, res, next) {
 	    return;
 	}
 
-	foodService.saveFood(user, req.files.image.path, {lat: req.body.latitude, long: req.body.longitude},  function (err, response) {
+	foodService.saveFood(user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude},  function (err, response) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);

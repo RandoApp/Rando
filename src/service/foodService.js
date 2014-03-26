@@ -6,6 +6,7 @@ var util = require("../util/util");
 var mv = require("mv");
 var foodModel = require("../model/foodModel");
 var userModel = require("../model/userModel");
+var mapService = require("./mapService");
 var Errors = require("../error/errors");
 
 module.exports =  {
@@ -80,7 +81,7 @@ module.exports =  {
 			    location: location,
 			    foodId: foodId,
 			    foodUrl: foodUrl,
-			    mapUrl: config.app.mapStub, //TODO: Remove this stub!
+			    mapUrl: mapService.locationToMapUrlSync(location.lattitude, location.longitude),
 			    creation: Date.now(),
 			    report: 0,
 			    bonAppetit: 0

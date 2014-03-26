@@ -76,7 +76,7 @@ function checkPlacesJSON() {
 	});
 }
 
-function mkdir(done) {
+function mkTilesdir(done) {
 	fs.mkdir(TILES_DIR, function (err) {
 		done(null);
 	});
@@ -178,8 +178,6 @@ function renderTiles(cities, templateStylesheet, done) {
 		var tileName = crypto.createHash("md5").update(city.name + city.longitude + city.latitude).digest("hex");
 		var cityStylesheet = templateStylesheet.replace(new RegExp(CITY_NAME_KEY, "g"), city.name.replace("'", "\\'"));
 		var stylesheetFileName = STYLESHEET_TMP_DIR + tileName + ".xml";
-
-		//TODO: expand all filenames dynamically. RIHT HERE.
 		fs.writeFileSync(stylesheetFileName, cityStylesheet);
 		renderTile(stylesheetFileName, tileName, city.longitude, city.latitude, callback);
 	}, function (err) {
@@ -262,7 +260,7 @@ function main() {
 	checkData();
 
 	async.waterfall([
-		mkdir,
+		mkTilesdir,
 		copyStyleFiles,
 		generateCitiesJSON,
 		loadStylesheetTemplate,

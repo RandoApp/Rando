@@ -6,9 +6,9 @@ var fs = require("fs");
 var crypto = require("crypto");
 
 module.exports =  {
-    citiesJson: null,
+    cities: null,
     locationToMapUrlSync: function (latitude, longitude) {
-		if (!this.citiesJson) this.loadCitiesJson();
+		if (!this.cities) this.loadCitiesJson();
 
 		var city = this.findNearestCity(latitude, longitude);
 		var tileName = this.generateTileName(city);
@@ -16,11 +16,11 @@ module.exports =  {
 	},
 	findNearestCity: function (latitude, longitude) {
 		var minDistance = Number.MAX_VALUE;
-		var city = this.citiesJson[0];
-		for (var i = 0; i < this.citiesJson.length; i++) {
-			var distance = Math.sqrt(Math.abs(Math.pow(latitude - this.citiesJson[i].latitude, 2) + Math.pow(longitude - this.citiesJson[i].longitude, 2)));
+		var city = this.cities[0];
+		for (var i = 0; i < this.cities.length; i++) {
+			var distance = Math.sqrt(Math.pow(latitude - this.cities[i].latitude, 2) + Math.pow(longitude - this.cities[i].longitude, 2));
 			if (distance < minDistance) {
-				city = this.citiesJson[i];
+				city = this.cities[i];
 				minDistance = distance;
 			}
 		}
@@ -30,8 +30,8 @@ module.exports =  {
 		return crypto.createHash("md5").update(city.name + city.longitude + city.latitude).digest("hex");
 	},
 	loadCitiesJson: function () {
-		if (!this.citiesJson) {
-			this.citiesJson = JSON.parse(fs.readFileSync(config.app.citiesJson));
+		if (!this.cities) {
+			this.cities = JSON.parse(fs.readFileSync(config.app.citiesJson));
 		}
 	}
 }
