@@ -61,6 +61,7 @@ module.exports =  {
 	logger.debug("[foodService.updateFood, ", user.email, "] Try update food for: ", user.email, " location: ", location, " foodId: ", foodId, " and url: ", foodUrl);
 	var mapUrl = mapService.locationToMapUrlSync(location.lattitude, location.longitude);
 
+
 	async.parallel({
 		addFood: function (done) {
 		    foodModel.add(user.id, location, Date.now(), foodId, foodUrl, mapUrl, function (err) {
