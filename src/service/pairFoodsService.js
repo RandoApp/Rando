@@ -53,7 +53,6 @@ module.exports = {
 	for (var i = 0; i < foods.length; i++) {
 	    var currentFood = foods[i];
 	    var food = this.findFoodForUser(currentFood, foods);
-	    logger.debug("findAndPairFoods. Get food: ", food, " and foods now look as: ", foods);
 	    if (food) {
 		this.connectFoods(currentFood, food);
 	    }
