@@ -1,6 +1,7 @@
 var should = require("should");
 var sinon = require("sinon");
 var foodService = require("../../src/service/foodService");
+var mapService = require("../../src/service/mapService");
 var util = require("../../src/util/util");
 var fs = require("fs");
 var mongooseMock = require("../util/mongooseMock");
@@ -51,6 +52,8 @@ describe('Food service.', function () {
 	});
 
 	it('Error when add food', function (done) {
+	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
+
 	    var error = "Data base error";
 	    mongooseMock.stubSave(function (callback) {
 		callback(new Error(error));
@@ -75,6 +78,7 @@ describe('Food service.', function () {
 
 
 	it('Successful save food', function (done) {
+	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
 	    mongooseMock.stubSave().stubFindById();
 	    var mkDirCalled = false;
 	    var renameCalled = false;
