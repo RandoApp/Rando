@@ -21,8 +21,6 @@ module.exports = {
 		return;
 	    }
 
-	    logger.debug("all foods: ", foods.length); 
-
 	    var oldFood = null;
 	    async.filter(foods, function (food, callback) {
 		if (food.creation) {
@@ -33,7 +31,6 @@ module.exports = {
 		} 
 		callback(false);
 	    }, function (foodsForPairs) {
-		logger.debug("filter end: ", foodsForPairs, " and oldFood: ", oldFood);
 		var foods = self.findAndPairFoods(foodsForPairs);
 
 		if (foods.length >= 1 && oldFood && (Date.now() - foods[0].creation) >= config.app.demon.foodTimeout) {
@@ -45,7 +42,6 @@ module.exports = {
 	});
     },
     findAndPairFoods: function (foods) {
-	logger.debug("Start findAndPairFoods with foods: ", foods);
 	if (!foods) {
 	    return [];
 	}
@@ -63,17 +59,13 @@ module.exports = {
     findFoodForUser: function (food, foods) {
 	logger.debug("Start findFoodForUser");
 	for (var i = 0; i < foods.length; i++) {
-	    logger.debug("Compare users: ", food.user, " == ", foods[i].user);
 	    if (food.user != foods[i].user) {
-		logger.debug("Stop findFoodForUser. return food[", i, "]: ", foods[i]);
 		return foods.splice(i, 1)[0];
 	    }
 	}
-	logger.debug("Stop findFoodForUser. return null");
 	return null;
     },
     connectFoods: function (food1, food2) {
-	logger.debug("Start connectFoods with food1: ", food1, "and food2:  ", food2);
 	this.processFoodForUser(food1.user, food2);
 	this.processFoodForUser(food2.user, food1);
     },
