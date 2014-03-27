@@ -26,7 +26,7 @@ describe('Food service.', function () {
 	});
 
 	it('Food path is not exist', function (done) {
-	    foodService.saveFood(mongooseMock.user(), "tmp/not-exists-food.jpg", {latitude: "32", longitude: "23"}, function (err) {
+	    foodService.saveFood(mongooseMock.user(), "/tmp/not-exists-food.jpg", {latitude: "32", longitude: "23"}, function (err) {
 		should.exist(err);
 		err.should.have.property("errno", 34);
 		done();
@@ -94,6 +94,7 @@ describe('Food service.', function () {
 		renameCalled.should.be.true;
 		should.not.exist(err);
 		should.exist(foodUrl);
+
 
 		mongooseMock.restore();
 		done();

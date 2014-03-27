@@ -20,33 +20,28 @@ module.exports =  {
 		    done(Errors.IncorrectFoodArgs());
 		    return;
 		}
+		logger.debug("[foodService.saveFood, ", user.email, "] args validation done");
 		done(null);
 	    },
 	    function (done) {
-		util.generateFoodName(function (err, foodId, newFoodPath) {
-		    if (err) {
-			logger.warn("[foodService.saveFood, ", user.email, "] Can't generateFoodName, because: ", err);
-			done(Errors.System(err));
-			return;
-		    }
-		    done(null, foodId, newFoodPath);
-		});
+		util.generateFoodName(done);
 	    },
-	    function (foodId, newFoodPath, done) {
-		logger.data("[foodService.saveFood, ", user.email, "] move: ", foodPath, " --> ", newFoodPath);
+	    function (foodId, foodName, done) {
+		logger.data("[foodService.saveFood, ", user.email, "] move: ", foodPath, " --> ", foodName);
+		var newFoodPath = config.app.static.folder.name + foodName;
 		mv(foodPath, newFoodPath, {mkdirp: true}, function (err) {
 		    if (err) {
 			logger.warn("[foodService.saveFood, ", user.email, "] Can't move  ", foodPath, " to ", newFoodPath, " because: ", err);
 			done(Errors.System(err));
 			return;
+
 		    }
-		    done(null, user, foodId, newFoodPath, location);
+		    done(null, user, foodId, foodName, location);
 		});
 	    },
-	    function (user, foodId, newFoodPath, location, done) {
+	    function (user, foodId, foodName, location, done) {
 		logger.debug("Generate foodUrl");
-		//TODO: Fix newFoodPath. It should not contains static/ prefix  
-		var foodUrl = config.app.url + newFoodPath.replace("static\/", "");
+		var foodUrl = config.app.url + foodName;
 		done(null, user, foodId, foodUrl, location);
 	    },
 	    this.updateFood
@@ -62,10 +57,13 @@ module.exports =  {
 	});
     },
     updateFood: function (user, foodId, foodUrl, location, callback) {
+
 	logger.debug("[foodService.updateFood, ", user.email, "] Try update food for: ", user.email, " location: ", location, " foodId: ", foodId, " and url: ", foodUrl);
+	var mapUrl = mapService.locationToMapUrlSync(location.lattitude, location.longitude);
+
 	async.parallel({
 		addFood: function (done) {
-		    foodModel.add(user.id, location, Date.now(), foodId, foodUrl, function (err) {
+		    foodModel.add(user.id, location, Date.now(), foodId, foodUrl, mapUrl, function (err) {
 			if (err) {
 			    logger.warn("[foodService.updateFood.addFood, ", user.email, "] Can't add food because: ", err);
 			    done(Errors.System(err));
@@ -81,7 +79,7 @@ module.exports =  {
 			    location: location,
 			    foodId: foodId,
 			    foodUrl: foodUrl,
-			    mapUrl: mapService.locationToMapUrlSync(location.lattitude, location.longitude),
+			    mapUrl: mapUrl,
 			    creation: Date.now(),
 			    report: 0,
 			    bonAppetit: 0
@@ -91,7 +89,7 @@ module.exports =  {
 			    location: "",
 			    foodId: "",
 			    foodUrl: "",
-			    mapUrl: config.app.mapStub, //TODO: Remove this stub!
+			    mapUrl: config.app.mapStub,
 			    creation: 0,
 			    report: 0,
 			    bonAppetit: 0

@@ -91,7 +91,7 @@ module.exports = {
 		return;
 	    }
 
-	    logger.debug("Find user: ", user);
+	    logger.debug("Find user: ", user.email);
 	    for (var i = 0; i < user.foods.length; i++) {
 		if (!user.foods[i].stranger.user) {
 		    logger.debug("Food for pairing found");

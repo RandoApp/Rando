@@ -78,7 +78,7 @@ module.exports = {
 		return;
 	    }
 	    if (user) {
-		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist: ", user);
+		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
 		if (self.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		    userModel.update(user, function (err) {
