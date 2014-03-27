@@ -35,7 +35,6 @@ app:
             length: 4
             food: food/
             map: map/
-	    name: static/
-
+            name: static/
 db:
     url: mongodb://localhost/foodex

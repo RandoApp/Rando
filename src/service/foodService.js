@@ -27,8 +27,8 @@ module.exports =  {
 		util.generateFoodName(done);
 	    },
 	    function (foodId, foodName, done) {
-		logger.data("[foodService.saveFood, ", user.email, "] move: ", foodPath, " --> ", foodName);
 		var newFoodPath = config.app.static.folder.name + foodName;
+		logger.data("[foodService.saveFood, ", user.email, "] move: ", foodPath, " --> ", newFoodPath);
 		mv(foodPath, newFoodPath, {mkdirp: true}, function (err) {
 		    if (err) {
 			logger.warn("[foodService.saveFood, ", user.email, "] Can't move  ", foodPath, " to ", newFoodPath, " because: ", err);
@@ -59,7 +59,7 @@ module.exports =  {
     updateFood: function (user, foodId, foodUrl, location, callback) {
 
 	logger.debug("[foodService.updateFood, ", user.email, "] Try update food for: ", user.email, " location: ", location, " foodId: ", foodId, " and url: ", foodUrl);
-	var mapUrl = mapService.locationToMapUrlSync(location.lattitude, location.longitude);
+	var mapUrl = mapService.locationToMapUrlSync(location.latitude, location.longitude);
 
 
 	async.parallel({
