@@ -12,7 +12,10 @@ var User = mongoose.model("user", new mongoose.Schema({
     foods: [{
 	user: {
 	    user: String,
-	    location: String,
+	    location: {
+		latitude: Number,
+		longitude: Number
+	    },
 	    foodId: String,
 	    foodUrl: String,
 	    creation: Number,
@@ -22,7 +25,10 @@ var User = mongoose.model("user", new mongoose.Schema({
 	},
 	stranger: {
 	    user: String,
-	    location: String,
+	    location: {
+		latitude: Number,
+		longitude: Number
+	    },
 	    foodId: String,
 	    foodUrl: String,
 	    mapUrl: String,
@@ -86,5 +92,9 @@ module.exports = {
     getByToken: function (token, callback) {
 	logger.data("[userMode.getByToken] Try find user by authToken: ", token);
 	User.findOne({authToken: token}, callback);
+    },
+    getAll: function (callback) {
+	logger.data("[userMode.getAll]");
+	User.find({}, callback);
     }
 };

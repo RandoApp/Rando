@@ -19,7 +19,10 @@ describe('Comment service.', function () {
 		food.should.be.eql({
 		    user: {
 			user: "524ea2324a590391a3e8b516",
-			localtion: "1111.1111, 1111.1111",
+			localtion: {
+			    latitude: 53.932,
+			    longitude: 27.3243
+			},
 			foodId: "3333",
 			foodUrl: "http://api.foodex.com/food/3333",
 			mapUrl: "http://api.foodex.com/food/4444",
@@ -27,7 +30,10 @@ describe('Comment service.', function () {
 			bonAppetit: 0
 		    },
 		    stranger: {
-			localtion: "2222.2222, 2222.2222",
+			localtion: {
+			    latitude: 53.932,
+			    longitude: 27.3243
+			},
 			user: "724ea2324a590391a3e8b516",
 			foodId: "3333",
 			foodUrl: "http://api.foodex.com/food/3333",

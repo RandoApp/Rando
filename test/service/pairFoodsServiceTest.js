@@ -26,7 +26,6 @@ describe('Pair Foods Service.', function () {
 	    }
 	    done();
 	});
-
 	it('connectFoods should trigger processFoodForUser with userId and food as args', function (done) {
 	    sinon.stub(pairFoodsService, "processFoodForUser", function (userId, food) {
 		if (userId == 12345) {
@@ -49,7 +48,7 @@ describe('Pair Foods Service.', function () {
 
 	it('pairFoods should pair old food if foodTimeout', function (done) {
 	    var foodsStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, foodsStub);
 	    });
 
@@ -70,7 +69,7 @@ describe('Pair Foods Service.', function () {
 	it('pairFoods should NOT pair old food if NOT foodTimeout', function (done) {
 	    var time = Date.now();
 	    var foodsStub = [{creation: time}, {creation: 0}, {creation: time}, {creation: time}];
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, foodsStub);
 	    });
 
@@ -86,11 +85,10 @@ describe('Pair Foods Service.', function () {
 
 	    pairFoodsService.pairFoods();
 	});
-
 	it('pairFoods should NOT pair old food if oldFood not exist', function (done) {
 	    var time = Date.now();
 	    var foodsStub = [{creation: 53433}, {creation: 12345}, {creation: 48483}, {creation: 32323}];
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, foodsStub);
 	    });
 
@@ -109,7 +107,7 @@ describe('Pair Foods Service.', function () {
 
 	it('pairFoods should not pair old food if findAndPairFoods return empty array', function (done) {
 	    var foodsStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, foodsStub);
 	    });
 
@@ -128,7 +126,7 @@ describe('Pair Foods Service.', function () {
 
 	it('pairFoods should not pair old food if findAndPairFoods return not zero array', function (done) {
 	    var foodsStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, foodsStub);
 	    });
 
@@ -147,7 +145,7 @@ describe('Pair Foods Service.', function () {
 
 	it('pairFoods should do nothing if data base error', function (done) {
 	    var error = "Database error";
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(new Error(error));
 	    });
 
@@ -164,7 +162,7 @@ describe('Pair Foods Service.', function () {
 
 	it('pairFoods should pass all foods with correct creation', function (done) {
 	    var foodsStub = [{creation: 12345}, {creation: 12345}, {creation: 12345}];
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, foodsStub);
 	    });
 
@@ -179,7 +177,7 @@ describe('Pair Foods Service.', function () {
 
 	it('pairFoods should ignore foods without creation', function (done) {
 	    var foodsStub = [{creation: 12345}, {creation: 0}, {creation: 23456}];
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, foodsStub);
 	    });
 
@@ -194,7 +192,7 @@ describe('Pair Foods Service.', function () {
 
 	it('pairFoods should ignore foods with bad creation', function (done) {
 	    var foodsStub = [{creation: 0}, {creation: null}, {}];
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, foodsStub);
 	    });
 
@@ -208,7 +206,7 @@ describe('Pair Foods Service.', function () {
 	});
 
 	it('pairFoods should ignore empty foods', function (done) {
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, []);
 	    });
 
@@ -222,7 +220,7 @@ describe('Pair Foods Service.', function () {
 	});
 
 	it('pairFoods should do nothing if foods not found', function (done) {
-	    mongooseMock.stubFind(function (callback) {
+	    mongooseMock.stubFind(function (query, callback) {
 		callback(null, null);
 	    });
 
