@@ -11,7 +11,10 @@ module.exports = {
 		foods: [{
 		    user: {
 			user: "524ea2324a590391a3e8b516",
-			localtion: "1111.1111, 1111.1111",
+			localtion: {
+			    latitude: 53.932,
+			    longitude: 27.3243
+			},
 			foodId: "3333",
 			foodUrl: "http://api.foodex.com/food/3333",
 			mapUrl: "http://api.foodex.com/food/4444",
@@ -19,7 +22,10 @@ module.exports = {
 			bonAppetit: 0
 		    },
 		    stranger: {
-			localtion: "2222.2222, 2222.2222",
+			localtion: {
+			    latitude: 53.932,
+			    longitude: 27.3243
+			},
 			user: "724ea2324a590391a3e8b516",
 			foodId: "3333",
 			foodUrl: "http://api.foodex.com/food/3333",
@@ -65,7 +71,10 @@ module.exports = {
 		    foods: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
-			    localtion: "1111.1111, 1111.1111",
+			    localtion: {
+				latitude: 53.932,
+				longitude: 27.3243
+			    },
 			    foodId: "3333",
 			    foodUrl: "http://api.foodex.com/food/3333",
 			    mapUrl: "http://api.foodex.com/food/4444",
@@ -73,7 +82,10 @@ module.exports = {
 			    bonAppetit: 0
 			},
 			stranger: {
-			    localtion: "2222.2222, 2222.2222",
+			    localtion: {
+				latitude: 53.932,
+				longitude: 27.3243
+			    },
 			    user: "724ea2324a590391a3e8b516",
 			    foodId: "3333",
 			    foodUrl: "http://api.foodex.com/food/3333",
@@ -108,7 +120,10 @@ module.exports = {
 		    foods: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
-			    localtion: "1111.1111, 1111.1111",
+			    localtion: {
+				latitude: 53.932,
+				longitude: 27.3243
+			    },
 			    foodId: "3333",
 			    foodUrl: "http://api.foodex.com/food/3333",
 			    creation: 123456789,
@@ -117,7 +132,10 @@ module.exports = {
 			    bonAppetit: false
 			},
 			stranger: {
-			    localtion: "",
+			    localtion: {
+				latitude: 0,
+				longitude: 0
+			    },
 			    user: "",
 			    foodId: "",
 			    foodUrl: "",
@@ -183,7 +201,10 @@ module.exports = {
 		    foods: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
-			    localtion: "1111.1111, 1111.1111",
+			    localtion: {
+				latitude: 53.932,
+				longitude: 27.3243
+			    },
 			    foodId: "3333",
 			    foodUrl: "http://api.foodex.com/food/3333",
 			    mapUrl: "http://api.foodex.com/food/4444",
@@ -191,7 +212,10 @@ module.exports = {
 			    bonAppetit: 0
 			},
 			stranger: {
-			    localtion: "2222.2222, 2222.2222",
+			    localtion: {
+				latitude: 53.932,
+				longitude: 27.3243
+			    },
 			    user: "724ea2324a590391a3e8b516",
 			    foodId: "3333",
 			    foodUrl: "http://api.foodex.com/food/3333",
@@ -202,7 +226,10 @@ module.exports = {
 		    }, {
 			user: {
 			    user: "524ea2324a590391a3e8b516",
-			    localtion: "1111.1111, 1111.1111",
+			    localtion: {
+				latitude: 53.932,
+				longitude: 27.3243
+			    },
 			    foodId: "8888",
 			    foodUrl: "http://api.foodex.com/food/8888",
 			    mapUrl: "http://api.foodex.com/food/4444",
@@ -210,7 +237,10 @@ module.exports = {
 			    bonAppetit: 0
 			},
 			stranger: {
-			    localtion: "2222.2222, 2222.2222",
+			    localtion: {
+				latitude: 53.932,
+				longitude: 27.3243
+			    },
 			    user: "724ea2324a590391a3e8b516",
 			    foodId: "9999",
 			    foodUrl: "http://api.foodex.com/food/9999",
