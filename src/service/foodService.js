@@ -57,10 +57,8 @@ module.exports =  {
 	});
     },
     updateFood: function (user, foodId, foodUrl, location, callback) {
-
 	logger.debug("[foodService.updateFood, ", user.email, "] Try update food for: ", user.email, " location: ", location, " foodId: ", foodId, " and url: ", foodUrl);
 	var mapUrl = mapService.locationToMapUrlSync(location.latitude, location.longitude);
-
 
 	async.parallel({
 		addFood: function (done) {
@@ -87,7 +85,10 @@ module.exports =  {
 			},
 			stranger: {
 			    user: "",
-			    location: "",
+			    location: {
+				latitude: 0,
+				longitude: 0
+			    },
 			    foodId: "",
 			    foodUrl: "",
 			    mapUrl: config.app.mapStub,

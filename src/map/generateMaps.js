@@ -274,5 +274,9 @@ function main() {
 	});
 }
 
+function updateDB () {
+
+}
+
 main();
 
