@@ -6,11 +6,12 @@ var logger = require("../log/logger");
 
 module.exports = {
     generateFoodName: function (callback) {
+	logger.debug("[util.genereateFoodName]");
 	async.waterfall([
 	    this.generateUniqueName,
 	    function (name, done) {
 		var folderName = name.substr(0, config.app.static.folder.length);
-		var fullPath = config.app.static.folder.food + "/" + folderName + "/" + name + "." + config.app.static.file.ext;
+		var fullPath = config.app.static.folder.food + folderName + "/" + name + "." + config.app.static.file.ext;
 
 		logger.debug("fullPath: ", fullPath);
 		done(null, name, fullPath);
@@ -26,6 +27,7 @@ module.exports = {
 	    });
     },
     generateUniqueName: function (callback) {
+	logger.debug("[util.generateUniqueName]");
 	crypto.pseudoRandomBytes(config.app.static.file.length, function(ex, buf) {
 	    if (ex) {
 		logger.warn("Can't genererateUniqueName: ", ex);

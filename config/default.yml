@@ -32,9 +32,9 @@ app:
             ext: png
             length: 21
         folder:
-            food: /tmp #This is stub. Real folder will be defined in another config file
-            map: /tmp #This is stub. Real folder will be defined in another config file
             length: 4
-
+            food: food/
+            map: map/
+            name: static/
 db:
     url: mongodb://localhost/foodex

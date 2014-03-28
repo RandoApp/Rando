@@ -33,21 +33,21 @@ app.post('/food/:token', function (req, res, next) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /food. Response error: ", response);
+	    logger.data("POST /food DONE with error: " + response.code);
 	    res.send(response);
 	    return;
 	}
 
-	foodService.saveFood(user, req.files.image.path, {lat: req.body.latitude, long: req.body.longitude},  function (err, response) {
+	foodService.saveFood(user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude},  function (err, response) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
-		logger.data("Stop POST /food. Response error: ", response);
+		logger.data("POST /food DONE with error: ", response.code);
 		res.send(response);
 		return;
 	    }
 
-	    logger.data("Stop POST /food. Response: ", response);
+	    logger.data("POST /food DONE");
 	    res.status(200);
 	    res.send(response);
 	});
@@ -61,7 +61,7 @@ app.post('/report/:id/:token', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /report. Response error: ", response);
+	    logger.data("POST /report DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
@@ -70,12 +70,12 @@ app.post('/report/:id/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
-		logger.data("Stop POST /report. Response error: ", response);
+		logger.data("POST /report DONE with error: ", response.code);
 		res.send(response);
 		return;
 	    }
 
-	    logger.data("Stop POST /report. Response: ", response);
+	    logger.data("POST /report DONE");
 	    res.send(response);
 	});
     });
@@ -88,7 +88,7 @@ app.post('/bonappetit/:id/:token', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /bonappetit. Response error: ", response);
+	    logger.data("POST /bonappetit DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
@@ -97,12 +97,12 @@ app.post('/bonappetit/:id/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
-		logger.data("Stop POST /bonappetit. Response error: ", response);
+		logger.data("POST /bonappetit DONE with error: ", response.code);
 		res.send(response);
 		return;
 	    }
 
-	    logger.data("Stop POST /bonAppetit. Response: ", response);
+	    logger.data("POST /bonAppetit DONE");
 	    res.send(response);
 	});
     });
@@ -115,12 +115,12 @@ app.post('/user', function(req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /user. Response error: ", response);
+	    logger.data("POST /user DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
 
-	logger.data("Stop POST /user. Response: ", response);
+	logger.data("POST /user DONE");
 	res.send(response);
     });
 });
@@ -132,7 +132,7 @@ app.get('/user/:token', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop GET /user. Response error: ", response);
+	    logger.data("GET /user DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
@@ -141,11 +141,11 @@ app.get('/user/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
-		logger.data("Stop GET /user. Response error: ", response);
+		logger.data("GET /user DONE with error: ", response.code);
 		res.send(response);
 		return;
 	    }
-	    logger.data("Stop GET /user. Response: ", user);
+	    logger.data("GET /user DONE");
 	    res.send(user);
 	});
     });
@@ -158,12 +158,12 @@ app.post('/anonymous', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /anonymous. Response error: ", response);
+	    logger.data("POST /anonymous DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
 
-	logger.data("Stop POST /anonymous. Response: ", response);
+	logger.data("POST /anonymous DONE");
 	res.status(200);
 	res.send(response);
     });
@@ -176,12 +176,12 @@ app.post('/facebook', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /facebook. Response error: ", response);
+	    logger.data("POST /facebook DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
 
-	logger.data("Stop POST /facebook. Response: ", response);
+	logger.data("POST /facebook DONE");
 	res.status(200);
 	res.send(response);
     });
@@ -194,12 +194,12 @@ app.post('/google', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /google. Response error: ", response);
+	    logger.data("POST /google DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
 
-	logger.data("Stop POST /google. Response: ", response);
+	logger.data("POST /google DONE");
 	res.status(200);
 	res.send(response);
     });
@@ -212,7 +212,7 @@ app.post('/logout/:token', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /logout. Response error: ", response);
+	    logger.data("POST /logout DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
@@ -221,12 +221,12 @@ app.post('/logout/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
-		logger.data("Stop POST /logout. Response error: ", response);
+		logger.data("POST /logout DONE with error: ", response.code);
 		res.send(response);
 		return;
 	    }
 
-	    logger.data("Stop POST /logout. Response: ", response);
+	    logger.data("POST /logout DONE");
 	    res.status(200);
 	    res.send(response);
 	});
@@ -240,12 +240,12 @@ app.post('/log', function (req, res) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("Stop POST /log. Response error: ", response);
+	    logger.data("POST /log DONE with error: ", response.code);
 	    res.send(response);
 	    return;
 	}
 
-	logger.data("Stop POST /log. Response: ", response);
+	logger.data("POST /log DONE");
 	res.status(200);
 	res.send(response);
     });
@@ -263,12 +263,12 @@ app.post('/log/:token', function (req, res) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
-		logger.data("Stop POST /log. Response error: ", response);
+		logger.data("POST /log DONE with error: ", response.code);
 		res.send(response);
 		return;
 	    }
 
-	    logger.data("Stop POST /log. Response: ", response);
+	    logger.data("POST /log DONE");
 	    res.status(200);
 	    res.send(response);
 	});

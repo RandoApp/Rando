@@ -14,16 +14,16 @@ var Food = mongoose.model("food", new mongoose.Schema({
 }));
 
 module.exports = {
-    add: function (userId, location, creation, foodId, foodUrl, callback) {
-	logger.data("[foodModel.add] Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl);
+    add: function (userId, location, creation, foodId, foodUrl, mapUrl, callback) {
+	logger.data("[foodModel.add] Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: ", mapUrl);
 
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
-		    logger.warn("[foodModel.add] Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: null", " because: ", err);
+		    logger.warn("[foodModel.add] Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: ", mapUrl, " , because: ", err);
  		    return;
 		}
-		logger.debug("[foodModel.add] Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, "mapUrl: null");
+		logger.debug("[foodModel.add] Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, "mapUrl: ", mapUrl);
 	    }
 	}
 
@@ -35,7 +35,7 @@ module.exports = {
 	    bonAppetit: 0,
 	    report: 0,
 	    foodUrl: foodUrl,
-	    mapUrl: config.app.mapStub //TODO: remove this stub
+	    mapUrl: mapUrl
 	});
 
 	food.save(callback);
@@ -45,7 +45,7 @@ module.exports = {
 	Food.find(callback);
     },
     remove: function (food) {
-	logger.data("[foodModel.remove] Remove food: ", food);
+	logger.data("[foodModel.remove] Try remove food");
 	food.remove(function (err) {
 	    if (err) {
 		logger.warn("[foodModel.remove] Can't remove food, because: ", err); 
