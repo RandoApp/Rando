@@ -12,7 +12,10 @@ var User = mongoose.model("user", new mongoose.Schema({
     foods: [{
 	user: {
 	    user: String,
-	    location: String,
+	    location: {
+		latitude: Number,
+		longitude: Number
+	    },
 	    foodId: String,
 	    foodUrl: String,
 	    creation: Number,
@@ -22,7 +25,10 @@ var User = mongoose.model("user", new mongoose.Schema({
 	},
 	stranger: {
 	    user: String,
-	    location: String,
+	    location: {
+		latitude: Number,
+		longitude: Number
+	    },
 	    foodId: String,
 	    foodUrl: String,
 	    mapUrl: String,
