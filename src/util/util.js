@@ -11,19 +11,23 @@ module.exports = {
 	    this.generateUniqueName,
 	    function (name, done) {
 		var folderName = name.substr(0, config.app.static.folder.length);
-		var fullPath = config.app.static.folder.food + folderName + "/" + name + "." + config.app.static.file.ext;
-
-		logger.debug("fullPath: ", fullPath);
-		done(null, name, fullPath);
+		var foodPaths = {
+		    origin: config.app.static.folder.food + folderName + "/" + name + "." + config.app.static.file.ext,
+		    small: config.app.static.folder.food + config.app.img.folder.small + folderName + "/" + name + "." + config.app.img.ext,
+		    medium: config.app.static.folder.food + config.app.img.folder.medium + folderName + "/" + name + "." + config.app.img.ext,
+		    large: config.app.static.folder.food + config.app.img.folder.large + folderName + "/" + name + "." + config.app.img.ext
+		}
+		logger.debug("foodPaths: ", foodPaths);
+		done(null, name, foodPaths);
 	    }],
-	    function (err, name, fullPath) {
+	    function (err, name, foodPaths) {
 		if (err) {
 		    logger.warn("genereFoodName fail with error: ", err);
 		    callback(err);
 		    return;
 		}
 
-		callback(null, name, fullPath);
+		callback(null, name, foodPaths);
 	    });
     },
     generateUniqueName: function (callback) {

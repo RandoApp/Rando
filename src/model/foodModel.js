@@ -11,13 +11,18 @@ var Food = mongoose.model("food", new mongoose.Schema({
     creation: Number,
     foodId: String,
     foodUrl: String,
+    foodSizeUrl: {
+	small: String,
+	medium: String,
+	large: String
+    },
     mapUrl: String,
     report: Number,
     bonAppetit: Number
 }));
 
 module.exports = {
-    add: function (userId, location, creation, foodId, foodUrl, mapUrl, callback) {
+    add: function (userId, location, creation, foodId, foodUrls, mapUrl, callback) {
 	logger.data("[foodModel.add] Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: ", mapUrl);
 
 	if (!callback) {
@@ -37,7 +42,12 @@ module.exports = {
 	    foodId: foodId,
 	    bonAppetit: 0,
 	    report: 0,
-	    foodUrl: foodUrl,
+	    foodUrl: foodUrls.origin,
+	    foodSizeUrl: {
+		small: foodUrls.small,
+		medium: foodUrls.medium,
+		large: foodUrls.large
+	    }
 	    mapUrl: mapUrl
 	});
 

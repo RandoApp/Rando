@@ -8,6 +8,8 @@ var foodModel = require("../model/foodModel");
 var userModel = require("../model/userModel");
 var mapService = require("./mapService");
 var Errors = require("../error/errors");
+var gm = require("gm");
+var mkdirp = require("mkdirp");
 
 module.exports =  {
     saveFood: function (user, foodPath, location, callback) {
@@ -26,17 +28,64 @@ module.exports =  {
 	    function (done) {
 		util.generateFoodName(done);
 	    },
-	    function (foodId, foodName, done) {
-		var newFoodPath = config.app.static.folder.name + foodName;
+	    function (foodId, foodPaths, done) {
+		var newFoodPath = config.app.static.folder.name + foodPaths.origin;
 		logger.data("[foodService.saveFood, ", user.email, "] move: ", foodPath, " --> ", newFoodPath);
 		mv(foodPath, newFoodPath, {mkdirp: true}, function (err) {
 		    if (err) {
 			logger.warn("[foodService.saveFood, ", user.email, "] Can't move  ", foodPath, " to ", newFoodPath, " because: ", err);
 			done(Errors.System(err));
 			return;
-
 		    }
-		    done(null, user, foodId, foodName, location);
+
+		    async.parallel({
+			small: function (parallelCallback) {
+			    async.series({
+				mkdir: function (seriesCallback) {
+				    var dir = foodPaths.small.replace(new RegExp(foodId + "\..+$"), "");
+				    
+				    mkdirp(dir, seriesCallback);
+				},
+				resize: function (seriesCallback) {
+				    var resizeFoodPath = config.app.static.folder.name + foodPaths.small;
+
+				    gm(newFoodPath).resize(config.img.size.small).quality(config.img.quality).write(foodPaths, seriesCallback);
+				}
+			    },
+			    function (err) {
+				parallelCallback(err);
+			    });
+			},
+			medium: function (parallelCallback) {
+			    async.series({
+				mkdir: function (seriesCallback) {
+				    mkdirp(dir, seriesCallback);
+				},
+				resize: function (seriesCallback) {
+				    gm(newFoodPath).resize(config.img.size.medium).quality(config.img.quality).write(path, seriesCallback);
+				}
+			    },
+			    function (err) {
+				parallelCallback(err);
+			    });
+			},
+			large: function (parallelCallback) {
+			    async.series({
+				mkdir: function (seriesCallback) {
+				    mkdirp(dir, seriesCallback);
+				},
+				resize: function (seriesCallback) {
+				    gm(newFoodPath).resize(config.img.size.large).quality(config.img.quality).write(path, seriesCallback);
+				}
+			    },
+			    function (err) {
+				parallelCallback(err);
+			    });
+			},
+		    }, function (err) {
+			done(null, {
+			    }, user, foodId, foodName, location);
+		    });
 		});
 	    },
 	    function (user, foodId, foodName, location, done) {

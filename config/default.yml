@@ -8,6 +8,17 @@ app:
     reportedFoodStub: http://95.85.19.94/food/food-reported-stub.png
     tokenLength: 21
     citiesJson: src/map/cities.json
+    img:
+        quality: 85 
+        ext: jpg
+        folder:
+            small: small/
+            medium: medium/
+            large: large/
+        size:
+            small: 480
+            medium: 800
+            large: 1200
     demon:
         wakeup: 20000
         foodTimeout: 300000
