@@ -7,7 +7,8 @@ module.exports = {
 		id: "524ea2324a590391a3e8b516",
 		email: "user@mail.com",
 		facebookId: "111111",
-		authToken: "12345fajiwjfoe2523ijof",
+
+	    authToken: "12345fajiwjfoe2523ijof",
 		foods: [{
 		    user: {
 			user: "524ea2324a590391a3e8b516",

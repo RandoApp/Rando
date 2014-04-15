@@ -48,6 +48,9 @@ module.exports = {
 		delete food.stranger.location;
 		if (food.stranger.report) {
 		    food.stranger.foodUrl = config.app.reportedFoodStub; 
+		    food.stranger.foodSizeUrl.small = config.app.reportedFoodStub; 
+		    food.stranger.foodSizeUrl.medium = config.app.reportedFoodStub; 
+		    food.stranger.foodSizeUrl.large = config.app.reportedFoodStub; 
 		}
 		userJSON.foods.push(food);
 	    }

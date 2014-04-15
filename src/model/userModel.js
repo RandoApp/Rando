@@ -18,6 +18,11 @@ var User = mongoose.model("user", new mongoose.Schema({
 	    },
 	    foodId: String,
 	    foodUrl: String,
+	    foodSizeUrl: {
+		small: String,
+		medium: String,
+		large: String
+	    },
 	    creation: Number,
 	    mapUrl: String,
 	    report: Number,
@@ -31,6 +36,11 @@ var User = mongoose.model("user", new mongoose.Schema({
 	    },
 	    foodId: String,
 	    foodUrl: String,
+	    foodSizeUrl: {
+		small: String,
+		medium: String,
+		large: String
+	    },
 	    mapUrl: String,
 	    creation: Number,
 	    report: Number,

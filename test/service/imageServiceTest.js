@@ -91,6 +91,7 @@ describe('Image service.', function () {
 		should.exist(err);
 		err.should.have.property("message", errorMessage);
 
+		fs.mkdir.restore();
 		gm.prototype.write.restore();
 		done();
 	    });

@@ -5,6 +5,7 @@ var mapService = require("../../src/service/mapService");
 var util = require("../../src/util/util");
 var fs = require("fs");
 var mongooseMock = require("../util/mongooseMock");
+var gm = require("gm");
 
 describe('Food service.', function () {
     describe('Save food.', function () {
@@ -65,6 +66,11 @@ describe('Food service.', function () {
 	    sinon.stub(fs, "rename", function (source, dest, callback) {
 		fs.rename.restore();
 		callback(null);
+	    });
+
+	    sinon.stub(gm.prototype, "write", function (path, callback) {
+		gm.prototype.write.restore();
+		callback();
 	    });
 
 	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {latitude: "32", longitude: "23"}, function (err) {

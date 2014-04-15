@@ -36,7 +36,7 @@ describe('Util.', function () {
 		util.generateUniqueName.restore();
 	    });
 
-	    util.generateFoodName(function (err, foodId, fullPath) {
+	    util.generateFoodName(function (err, foodId, foodUrls) {
 		should.exist(err);
 		err.should.have.property("message", error);
 		done();
@@ -44,10 +44,13 @@ describe('Util.', function () {
 	});
 
 	it('Full path is correct', function (done) {
-	    util.generateFoodName(function (err, foodId, fullPath) {
+	    util.generateFoodName(function (err, foodId, foodUrls) {
 		should.not.exist(err);
 		should.exist(foodId);
-		fullPath.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.png$/);
+		foodUrls.origin.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.png$/);
+		foodUrls.small.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
+		foodUrls.medium.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
+		foodUrls.large.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
 		done();
 	    });
 	});
