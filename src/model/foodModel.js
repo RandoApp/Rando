@@ -11,22 +11,27 @@ var Food = mongoose.model("food", new mongoose.Schema({
     creation: Number,
     foodId: String,
     foodUrl: String,
+    foodSizeUrl: {
+	small: String,
+	medium: String,
+	large: String
+    },
     mapUrl: String,
     report: Number,
     bonAppetit: Number
 }));
 
 module.exports = {
-    add: function (userId, location, creation, foodId, foodUrl, mapUrl, callback) {
-	logger.data("[foodModel.add] Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: ", mapUrl);
+    add: function (userId, location, creation, foodId, foodUrl, foodSizeUrl, mapUrl, callback) {
+	logger.data("[foodModel.add] Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl,  " foodSizeUrl: ", foodSizeUrl, "mapUrl: ", mapUrl);
 
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
-		    logger.warn("[foodModel.add] Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "mapUrl: ", mapUrl, " , because: ", err);
+		    logger.warn("[foodModel.add] Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "foodSizeUrl: " , foodSizeUrl, "mapUrl: ", mapUrl, " , because: ", err);
  		    return;
 		}
-		logger.debug("[foodModel.add] Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, "mapUrl: ", mapUrl);
+		logger.debug("[foodModel.add] Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, " foodSizeUrl: ", foodSizeUrl, "mapUrl: ", mapUrl);
 	    }
 	}
 
@@ -38,6 +43,11 @@ module.exports = {
 	    bonAppetit: 0,
 	    report: 0,
 	    foodUrl: foodUrl,
+	    foodSizeUrl: {
+		small: foodSizeUrl.small,
+		medium: foodSizeUrl.medium,
+		large: foodSizeUrl.large
+	    },
 	    mapUrl: mapUrl
 	});
 

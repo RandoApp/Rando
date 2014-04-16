@@ -7,7 +7,10 @@ var mv = require("mv");
 var foodModel = require("../model/foodModel");
 var userModel = require("../model/userModel");
 var mapService = require("./mapService");
+var imageService = require("./imageService");
 var Errors = require("../error/errors");
+var gm = require("gm").subClass({ imageMagick: true });
+var mkdirp = require("mkdirp");
 
 module.exports =  {
     saveFood: function (user, foodPath, location, callback) {
@@ -26,23 +29,51 @@ module.exports =  {
 	    function (done) {
 		util.generateFoodName(done);
 	    },
-	    function (foodId, foodName, done) {
-		var newFoodPath = config.app.static.folder.name + foodName;
+	    function (foodId, foodPaths, done) {
+		var newFoodPath = config.app.static.folder.name + foodPaths.origin;
 		logger.data("[foodService.saveFood, ", user.email, "] move: ", foodPath, " --> ", newFoodPath);
 		mv(foodPath, newFoodPath, {mkdirp: true}, function (err) {
 		    if (err) {
 			logger.warn("[foodService.saveFood, ", user.email, "] Can't move  ", foodPath, " to ", newFoodPath, " because: ", err);
 			done(Errors.System(err));
 			return;
-
 		    }
-		    done(null, user, foodId, foodName, location);
+
+		    done(null, newFoodPath, foodPaths, user, foodId, location);
 		});
 	    },
-	    function (user, foodId, foodName, location, done) {
+	    function (foodPath, foodPaths, user, foodId, location, done) {
+		logger.data("[foodService.saveFood, ", user.email, "] Try resize food images to small, medium and large sizes");
+
+		async.parallel({
+		    small: function (parallelCallback) {
+			imageService.resize("small", foodPaths, foodId, foodPath, parallelCallback);
+		    },
+		    medium: function (parallelCallback) {
+			imageService.resize("medium", foodPaths, foodId, foodPath, parallelCallback);
+		    },
+		    large: function (parallelCallback) {
+			imageService.resize("large", foodPaths, foodId, foodPath, parallelCallback);
+		    }
+		}, function (err) {
+		    if (err) {
+			logger.error("[foodService.saveFood, ", user.email, "] Can not resize images because: ", err);
+			done(err);
+			return;
+		    }
+		    logger.debug("[foodService.saveFood, ", user.email, "] All images resized successfully. Go to next step");
+		    done(null, foodPaths, user, foodId, location);
+		});
+	    },
+	    function (foodPaths, user, foodId, location, done) {
 		logger.debug("Generate foodUrl");
-		var foodUrl = config.app.url + foodName;
-		done(null, user, foodId, foodUrl, location);
+		var foodUrl = config.app.url + foodPaths.origin;
+		var foodSizeUrl = {
+		    small: config.app.url + foodPaths.small,
+		    medium: config.app.url + foodPaths.medium,
+		    large: config.app.url + foodPaths.large
+		}
+		done(null, user, foodId, foodUrl, foodSizeUrl, location);
 	    },
 	    this.updateFood
 	], function (err, foodUrl) {
@@ -56,13 +87,13 @@ module.exports =  {
 	    callback(null, {foodUrl: foodUrl, creation: Date.now()});
 	});
     },
-    updateFood: function (user, foodId, foodUrl, location, callback) {
-	logger.debug("[foodService.updateFood, ", user.email, "] Try update food for: ", user.email, " location: ", location, " foodId: ", foodId, " and url: ", foodUrl);
+    updateFood: function (user, foodId, foodUrl, foodSizeUrl, location, callback) {
+	logger.debug("[foodService.updateFood, ", user.email, "] Try update food for: ", user.email, " location: ", location, " foodId: ", foodId, " url: ", foodUrl, " food url: ", foodSizeUrl);
 	var mapUrl = mapService.locationToMapUrlSync(location.latitude, location.longitude);
 
 	async.parallel({
 		addFood: function (done) {
-		    foodModel.add(user.id, location, Date.now(), foodId, foodUrl, mapUrl, function (err) {
+		    foodModel.add(user.id, location, Date.now(), foodId, foodUrl, foodSizeUrl, mapUrl, function (err) {
 			if (err) {
 			    logger.warn("[foodService.updateFood.addFood, ", user.email, "] Can't add food because: ", err);
 			    done(Errors.System(err));
@@ -78,6 +109,11 @@ module.exports =  {
 			    location: location,
 			    foodId: foodId,
 			    foodUrl: foodUrl,
+			    foodSizeUrl: {
+				small: foodSizeUrl.small,
+				medium: foodSizeUrl.medium,
+				large: foodSizeUrl.large 
+			    },
 			    mapUrl: mapUrl,
 			    creation: Date.now(),
 			    report: 0,
@@ -91,6 +127,11 @@ module.exports =  {
 			    },
 			    foodId: "",
 			    foodUrl: "",
+			    foodSizeUrl: {
+				small: "",
+				medium: "",
+				large: ""
+			    },
 			    mapUrl: config.app.mapStub,
 			    creation: 0,
 			    report: 0,
