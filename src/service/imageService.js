@@ -5,8 +5,7 @@ var check = require("validator").check;
 var util = require("../util/util");
 var mv = require("mv");
 var Errors = require("../error/errors");
-//var gm = require("gm").subClass({ imageMagick: true });
-var gm = require("gm");
+var gm = require("gm").subClass({ imageMagick: true });
 var mkdirp = require("mkdirp");
 
 module.exports =  {
