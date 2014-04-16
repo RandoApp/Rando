@@ -14,7 +14,7 @@ module.exports =  {
 
 	async.series({
 	    mkdir: function (done) {
-		var dir = foodPaths[size].replace(new RegExp(foodId + "\..+$"), "");
+		var dir = config.app.static.folder.name + foodPaths[size].replace(new RegExp(foodId + "\..+$"), "");
 		logger.debug("[imageService.resize.mkdir] mkdirp for path: ", dir);
 		mkdirp(dir, function (err, made) {
 		    if (err || made == null) {
