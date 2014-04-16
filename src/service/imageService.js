@@ -38,7 +38,7 @@ module.exports =  {
 			return;
 		    } 
 
-		    logger.error("[imageService.resize.resize] gm.resize.quality.write done successfully");
+		    logger.debug("[imageService.resize.resize] gm.resize.quality.write done successfully");
 		    done();
 		});
 	    }
