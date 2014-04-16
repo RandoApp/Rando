@@ -62,12 +62,12 @@ module.exports =  {
 			return;
 		    }
 		    logger.debug("[foodService.saveFood, ", user.email, "] All images resized successfully. Go to next step");
-		    done(null, foodPath, foodPaths, user, foodId, location);
+		    done(null, foodPaths, user, foodId, location);
 		});
 	    },
-	    function (foodPath, foodPaths, user, foodId, location, done) {
+	    function (foodPaths, user, foodId, location, done) {
 		logger.debug("Generate foodUrl");
-		var foodUrl = config.app.url + foodPath;
+		var foodUrl = config.app.url + foodPaths.origin;
 		var foodSizeUrl = {
 		    small: config.app.url + foodPaths.small,
 		    medium: config.app.url + foodPaths.medium,
