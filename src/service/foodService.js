@@ -132,7 +132,7 @@ module.exports =  {
 				medium: "",
 				large: ""
 			    },
-			    mapUrl: config.app.mapStub,
+			    mapUrl: "",
 			    creation: 0,
 			    report: 0,
 			    bonAppetit: 0
