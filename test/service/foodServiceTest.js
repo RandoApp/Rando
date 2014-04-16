@@ -5,10 +5,11 @@ var mapService = require("../../src/service/mapService");
 var util = require("../../src/util/util");
 var fs = require("fs");
 var mongooseMock = require("../util/mongooseMock");
-var gm = require("gm");
+var gm = require("gm").subClass({ imageMagick: true });
 
 describe('Food service.', function () {
     describe('Save food.', function () {
+
 	beforeEach(function (done) {
 	    mongooseMock.restore();
 	    done();
@@ -68,8 +69,7 @@ describe('Food service.', function () {
 		callback(null);
 	    });
 
-	    sinon.stub(gm.prototype, "write", function (path, callback) {
-		gm.prototype.write.restore();
+	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
 		callback();
 	    });
 
@@ -77,11 +77,11 @@ describe('Food service.', function () {
 		should.exist(err);
 		err.should.have.property("message", error);
 
+		gm.prototype.write.restore();
 		mongooseMock.restore();
 		done();
 	    });
 	});
-
 
 	it('Successful save food', function (done) {
 	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
@@ -98,6 +98,9 @@ describe('Food service.', function () {
 		fs.rename.restore();
 		callback(null);
 	    });
+	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
+		callback();
+	    });
 
 	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {latitude: "32", longitude: "23"}, function (err, foodUrl) {
 		mkDirCalled.should.be.true;
@@ -106,6 +109,7 @@ describe('Food service.', function () {
 		should.exist(foodUrl);
 
 
+		gm.prototype.write.restore();
 		mongooseMock.restore();
 		done();
 	    });

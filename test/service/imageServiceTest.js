@@ -2,7 +2,7 @@ var should = require("should");
 var sinon = require("sinon");
 var imageService = require("../../src/service/imageService");
 var fs = require("fs");
-var gm = require("gm");
+var gm = require("gm").subClass({ imageMagick: true });
 
 describe('Image service.', function () {
     describe('Resize.', function () {
@@ -15,7 +15,7 @@ describe('Image service.', function () {
 		callback(null);
 	    });
 
-	    sinon.stub(gm.prototype, "write", function (path, callback) {
+	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
 		isGmWriteCalled = true;
 		callback(null);
 	    });
@@ -46,7 +46,7 @@ describe('Image service.', function () {
 		callback(new Error("Some error"));
 	    });
 
-	    sinon.stub(gm.prototype, "write", function (path, callback) {
+	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
 		isGmWriteCalled = true;
 		callback();
 	    });
@@ -74,7 +74,7 @@ describe('Image service.', function () {
 	    sinon.stub(fs, "mkdir", function (p, mode, callback) {
 		callback();
 	    });
-	    sinon.stub(gm.prototype, "write", function (path, callback) {
+	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
 		var error = new Error(errorMessage); 
 		callback(error);
 	    });
@@ -98,20 +98,20 @@ describe('Image service.', function () {
 	});
 
 	it('gm should call with correct args', function (done) {
-	    sinon.stub(gm.prototype, "resize", function (size) {
+	    sinon.stub(gm.prototype.__proto__, "resize", function (size) {
 		should.exists(size);
 		size.should.be.type('number');
 		return this;
 	    });
 
-	    sinon.stub(gm.prototype, "quality", function (val) {
+	    sinon.stub(gm.prototype.__proto__, "quality", function (val) {
 		should.exists(val);
 		val.should.be.type('number');
 		val.should.be.within(0, 100);
 		return this;
 	    });
 
-	    sinon.stub(gm.prototype, "write", function (path, callback) {
+	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
 		callback(null);
 	    });
 

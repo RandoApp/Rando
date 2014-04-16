@@ -9,7 +9,7 @@ var userModel = require("../model/userModel");
 var mapService = require("./mapService");
 var imageService = require("./imageService");
 var Errors = require("../error/errors");
-var gm = require("gm");
+var gm = require("gm").subClass({ imageMagick: true });
 var mkdirp = require("mkdirp");
 
 module.exports =  {
@@ -43,6 +43,8 @@ module.exports =  {
 		});
 	    },
 	    function (foodPath, foodPaths, user, foodId, location, done) {
+		logger.data("[foodService.saveFood, ", user.email, "] Try resize food images to small, medium and large sizes");
+
 		async.parallel({
 		    small: function (parallelCallback) {
 			imageService.resize("small", foodPaths, foodId, foodPath, parallelCallback);
@@ -54,6 +56,12 @@ module.exports =  {
 			imageService.resize("large", foodPaths, foodId, foodPath, parallelCallback);
 		    }
 		}, function (err) {
+		    if (err) {
+			logger.error("[foodService.saveFood, ", user.email, "] Can not resize images because: ", err);
+			done(err);
+			return;
+		    }
+		    logger.debug("[foodService.saveFood, ", user.email, "] All images resized successfully. Go to next step");
 		    done(null, foodPath, foodPaths, user, foodId, location);
 		});
 	    },
