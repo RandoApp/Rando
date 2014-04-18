@@ -17,21 +17,26 @@ var Food = mongoose.model("food", new mongoose.Schema({
 	large: String
     },
     mapUrl: String,
+    mapSizeUrl: {
+	small: String,
+	medium: String,
+	large: String
+    },
     report: Number,
     bonAppetit: Number
 }));
 
 module.exports = {
-    add: function (userId, location, creation, foodId, foodUrl, foodSizeUrl, mapUrl, callback) {
-	logger.data("[foodModel.add] Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl,  " foodSizeUrl: ", foodSizeUrl, "mapUrl: ", mapUrl);
+    add: function (userId, location, creation, foodId, foodUrl, foodSizeUrl, mapSizeUrl, callback) {
+	logger.data("[foodModel.add] Food add. User: ", userId, " , location: ", location, ", creation: ", creation, ", foodId: ", foodId, "foodUrl: ", foodUrl,  " foodSizeUrl: ", foodSizeUrl, "mapSizeUrl: ", mapSizeUrl);
 
 	if (!callback) {
 	    callback = function (err) {
 		if (err) {
-		    logger.warn("[foodModel.add] Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "foodSizeUrl: " , foodSizeUrl, "mapUrl: ", mapUrl, " , because: ", err);
+		    logger.warn("[foodModel.add] Can't add food! User: ", userId, " location: ", location, " creation: ", creation, " foodId: ", foodId, "foodUrl: ", foodUrl, "foodSizeUrl: " , foodSizeUrl, "mapSizeUrl: ", mapSizeUrl, " , because: ", err);
  		    return;
 		}
-		logger.debug("[foodModel.add] Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, " foodSizeUrl: ", foodSizeUrl, "mapUrl: ", mapUrl);
+		logger.debug("[foodModel.add] Food added. User: ", userId, " location: ", location, " creation: ", creation, "foodId: ", foodId, " foodUrl: ", foodUrl, " foodSizeUrl: ", foodSizeUrl, "mapSizeUrl: ", mapSizeUrl);
 	    }
 	}
 
@@ -48,7 +53,12 @@ module.exports = {
 		medium: foodSizeUrl.medium,
 		large: foodSizeUrl.large
 	    },
-	    mapUrl: mapUrl
+	    mapUrl: mapSizeUrl.large,
+	    mapSizeUrl: {
+		small: mapSizeUrl.small,
+		medium: mapSizeUrl.medium,
+		large: mapSizeUrl.large
+	    }
 	});
 
 	food.save(callback);

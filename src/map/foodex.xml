@@ -175,7 +175,7 @@
   <Rule>
     <Filter>([scalerank] &lt; 7) and ([nameascii] != 'CITY_NAMEASCII')</Filter>
     <MarkersSymbolizer width="8" fill="#116688" fill-opacity="0" stroke="#116688" stroke-width="2" allow-overlap="true" />
-    <TextSymbolizer fontset-name="fontset-0" size="20" justify-alignment="center" opacity="1" dy="-15" allow-overlap="true" ><![CDATA[[nameascii]]]></TextSymbolizer>
+    <TextSymbolizer fontset-name="fontset-0" size="40" justify-alignment="center" opacity="1" dy="-15" allow-overlap="true" ><![CDATA[[nameascii]]]></TextSymbolizer>
   </Rule>
   <Rule>
     <Filter>([scalerank] &lt; 7)</Filter>
@@ -196,7 +196,7 @@
 
 <Style name="countries-labels" filter-mode="first">
   <Rule>
-    <TextSymbolizer fontset-name="fontset-1" fill="#000000" size="25" character-spacing="5" wrap-width="40" line-spacing="2" halo-radius="1" halo-fill="#010101" allow-overlap="true" ><![CDATA[[sovereignt]]]></TextSymbolizer>
+    <TextSymbolizer fontset-name="fontset-1" fill="#000000" size="30" character-spacing="5" wrap-width="40" line-spacing="2" halo-radius="1" halo-fill="#010101" allow-overlap="true" ><![CDATA[[sovereignt]]]></TextSymbolizer>
   </Rule>
 </Style>
 <Layer name="countries-labels"
@@ -214,8 +214,8 @@
 <Style name="markers" filter-mode="first">
   <Rule>
     <Filter>([nameascii] = 'CITY_NAMEASCII')</Filter>
-    <MarkersSymbolizer file="MARKER_URL" width="22" fill="#dd6600" fill-opacity="1" stroke="#eeeedd" stroke-width="4" allow-overlap="true" />
-    <TextSymbolizer fontset-name="fontset-0" size="20" justify-alignment="center" opacity="1" dy="-15" allow-overlap="true" ><![CDATA[[nameascii]]]></TextSymbolizer>
+    <MarkersSymbolizer file="MARKER_URL" width="44" fill="#dd6600" fill-opacity="1" stroke="#eeeedd" stroke-width="8" allow-overlap="true" />
+    <TextSymbolizer fontset-name="fontset-0" size="45" justify-alignment="center" opacity="1" dy="-15" allow-overlap="true" ><![CDATA[[nameascii]]]></TextSymbolizer>
   </Rule>
 </Style>
 <Layer name="markers"

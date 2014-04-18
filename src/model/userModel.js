@@ -25,6 +25,11 @@ var User = mongoose.model("user", new mongoose.Schema({
 	    },
 	    creation: Number,
 	    mapUrl: String,
+	    mapSizeUrl: {
+		small: String,
+		medium: String,
+		large: String
+	    },
 	    report: Number,
 	    bonAppetit: Number
 	},
@@ -42,6 +47,11 @@ var User = mongoose.model("user", new mongoose.Schema({
 		large: String
 	    },
 	    mapUrl: String,
+	    mapSizeUrl: {
+		small: String,
+		medium: String,
+		large: String
+	    },
 	    creation: Number,
 	    report: Number,
 	    bonAppetit: Number

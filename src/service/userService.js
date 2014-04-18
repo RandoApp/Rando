@@ -51,6 +51,11 @@ module.exports = {
 		    food.stranger.foodSizeUrl.small = config.app.reportedFoodStub; 
 		    food.stranger.foodSizeUrl.medium = config.app.reportedFoodStub; 
 		    food.stranger.foodSizeUrl.large = config.app.reportedFoodStub; 
+
+		    food.stranger.mapUrl = config.app.reportedFoodStub; 
+		    food.stranger.mapSizeUrl.small = config.app.reportedFoodStub; 
+		    food.stranger.mapSizeUrl.medium = config.app.reportedFoodStub; 
+		    food.stranger.mapSizeUrl.large = config.app.reportedFoodStub; 
 		}
 		userJSON.foods.push(food);
 	    }

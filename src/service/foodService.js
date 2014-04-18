@@ -89,11 +89,11 @@ module.exports =  {
     },
     updateFood: function (user, foodId, foodUrl, foodSizeUrl, location, callback) {
 	logger.debug("[foodService.updateFood, ", user.email, "] Try update food for: ", user.email, " location: ", location, " foodId: ", foodId, " url: ", foodUrl, " food url: ", foodSizeUrl);
-	var mapUrl = mapService.locationToMapUrlSync(location.latitude, location.longitude);
+	var mapSizeUrl = mapService.locationToMapUrlSync(location.latitude, location.longitude);
 
 	async.parallel({
 		addFood: function (done) {
-		    foodModel.add(user.id, location, Date.now(), foodId, foodUrl, foodSizeUrl, mapUrl, function (err) {
+		    foodModel.add(user.id, location, Date.now(), foodId, foodUrl, foodSizeUrl, mapSizeUrl, function (err) {
 			if (err) {
 			    logger.warn("[foodService.updateFood.addFood, ", user.email, "] Can't add food because: ", err);
 			    done(Errors.System(err));
@@ -114,7 +114,12 @@ module.exports =  {
 				medium: foodSizeUrl.medium,
 				large: foodSizeUrl.large 
 			    },
-			    mapUrl: mapUrl,
+			    mapUrl: mapSizeUrl.large,
+			    mapSizeUrl: {
+				small: mapSizeUrl.small,
+				medium: mapSizeUrl.medium,
+				large: mapSizeUrl.large 
+			    },
 			    creation: Date.now(),
 			    report: 0,
 			    bonAppetit: 0
@@ -133,6 +138,11 @@ module.exports =  {
 				large: ""
 			    },
 			    mapUrl: "",
+			    mapSizeUrl: {
+				small: "",
+				medium: "",
+				large: ""
+			    },
 			    creation: 0,
 			    report: 0,
 			    bonAppetit: 0
