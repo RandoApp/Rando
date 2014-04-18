@@ -1,13 +1,16 @@
 var fs = require("fs");
+var config = require("config");
 var crypto = require("crypto");
 var async = require("async");
 var mapnik = require("mapnik");
 var mercator = new (require("sphericalmercator"));
+var gm = require("gm").subClass({ imageMagick: true });
 
 //How many cities should be processed in the same time:
 var TILE_RENDER_LIMIT = 30;
 
 
+var SCRIPT_DIR = "src/map/";
 var TEMPLATE_STYLESHEET = "foodex.xml";
 var MARKER_FILE = "markerStar.svg";
 //KEYS in foodex.xml file for replacing:
@@ -38,15 +41,20 @@ var shpFiles = [
 var CITIES_FILE = "/tmp/foodex-map-data/cities.json";
 var CITIES_SOURCE_FILE = "cities.json";
 
-var TILE_IMAGE_SIZE = 1024;
+var TILE_IMAGE_SIZE = config.app.img.size.large;
 var MAP_BBOX_SIZE = 3.3; //in degrees
 
 
 function checkData () {
-	for (var i = 0; i < shpFiles.length; i++) {
-		checkShpFile(SHP_FILES_DIR + shpFiles[i]);
-	}
-	checkPlacesJSON();
+    if (!config.app) {
+	console.log("Config not found. Do you run script from root of project?\nnode src/map/generateMaps.js");
+	process.exit(1);
+    }
+
+    for (var i = 0; i < shpFiles.length; i++) {
+	    checkShpFile(SHP_FILES_DIR + shpFiles[i]);
+    }
+    checkPlacesJSON();
 }
 
 function checkShpFile(shpFile) {
@@ -101,7 +109,7 @@ function cp(source, target, callback) {
 }
 
 function copyStyleFiles(done) {
-	cp(MARKER_FILE, STYLESHEET_TMP_DIR + MARKER_FILE, done);
+	cp(SCRIPT_DIR + MARKER_FILE, STYLESHEET_TMP_DIR + MARKER_FILE, done);
 }
 
 function generateCitiesJSON(done) {
@@ -154,9 +162,9 @@ function generateCitiesJSON(done) {
 }
 
 function loadStylesheetTemplate(cities, done) {
-	fs.readFile(TEMPLATE_STYLESHEET, function (err, data) {
+	fs.readFile(SCRIPT_DIR + TEMPLATE_STYLESHEET, function (err, data) {
 		if (err) {
-			console.error("Can not read stylesheet " + TEMPLATE_STYLESHEET + " , because: " + err);
+			console.error("Can not read stylesheet " + SCRIPT_DIR + TEMPLATE_STYLESHEET + " , because: " + err);
 			done(err);
 			return;
 		}
@@ -256,6 +264,93 @@ function renderTile(stylesheet, tileName, longitude, latitude, done) {
 	});
 }
 
+function mkdir(dir, callback) {
+    fs.mkdir(dir, function (err) {
+	if (err && err.code != "EEXIST") {
+	    callback(err);
+	    return;
+	}
+
+	console.log("mkdir " + dir);
+	callback();
+    });
+}
+
+function mkSizeDirs(done) {
+    async.parallel([
+	function (callback) { 
+	    mkdir(TILES_DIR + config.app.img.folder.small, callback);
+	},
+	function (callback) {
+	    mkdir(TILES_DIR + config.app.img.folder.medium, callback);
+	},
+	function (callback) {
+	    mkdir(TILES_DIR + config.app.img.folder.large, callback);
+	}
+    ], function (err) {
+	if (err) {
+	    console.log("Can not mkdir, because: " + err);
+	    done(err);
+	    return;
+	}
+	done();
+    });
+}
+
+function convertAndResizeTiles (done) {
+    fs.readdir(TILES_DIR, function (err, files) {
+	if (err) {
+	    console.error("Can not read dir " + TILES_DIR + ", because: " + err);
+	    done(err);
+	    return;
+	}
+
+	console.log("Try process " + files.length + " tiles");
+
+	async.eachLimit(files, TILE_RENDER_LIMIT, function (file, fileDone) {
+	    async.parallel([
+		function (callback) {
+		    convertAndResizeTile("small", file, callback);
+		},
+		function (callback) {
+		    convertAndResizeTile("medium", file, callback);
+		},
+		function (callback) {
+		    convertAndResizeTile("large", file, callback);
+		},
+	    ], function (err) {
+		if (err) {
+		    console.error("Can not convert and resize tile " + file + ", because: " + err);
+		    fileDone(err);
+		    return;
+		}
+		fileDone();
+	    });
+	}, function (err) {
+	    if (err) {
+		console.error("Can not process tiles in " + TILES_DIR + ", because: " + err);
+		done(err);
+		return;
+	    }
+	    done();
+	});
+    });
+}
+	
+function convertAndResizeTile (size, file, callback) {
+    var inputTile = TILES_DIR + file;
+    var outputTile = TILES_DIR + config.app.img.folder[size] + file.replace(".png", ".jpg");
+    gm(inputTile).resize(config.app.img.size[size]).quality(config.app.img.quality).write(outputTile, function (err) {
+	if (err) {
+	    console.error("Can not convert and resize tile " + inputTile + ", beacause: "  + err);
+	    callback(err);
+	    return;
+	}
+	console.log(outputTile + " done");
+	callback();
+    });
+}
+
 function main() {
 	checkData();
 
@@ -264,7 +359,9 @@ function main() {
 		copyStyleFiles,
 		generateCitiesJSON,
 		loadStylesheetTemplate,
-		renderTiles
+		renderTiles,
+	        mkSizeDirs,
+	        convertAndResizeTiles
 	], function (err) {
 		if (err) {
 			console.error("Error in main: " + err);

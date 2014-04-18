@@ -15,9 +15,13 @@ module.exports =  {
 	logger.debug("[mapService.locationToMapUrlSync] Found nearest city: ", city);
 	var tileName = this.generateTileName(city);
 	logger.debug("[mapService.locationToMapUrlSync] generate tileName: ", tileName);
-	var mapUrl = config.app.url + config.app.static.folder.map + tileName + "." + config.app.static.file.ext;
-	logger.debug("[mapService.locationToMapUrlSync] mapUrl: ", mapUrl);
-	return mapUrl;
+	var mapSizeUrl = {
+	    small: config.app.url + config.app.static.folder.map + config.app.img.folder.small + tileName + "." + config.app.img.ext,
+	    medium: config.app.url + config.app.static.folder.map + config.app.img.folder.medium + tileName + "." + config.app.img.ext,
+	    large: config.app.url + config.app.static.folder.map + config.app.img.folder.large + tileName + "." + config.app.img.ext,
+	}
+	logger.debug("[mapService.locationToMapUrlSync] mapSizeUrl: ", mapSizeUrl);
+	return mapSizeUrl;
 	},
 	findNearestCity: function (latitude, longitude) {
 	    var minDistance = Number.MAX_VALUE;
