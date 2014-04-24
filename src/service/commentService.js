@@ -5,21 +5,21 @@ var mongoose = require("mongoose");
 var Errors = require("../error/errors");
 
 module.exports = {
-    report: function (user, foodId, callback) {
-	logger.debug("[commentService.report, ", user.email, "] Start report for food: ", foodId);
+    report: function (user, randoId, callback) {
+	logger.debug("[commentService.report, ", user.email, "] Start report for rando: ", randoId);
 	var self = this;
 
 	async.waterfall([
 	    function (done) {
-		self.updateFood(user.id, foodId, function (food) {
-		    food.stranger.report = 1;
-		}, function (err, food) {
-		    done(null, food.stranger.user, food.stranger.foodId);
+		self.updateRando(user.id, randoId, function (rando) {
+		    rando.stranger.report = 1;
+		}, function (err, rando) {
+		    done(null, rando.stranger.user, rando.stranger.randoId);
 		});
 	    },
-	    function (strangerId, foodId, done) {
-		self.updateFood(strangerId, foodId, function (food) {
-		    food.user.report = 1;
+	    function (strangerId, randoId, done) {
+		self.updateRando(strangerId, randoId, function (rando) {
+		    rando.user.report = 1;
 		}, function () {
 		    done();
 		});
@@ -33,21 +33,21 @@ module.exports = {
 	    callback(null, {command: "report", result: "done"});
 	});
     },
-    bonAppetit: function (user, foodId, callback) {
-	logger.debug("[commentService.bonAppetit, ", user.email, "] Start bonAppetit for food: ", foodId);
+    bonAppetit: function (user, randoId, callback) {
+	logger.debug("[commentService.bonAppetit, ", user.email, "] Start bonAppetit for rando: ", randoId);
 	var self = this;
 
 	async.waterfall([
 	    function (done) {
-		self.updateFood(user.id, foodId, function (food) {
-		    food.stranger.bonAppetit = 1;
-		}, function(err, food) {
-		    done(null, food.stranger.user, food.stranger.foodId);
+		self.updateRando(user.id, randoId, function (rando) {
+		    rando.stranger.bonAppetit = 1;
+		}, function(err, rando) {
+		    done(null, rando.stranger.user, rando.stranger.randoId);
 		});
 	    },
-	    function (strangerId, foodId, done) {
-		self.updateFood(strangerId, foodId, function (food) {
-		    food.user.bonAppetit = 1;
+	    function (strangerId, randoId, done) {
+		self.updateRando(strangerId, randoId, function (rando) {
+		    rando.user.bonAppetit = 1;
 		}, function() {
 		    done();
 		});
@@ -61,51 +61,51 @@ module.exports = {
 	    callback(null, {command: "bonAppetit", result: "done"});
 	});
     },
-    updateFood: function (userId, foodId, updater, callback) {
-	this.findUserWithFood(userId, foodId, function (err, user, food) {
+    updateRando: function (userId, randoId, updater, callback) {
+	this.findUserWithRando(userId, randoId, function (err, user, rando) {
 	    if (err) {
-		logger.warn("[commentService.updateFood, ", userId, "] Error, when run findUserWithFood. userId: ", userId, " foodId: ", foodId, " error: ", err);
+		logger.warn("[commentService.updateRando, ", userId, "] Error, when run findUserWithRando. userId: ", userId, " randoId: ", randoId, " error: ", err);
 		callback(err);
 		return;
-	    } else if (!food) {
-		logger.warn("[commentService.updateFood, ", user.email, "] Food is not exist, after run findUserWithFood. userId: ", userId, " foodId: ", foodId);
+	    } else if (!rando) {
+		logger.warn("[commentService.updateRando, ", user.email, "] Rando is not exist, after run findUserWithRando. userId: ", userId, " randoId: ", randoId);
 		callback(Errors.FoodForCommentNotFound());
 		return;
 	    }
 
-	    logger.debug("[commentService.updateFood, ", user.email, "] Trigger updater with food with id: ", foodId);
+	    logger.debug("[commentService.updateRando, ", user.email, "] Trigger updater with rando with id: ", randoId);
 
 
-	    updater(food);
+	    updater(rando);
 
 	    userModel.update(user);
-	    callback(null, food);
+	    callback(null, rando);
 	});
     },
-    findUserWithFood: function (userId, foodId, callback) {
+    findUserWithRando: function (userId, randoId, callback) {
 	userModel.getById(userId, function (err, user) {
 	    if (err) {
-		logger.warn("[commentService.findUserWithFood, ", userId, "] Can't find user by id: ", userId);
+		logger.warn("[commentService.findUserWithRando, ", userId, "] Can't find user by id: ", userId);
 		callback(Errors.System(err));
 		return;
 	    } else if (!user) {
-		logger.debug("[commentService.findUserWithFood, ", userId, "] User not found: ", userId);
+		logger.debug("[commentService.findUserWithRando, ", userId, "] User not found: ", userId);
 		callback(Errors.UserForCommentNotFound());
 		return;
-	    } else if (!user.foods || user.foods.length == 0) {
-		logger.debug("[commentService.findUserWithFood, ", user.email, "] User does not have food");
+	    } else if (!user.randos || user.randos.length == 0) {
+		logger.debug("[commentService.findUserWithRando, ", user.email, "] User does not have rando");
 		callback(Errors.FoodForCommentNotFound());
 		return;
 	    }
 
-	    logger.debug("[commentService.findUserWithFood, ", user.email, "] Found user.");
+	    logger.debug("[commentService.findUserWithRando, ", user.email, "] Found user.");
 
-	    async.filter(user.foods, function (food, done) {
-		logger.debug("[commentService.findUserWithFood, ", user.email, "] Filter food: ", food.stranger.foodId, " == ", foodId);
+	    async.filter(user.randos, function (rando, done) {
+		logger.debug("[commentService.findUserWithRando, ", user.email, "] Filter rando: ", rando.stranger.randoId, " == ", randoId);
 		//TODO: think about correction this predicate:
-		done(food.stranger.foodId == foodId || food.user.foodId == foodId);
+		done(rando.stranger.randoId == randoId || rando.user.randoId == randoId);
 	    }, function (result) {
-		logger.debug("[commentService.findUserWithFood, ", user.email, "] Found foods: ", result.length);
+		logger.debug("[commentService.findUserWithRando, ", user.email, "] Found randos: ", result.length);
 		callback(null, user, result[0]);
 	    });
 	});

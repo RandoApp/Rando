@@ -7,23 +7,23 @@ var crypto = require("crypto");
 
 module.exports =  {
     cities: null,
-    locationToMapUrlSync: function (latitude, longitude) {
-	logger.debug("[mapService.locationToMapUrlSync] latitude: ", latitude, " longitude: ", longitude);
+    locationToMapURLSync: function (latitude, longitude) {
+	logger.debug("[mapService.locationToMapURLSync] latitude: ", latitude, " longitude: ", longitude);
 	if (!this.cities) this.loadCitiesJson();
 
 	var city = this.findNearestCity(latitude, longitude);
-	logger.debug("[mapService.locationToMapUrlSync] Found nearest city: ", city);
+	logger.debug("[mapService.locationToMapURLSync] Found nearest city: ", city);
 	var tileName = this.generateTileName(city);
-	logger.debug("[mapService.locationToMapUrlSync] generate tileName: ", tileName);
-	var mapSizeUrl = {
+	logger.debug("[mapService.locationToMapURLSync] generate tileName: ", tileName);
+	var mapSizeURL = {
 	    small: config.app.url + config.app.static.folder.map + config.app.img.folder.small + tileName + "." + config.app.img.ext,
 	    medium: config.app.url + config.app.static.folder.map + config.app.img.folder.medium + tileName + "." + config.app.img.ext,
 	    large: config.app.url + config.app.static.folder.map + config.app.img.folder.large + tileName + "." + config.app.img.ext,
 	}
-	logger.debug("[mapService.locationToMapUrlSync] mapSizeUrl: ", mapSizeUrl);
-	return mapSizeUrl;
-	},
-	findNearestCity: function (latitude, longitude) {
+	logger.debug("[mapService.locationToMapURLSync] mapSizeURL: ", mapSizeURL);
+	return mapSizeURL;
+    },
+    findNearestCity: function (latitude, longitude) {
 	    var minDistance = Number.MAX_VALUE;
 	    var city = this.cities[0];
 	    for (var i = 0; i < this.cities.length; i++) {

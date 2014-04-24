@@ -1,14 +1,14 @@
 var should = require("should");
 var sinon = require("sinon");
-var foodService = require("../../src/service/foodService");
+var randoService = require("../../src/service/randoService");
 var mapService = require("../../src/service/mapService");
 var util = require("../../src/util/util");
 var fs = require("fs");
 var mongooseMock = require("../util/mongooseMock");
 var gm = require("gm").subClass({ imageMagick: true });
 
-describe('Food service.', function () {
-    describe('Save food.', function () {
+describe('Rando service.', function () {
+    describe('Save image.', function () {
 
 	beforeEach(function (done) {
 	    mongooseMock.restore();
@@ -20,32 +20,32 @@ describe('Food service.', function () {
 	    done();
 	});
 
-	it('Undefined food path', function (done) {
-	    foodService.saveFood(mongooseMock.user(), null, {latitude: "32", longitude: "23"}, function (err) {
+	it('Undefined rando path', function (done) {
+	    randoService.saveImage(mongooseMock.user(), null, {latitude: "32", longitude: "23"}, function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 		done();
 	    });
 	});
 
-	it('Food path is not exist', function (done) {
-	    foodService.saveFood(mongooseMock.user(), "/tmp/not-exists-food.jpg", {latitude: "32", longitude: "23"}, function (err) {
+	it('Image path is not exist', function (done) {
+	    randoService.saveImage(mongooseMock.user(), "/tmp/not-exists-image.jpg", {latitude: "32", longitude: "23"}, function (err) {
 		should.exist(err);
 		err.should.have.property("errno", 34);
 		done();
 	    });
 	});
 
-	it('Generate Food Name with error throw error', function (done) {
+	it('Generate Image Name with error throw error', function (done) {
 	    var error = "Some streng error";
 	    var called = false;
-	    sinon.stub(util, "generateFoodName", function (callback) {
+	    sinon.stub(util, "generateImageName", function (callback) {
 		called = true;
-		util.generateFoodName.restore();
+		util.generateImageName.restore();
 		callback(new Error(error));
 	    });
 
-	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {latitude: "32", longitude: "23"}, function (err) {
+	    randoService.saveImage(mongooseMock.user(), "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
 		called.should.be.true;
 		should.exist(err);
 		err.should.have.property("message", error);
@@ -53,7 +53,7 @@ describe('Food service.', function () {
 	    });
 	});
 
-	it('Error when add food', function (done) {
+	it('Error when add image', function (done) {
 	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
 
 	    var error = "Data base error";
@@ -73,7 +73,7 @@ describe('Food service.', function () {
 		callback();
 	    });
 
-	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {latitude: "32", longitude: "23"}, function (err) {
+	    randoService.saveImage(mongooseMock.user(), "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
 		should.exist(err);
 		err.should.have.property("message", error);
 
@@ -83,7 +83,7 @@ describe('Food service.', function () {
 	    });
 	});
 
-	it('Successful save food', function (done) {
+	it('Successful save image', function (done) {
 	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
 	    mongooseMock.stubSave().stubFindById();
 	    var mkDirCalled = false;
@@ -102,11 +102,11 @@ describe('Food service.', function () {
 		callback();
 	    });
 
-	    foodService.saveFood(mongooseMock.user(), "/tmp/some-food.png", {latitude: "32", longitude: "23"}, function (err, foodUrl) {
+	    randoService.saveImage(mongooseMock.user(), "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err, imageURL) {
 		mkDirCalled.should.be.true;
 		renameCalled.should.be.true;
 		should.not.exist(err);
-		should.exist(foodUrl);
+		should.exist(imageURL);
 
 
 		gm.prototype.write.restore();

@@ -37,32 +37,32 @@ module.exports = {
 	logger.debug("[userService.getUser, ", user.email, "] Try get user");
 	var userJSON = {
 	    email: user.email,
-	    foods: []
+	    randos: []
 	}
-	async.each(user.foods, function (food, done) {
-	    if (food) {
-		logger.debug("[userService.getUser, ", user.email, "] Remove food.user.userId and food.stranger.strangerId in food");
-		delete food.user.user;
-		delete food.stranger.user;
-		delete food.user.location;
-		delete food.stranger.location;
-		if (food.stranger.report) {
-		    food.stranger.foodUrl = config.app.reportedFoodStub; 
-		    food.stranger.foodSizeUrl.small = config.app.reportedFoodStub; 
-		    food.stranger.foodSizeUrl.medium = config.app.reportedFoodStub; 
-		    food.stranger.foodSizeUrl.large = config.app.reportedFoodStub; 
+	async.each(user.randos, function (rando, done) {
+	    if (rando) {
+		logger.debug("[userService.getUser, ", user.email, "] Remove rando.user.userId and food.stranger.strangerId in food");
+		delete rando.user.user;
+		delete rando.stranger.user;
+		delete rando.user.location;
+		delete rando.stranger.location;
+		if (rando.stranger.report) {
+		    rando.stranger.imageURL = config.app.reportedImageStub; 
+		    rando.stranger.imageSizeURL.small = config.app.reportedImageStub; 
+		    rando.stranger.imageSizeURL.medium = config.app.reportedImageStub; 
+		    rando.stranger.imageSizeURL.large = config.app.reportedImageStub; 
 
-		    food.stranger.mapUrl = config.app.reportedFoodStub; 
-		    food.stranger.mapSizeUrl.small = config.app.reportedFoodStub; 
-		    food.stranger.mapSizeUrl.medium = config.app.reportedFoodStub; 
-		    food.stranger.mapSizeUrl.large = config.app.reportedFoodStub; 
+		    rando.stranger.mapURL = config.app.reportedImageStub; 
+		    rando.stranger.mapSizeURL.small = config.app.reportedImageStub; 
+		    rando.stranger.mapSizeURL.medium = config.app.reportedImageStub; 
+		    rando.stranger.mapSizeURL.large = config.app.reportedImageStub; 
 		}
-		userJSON.foods.push(food);
+		userJSON.randos.push(rando);
 	    }
 	    done();
 	}, function (err) {
 	    if (err) {
-		logger.warn("[userService.getUser, ", userId, "] Error when each foods for: ", user);
+		logger.warn("[userService.getUser, ", userId, "] Error when each randos for: ", user);
 		callback(Errors.System(err));
 		return;
 	    }

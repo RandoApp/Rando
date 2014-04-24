@@ -20,15 +20,15 @@ describe('Image service.', function () {
 		callback(null);
 	    });
 
-	    var foodId = "123iojf";
-	    var foodPaths = {
-		small: "food/small/123i/" + foodId + ".jpg",
-		medium: "food/medium/123i/" + foodId + ".jpg",
-		large: "food/large/123i/" + foodId + ".jpg"
+	    var randoId = "123iojf";
+	    var imagePaths = {
+		small: "image/small/123i/" + randoId + ".jpg",
+		medium: "image/medium/123i/" + randoId + ".jpg",
+		large: "image/large/123i/" + randoId + ".jpg"
 	    };
-	    var foodPath = "food/123i/" + foodId;
+	    var imagePath = "image/123i/" + randoId;
 
-	    imageService.resize("small", foodPaths, foodId, foodPath, function (err) {
+	    imageService.resize("small", imagePaths, randoId, imagePath, function (err) {
 		should.not.exist(err);
 		isMkdirCalled.should.be.true;
 		isGmWriteCalled.should.be.true;
@@ -51,15 +51,15 @@ describe('Image service.', function () {
 		callback();
 	    });
 
-	    var foodId = "123iojf";
-	    var foodPaths = {
-		small: "food/small/123i/" + foodId + ".jpg",
-		medium: "food/medium/123i/" + foodId + ".jpg",
-		large: "food/large/123i/" + foodId + ".jpg"
+	    var randoId = "123iojf";
+	    var imagePaths = {
+		small: "image/small/123i/" + randoId + ".jpg",
+		medium: "image/medium/123i/" + randoId + ".jpg",
+		large: "image/large/123i/" + randoId + ".jpg"
 	    };
-	    var foodPath = "food/123i/" + foodId;
+	    var imagePath = "image/123i/" + randoId;
 
-	    imageService.resize("small", foodPaths, foodId, foodPath, function (err) {
+	    imageService.resize("small", imagePaths, randoId, imagePath, function (err) {
 		should.exists(err);
 		isGmWriteCalled.should.be.false;
 
@@ -79,15 +79,15 @@ describe('Image service.', function () {
 		callback(error);
 	    });
 
-	    var foodId = "123iojf";
-	    var foodPaths = {
-		small: "food/small/123i/" + foodId + ".jpg",
-		medium: "food/medium/123i/" + foodId + ".jpg",
-		large: "food/large/123i/" + foodId + ".jpg"
+	    var randoId = "123iojf";
+	    var imagePaths = {
+		small: "image/small/123i/" + randoId + ".jpg",
+		medium: "image/medium/123i/" + randoId + ".jpg",
+		large: "image/large/123i/" + randoId + ".jpg"
 	    };
-	    var foodPath = "food/123i/" + foodId;
+	    var imagePath = "image/123i/" + randoId;
 
-	    imageService.resize("small", foodPaths, foodId, foodPath, function (err) {
+	    imageService.resize("small", imagePaths, randoId, imagePath, function (err) {
 		should.exist(err);
 		err.should.have.property("message", errorMessage);
 
@@ -115,19 +115,21 @@ describe('Image service.', function () {
 		callback(null);
 	    });
 
-	    var foodId = "123iojf";
-	    var foodPaths = {
-		small: "food/small/123i/" + foodId + ".jpg",
-		medium: "food/medium/123i/" + foodId + ".jpg",
-		large: "food/large/123i/" + foodId + ".jpg"
+	    var randoId = "123iojf";
+	    var imagePaths = {
+		small: "image/small/123i/" + randoId + ".jpg",
+		medium: "image/medium/123i/" + randoId + ".jpg",
+		large: "image/large/123i/" + randoId + ".jpg"
 	    };
-	    var foodPath = "food/123i/" + foodId;
+	    var imagePath = "image/123i/" + randoId;
 
-	    imageService.resize("small", foodPaths, foodId, foodPath, function (err) {
+	    imageService.resize("small", imagePaths, randoId, imagePath, function (err) {
 		gm.prototype.resize.restore();
 		gm.prototype.quality.restore();
+		gm.prototype.write.restore();
 		done();
 	    });
 	});
     });
 });
+

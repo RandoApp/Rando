@@ -3,9 +3,8 @@ app:
     port: 8888
     cacheControl: 31557600000
     secret: Secret #This is a stub. 
-    anonymousEmailPosftix: foodex.com
-    mapStub: http://95.85.19.94/map/minskmap.png
-    reportedFoodStub: http://95.85.19.94/food/food-reported-stub.png
+    anonymousEmailPosftix: rando4.me
+    reportedImageStub: http://95.85.19.94/image/image-reported-stub.png
     tokenLength: 21
     citiesJson: src/map/cities.json
     img:
@@ -21,7 +20,7 @@ app:
             large: 1200
     demon:
         wakeup: 20000
-        foodTimeout: 300000
+        pairingTimeout: 300000
     fb:
         id: 123456789 #This is a stub
         secret: abcd12345efg #This is a stub
@@ -33,7 +32,7 @@ app:
         port: 443
     log:
         folder: logs
-        file: foodex.log
+        file: rando.log
         handleException: true
         level:
             console: debug
@@ -44,8 +43,8 @@ app:
             length: 21
         folder:
             length: 4
-            food: food/
+            image: image/
             map: map/
             name: static/
 db:
-    url: mongodb://localhost/foodex
+    url: mongodb://localhost/rando
