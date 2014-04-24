@@ -9,12 +9,12 @@ var gm = require("gm").subClass({ imageMagick: true });
 var mkdirp = require("mkdirp");
 
 module.exports =  {
-    resize: function (size, foodPaths, foodId, foodPath, callback) {
-	logger.data("[imageService.resize] Try resize image to size: ", size, " image path: ", foodPath, " foodPaths: ", foodPaths, " foodId: ", foodId);
+    resize: function (size, imagePaths, randoId, imagePath, callback) {
+	logger.data("[imageService.resize] Try resize image to size: ", size, " image path: ", imagePath, " imagePaths: ", imagePaths, " randoId: ", randoId);
 
 	async.series({
 	    mkdir: function (done) {
-		var dir = config.app.static.folder.name + foodPaths[size].replace(new RegExp(foodId + "\..+$"), "");
+		var dir = config.app.static.folder.name + imagePaths[size].replace(new RegExp(randoId + "\..+$"), "");
 		logger.debug("[imageService.resize.mkdir] mkdirp for path: ", dir);
 		mkdirp(dir, function (err, made) {
 		    if (err || made == null) {
@@ -28,10 +28,10 @@ module.exports =  {
 	    },
 	    resize: function (done) {
 		logger.debug("[imageService.resize.resize] gm.resize.quality.write");
-		var originFoodPath = config.app.static.folder.name + foodPaths.origin;
-		var sizeFoodPath = config.app.static.folder.name + foodPaths[size];
-		logger.debug("[imageService.resize.resize] Try resize image with options: originalFoodPath: ", originFoodPath, "destination food image: ", sizeFoodPath);
-		gm(originFoodPath).resize(config.app.img.size[size]).quality(config.app.img.quality).write(sizeFoodPath, function (err) {
+		var originImagePath = config.app.static.folder.name + imagePaths.origin;
+		var sizeImagePath = config.app.static.folder.name + imagePaths[size];
+		logger.debug("[imageService.resize.resize] Try resize image with options: originalFoodPath: ", originImagePath, "destination image: ", sizeImagePath);
+		gm(originImagePath).resize(config.app.img.size[size]).quality(config.app.img.quality).write(sizeImagePath, function (err) {
 		    if (err) {
 			logger.error("[imageService.resize.resize] gm.resize.quality.write done with error: ", err);
 			done(err);

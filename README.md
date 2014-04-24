@@ -1,4 +1,4 @@
-foodex [![Build Status](https://travis-ci.org/dimhold/foodex.png?branch=master)](https://travis-ci.org/dimhold/foodex) [![Dependencies Status](https://david-dm.org/dimhold/foodex.png)](https://david-dm.org/dimhold/foodex) [![Coverage Status](https://coveralls.io/repos/dimhold/foodex/badge.png?branch=master)](https://coveralls.io/r/dimhold/foodex?branch=master)
+Rando [![Build Status](https://travis-ci.org/RandoApp/Rando.png?branch=master)](https://travis-ci.org/RandoApp/Rando) [![Dependencies Status](https://david-dm.org/RandoApp/Rando.png)](https://david-dm.org/RandoApp/Rando) [![Coverage Status](https://coveralls.io/repos/RandoApp/Rando/badge.png?branch=master)](https://coveralls.io/r/RandoApp/Rando?branch=master)
 ======
 
-Share pictures of your meal with a stranger. Look at meals of random people around the world.
+Give, receive and collect unique photos from random people from all over the world

@@ -216,7 +216,7 @@ describe('User service.', function () {
 		should.exist(user);
 		//TODO: make assertion more strongly;
 		user.should.have.property("email", "user@mail.com");
-		user.foods.should.not.be.empty;
+		user.randos.should.not.be.empty;
 		done();
 	    });
 	});
@@ -263,7 +263,7 @@ describe('User service.', function () {
 	    mongooseMock.stubFindOneWithNotFoundUser().stubSave(function (callback) {
 		this._id = "524ea2324a590391a3e8b516";
 
-		this.should.have.property("email", "efab3c3@foodex.com");
+		this.should.have.property("email", "efab3c3@rando4.me");
 		this.should.have.property("anonymousId", "efab3c3");
 		callback(null, this);
 	    });

@@ -28,7 +28,7 @@ describe('Util.', function () {
 	});
     });
 
-    describe('generateFoodName.', function () {
+    describe('generateImageName.', function () {
 	it('Error bubble up', function (done) {
 	    var error = "Error when generate unique name";
 	    sinon.stub(util, "generateUniqueName", function (callback) {
@@ -36,7 +36,7 @@ describe('Util.', function () {
 		util.generateUniqueName.restore();
 	    });
 
-	    util.generateFoodName(function (err, foodId, foodUrls) {
+	    util.generateImageName(function (err, randoId, imageURLs) {
 		should.exist(err);
 		err.should.have.property("message", error);
 		done();
@@ -44,13 +44,13 @@ describe('Util.', function () {
 	});
 
 	it('Full path is correct', function (done) {
-	    util.generateFoodName(function (err, foodId, foodUrls) {
+	    util.generateImageName(function (err, randoId, imageURLs) {
 		should.not.exist(err);
-		should.exist(foodId);
-		foodUrls.origin.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.png$/);
-		foodUrls.small.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
-		foodUrls.medium.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
-		foodUrls.large.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
+		should.exist(randoId);
+		imageURLs.origin.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.png$/);
+		imageURLs.small.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
+		imageURLs.medium.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
+		imageURLs.large.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
 		done();
 	    });
 	});

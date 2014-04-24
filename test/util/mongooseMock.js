@@ -8,16 +8,16 @@ module.exports = {
 		email: "user@mail.com",
 		facebookId: "111111",
 		authToken: "12345fajiwjfoe2523ijof",
-		foods: [{
+		randos: [{
 		    user: {
 			user: "524ea2324a590391a3e8b516",
 			localtion: {
 			    latitude: 53.932,
 			    longitude: 27.3243
 			},
-			foodId: "3333",
-			foodUrl: "http://api.foodex.com/food/3333",
-			mapUrl: "http://api.foodex.com/food/4444",
+			randoId: "3333",
+			imageURL: "http://rando4.me/image/3333",
+			mapURL: "http://rando4.me/image/4444",
 			report: 0,
 			bonAppetit: 0
 		    },
@@ -27,9 +27,9 @@ module.exports = {
 			    longitude: 27.3243
 			},
 			user: "724ea2324a590391a3e8b516",
-			foodId: "3333",
-			foodUrl: "http://api.foodex.com/food/3333",
-			mapUrl: "http://api.foodex.com/map/444",
+			randoId: "3333",
+			imageURL: "http://rando4.me/image/3333",
+			mapURL: "http://rando4.me/map/444",
 			report: 0,
 			bonAppetit: 0 
 		    }
@@ -49,7 +49,7 @@ module.exports = {
 		    email: "user@mail.com",
 		    authToken: "fwiojf23j424",
 		    facebookId: "111111",
-		    foods: []
+		    randos: []
 		});
 	    };
 	}
@@ -68,16 +68,16 @@ module.exports = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
 		    facebookId: "111111", authToken: "4kjafojif32oij4o32ij4o",
-		    foods: [{
+		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
 			    localtion: {
 				latitude: 53.932,
 				longitude: 27.3243
 			    },
-			    foodId: "3333",
-			    foodUrl: "http://api.foodex.com/food/3333",
-			    mapUrl: "http://api.foodex.com/food/4444",
+			    randoId: "3333",
+			    imageURL: "http://rando4.me/image/3333",
+			    mapURL: "http://rando4.me/image/4444",
 			    report: 0,
 			    bonAppetit: 0
 			},
@@ -87,9 +87,9 @@ module.exports = {
 				longitude: 27.3243
 			    },
 			    user: "724ea2324a590391a3e8b516",
-			    foodId: "3333",
-			    foodUrl: "http://api.foodex.com/food/3333",
-			    mapUrl: "http://api.foodex.com/map/444",
+			    randoId: "3333",
+			    imageURL: "http://rando4.me/image/3333",
+			    mapURL: "http://rando4.me/map/444",
 			    report: 0,
 			    bonAppetit: 0 
 			}
@@ -109,7 +109,7 @@ module.exports = {
 	sinon.stub(mongoose.Model, "findOne", stub);
 	return this;
     },
-    stubFindUserWithNotPairedFood: function (stub) {
+    stubFindUserWithNotPairedRando: function (stub) {
 	if (!stub) {
 	    stub = function (email, callback) {
 		var user = {
@@ -117,17 +117,17 @@ module.exports = {
 		    email: email,
 		    facebookId: "111111",
 		    authToken: "4kjafojif32oij4o32ij4o",
-		    foods: [{
+		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
 			    localtion: {
 				latitude: 53.932,
 				longitude: 27.3243
 			    },
-			    foodId: "3333",
-			    foodUrl: "http://api.foodex.com/food/3333",
+			    randoId: "3333",
+			    imageURL: "http://rando4.me/image/3333",
 			    creation: 123456789,
-			    mapUrl: "http://api.foodex.com/food/4444",
+			    mapURL: "http://rando4.me/image/4444",
 			    report: 0,
 			    bonAppetit: false
 			},
@@ -137,9 +137,9 @@ module.exports = {
 				longitude: 0
 			    },
 			    user: "",
-			    foodId: "",
-			    foodUrl: "",
-			    mapUrl: "",
+			    randoId: "",
+			    imageURL: "",
+			    mapURL: "",
 			    report: 0,
 			    bonAppetit: 0 
 			}
@@ -162,7 +162,7 @@ module.exports = {
 		    email: email,
 		    authToken: "fiowmifj32432ojfe",
 		    facebookId: "111111",
-		    foods: []
+		    randos: []
 		};
 		user.__proto__ = mongoose.model("user").prototype;
 
@@ -198,16 +198,16 @@ module.exports = {
 		    email: "user@mail.ru",
 		    authToken: "4kjafojif32oij4o32ij4o",
 		    facebookId: "111111",
-		    foods: [{
+		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
 			    localtion: {
 				latitude: 53.932,
 				longitude: 27.3243
 			    },
-			    foodId: "3333",
-			    foodUrl: "http://api.foodex.com/food/3333",
-			    mapUrl: "http://api.foodex.com/food/4444",
+			    randoId: "3333",
+			    imageURL: "http://rando4.me/image/3333",
+			    mapURL: "http://rando4.me/image/4444",
 			    report: 0,
 			    bonAppetit: 0
 			},
@@ -217,9 +217,9 @@ module.exports = {
 				longitude: 27.3243
 			    },
 			    user: "724ea2324a590391a3e8b516",
-			    foodId: "3333",
-			    foodUrl: "http://api.foodex.com/food/3333",
-			    mapUrl: "http://api.foodex.com/map/444",
+			    randoId: "3333",
+			    imageURL: "http://rando4.me/image/3333",
+			    mapURL: "http://rando4.me/map/444",
 			    report: 0,
 			    bonAppetit: 0 
 			}
@@ -230,9 +230,9 @@ module.exports = {
 				latitude: 53.932,
 				longitude: 27.3243
 			    },
-			    foodId: "8888",
-			    foodUrl: "http://api.foodex.com/food/8888",
-			    mapUrl: "http://api.foodex.com/food/4444",
+			    randoId: "8888",
+			    imageURL: "http://rando4.me/image/8888",
+			    mapURL: "http://rando4.me/image/4444",
 			    report: 0,
 			    bonAppetit: 0
 			},
@@ -242,9 +242,9 @@ module.exports = {
 				longitude: 27.3243
 			    },
 			    user: "724ea2324a590391a3e8b516",
-			    foodId: "9999",
-			    foodUrl: "http://api.foodex.com/food/9999",
-			    mapUrl: "http://api.foodex.com/map/444",
+			    randoId: "9999",
+			    imageURL: "http://rando4.me/image/9999",
+			    mapURL: "http://rando4.me/map/444",
 			    report: 0,
 			    bonAppetit: 0 
 			}

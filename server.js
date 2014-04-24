@@ -4,11 +4,11 @@ var config = require("config");
 var logger = require("./src/log/logger");
 var userService = require("./src/service/userService");
 var commentService = require("./src/service/commentService");
-var foodService = require("./src/service/foodService");
+var randoService = require("./src/service/randoService");
 var logService = require("./src/service/logService");
 var mongodbConnection = require("./src/model/db").establishConnection();
 var Errors = require("./src/error/errors");
-var pairFoodsService = require("./src/service/pairFoodsService");
+var pairRandosService = require("./src/service/pairRandosService");
 var app = express();
 
 (function checkSources() {
@@ -19,35 +19,35 @@ var app = express();
 })();
 
 
-pairFoodsService.startDemon();
+pairRandosService.startDemon();
 
 app.use(express.static(__dirname + '/static', {maxAge: config.app.cacheControl}));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.cookieParser());
 
-app.post('/food/:token', function (req, res, next) {
-    logger.data("Start process user request. POST /food. Token: ", req.params.token);
+app.post('/image/:token', function (req, res, next) {
+    logger.data("Start process user request. POST /image. Token: ", req.params.token);
 
     userService.forUserWithToken(req.params.token, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
-	    logger.data("POST /food DONE with error: " + response.code);
+	    logger.data("POST /image DONE with error: " + response.code);
 	    res.send(response);
 	    return;
 	}
 
-	foodService.saveFood(user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude},  function (err, response) {
+	randoService.saveImage(user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude},  function (err, response) {
 	    if (err) {
 		var response = Errors.toResponse(err);
 		res.status(response.status);
-		logger.data("POST /food DONE with error: ", response.code);
+		logger.data("POST /image DONE with error: ", response.code);
 		res.send(response);
 		return;
 	    }
 
-	    logger.data("POST /food DONE");
+	    logger.data("POST /image DONE");
 	    res.status(200);
 	    res.send(response);
 	});

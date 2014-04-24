@@ -9,23 +9,23 @@ var User = mongoose.model("user", new mongoose.Schema({
     googleId: String,
     anonymousId: String,
     password: String,
-    foods: [{
+    randos: [{
 	user: {
 	    user: String,
 	    location: {
 		latitude: Number,
 		longitude: Number
 	    },
-	    foodId: String,
-	    foodUrl: String,
-	    foodSizeUrl: {
+	    randoId: String,
+	    imageURL: String,
+	    imageSizeURL: {
 		small: String,
 		medium: String,
 		large: String
 	    },
 	    creation: Number,
-	    mapUrl: String,
-	    mapSizeUrl: {
+	    mapURL: String,
+	    mapSizeURL: {
 		small: String,
 		medium: String,
 		large: String
@@ -39,15 +39,15 @@ var User = mongoose.model("user", new mongoose.Schema({
 		latitude: Number,
 		longitude: Number
 	    },
-	    foodId: String,
-	    foodUrl: String,
-	    foodSizeUrl: {
+	    randoId: String,
+	    imageURL: String,
+	    imageSizeURL: {
 		small: String,
 		medium: String,
 		large: String
 	    },
-	    mapUrl: String,
-	    mapSizeUrl: {
+	    mapURL: String,
+	    mapSizeURL: {
 		small: String,
 		medium: String,
 		large: String

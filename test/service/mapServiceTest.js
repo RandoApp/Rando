@@ -75,7 +75,7 @@ describe('Map service.', function () {
 	});
 
     describe('Generate tile name.', function () {
-		it('Should find user and food', function (done) {
+		it('Should find user and rando', function (done) {
 			var city = {name: "Minsk", latitude: 53.8999774364, longitude: 27.5666271553};
 			var tileName = mapService.generateTileName(city);
 			tileName.should.be.eql("c425b557fcbde6cd337150d22811837d");
@@ -84,19 +84,19 @@ describe('Map service.', function () {
 	});
 
     describe('Location to map url sync', function () {
-		it('Should find user and food', function (done) {
+		it('Should find user and rando', function (done) {
 			var configUrl = config.app.url;
 			var configMap = config.app.static.folder.map;
 			var configExt = config.app.static.file.ext;
-			config.app.url = "http://foodex.url";
+			config.app.url = "http://rando4.me";
 			config.app.static.folder.map = "/map/";
 
 			mapService.cities = [{name: "Minsk", latitude: 53.8999774364, longitude: 27.5666271553}];
 
-			var mapSizeUrl = mapService.locationToMapUrlSync(53, 27);
-			mapSizeUrl.small.should.be.eql("http://foodex.url/map/small/c425b557fcbde6cd337150d22811837d.jpg");
-			mapSizeUrl.medium.should.be.eql("http://foodex.url/map/medium/c425b557fcbde6cd337150d22811837d.jpg");
-			mapSizeUrl.large.should.be.eql("http://foodex.url/map/large/c425b557fcbde6cd337150d22811837d.jpg");
+			var mapSizeUrl = mapService.locationToMapURLSync(53, 27);
+			mapSizeUrl.small.should.be.eql("http://rando4.me/map/small/c425b557fcbde6cd337150d22811837d.jpg");
+			mapSizeUrl.medium.should.be.eql("http://rando4.me/map/medium/c425b557fcbde6cd337150d22811837d.jpg");
+			mapSizeUrl.large.should.be.eql("http://rando4.me/map/large/c425b557fcbde6cd337150d22811837d.jpg");
 
 			config.app.url = configUrl;
 			config.app.static.folder.map = configMap;
