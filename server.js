@@ -13,7 +13,7 @@ var app = express();
 
 (function checkSources() {
     if (!fs.existsSync(config.app.citiesJson)) {
-	console.error("File " + config.app.citiesJson + " not found. Did you run src/map/generate_maps.js before start server?\n\nIf not, please, run:\ncd src/map\nnode generateMaps.js");
+	console.error("File " + config.app.citiesJson + " not found. Did you run map.js script from git@github.com:RandoApp/Map.git repository before start server?\n");
 	process.exit(1);
     }
 })();
