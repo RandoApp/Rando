@@ -19,8 +19,6 @@
     "async": "0.7.x",
     "validator": "2.1.x",
     "mv": "2.0.x",
-    "mapnik": "1.4.x",
-    "sphericalmercator": "1.0.x",
     "mkdirp": "0.3.x",
     "gm": "1.14.x"
   },

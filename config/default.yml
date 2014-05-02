@@ -1,10 +1,10 @@
 app:
-    url: http://95.85.19.94/
+    url: http://rando4.me/
     port: 8888
     cacheControl: 31557600000
     secret: Secret #This is a stub. 
     anonymousEmailPosftix: rando4.me
-    reportedImageStub: http://95.85.19.94/image/image-reported-stub.png
+    reportedImageStub: http://rando4.me/image/image-reported-stub.png
     tokenLength: 21
     citiesJson: src/map/cities.json
     img:
