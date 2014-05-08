@@ -205,24 +205,34 @@ module.exports = {
 	logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
 
 	var self = this;
+	var googleJson = "";
+
 	require("https").get({
 	    hostname: config.app.google.host,
 	    port: config.app.google.port,
 	    path: config.app.google.path + token
 	}, function(resp) {
-	    resp.on('data', function (chunk) {
-		var json = JSON.parse(chunk.toString("utf8"));
-		logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
-		if (json.family_name = familyName) {
-		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
-		    self.findOrCreateByGoogleData(json.id, email, callback);
-		} else {
-		    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
-		    callback(Errors.GoogleIncorrectArgs());
-		}
+		resp.on('data', function (chunk) {
+			googleJson += chunk.toString("utf8");
+		}).on('end', function (chunk) {
+			try {
+				var json = JSON.parse(googleJson);
+			} catch (e) {
+				logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Bad JSON: ", e.message);
+				callback(Errors.GoogleError());
+				return;
+			}
+			logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
+			if (json.family_name = familyName) {
+				logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
+				self.findOrCreateByGoogleData(json.id, email, callback);
+			} else {
+				logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
+				callback(Errors.GoogleIncorrectArgs());
+			}
 	    }).on("error", function (e) {
-		logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
-		callback(Errors.GoogleError());
+			logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
+			callback(Errors.GoogleError());
 	    });
 	});
     },
