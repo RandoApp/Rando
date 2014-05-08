@@ -36,7 +36,7 @@ app:
         handleException: true
         level:
             console: debug
-            file: info
+            file: debug 
     static:
         file:
             ext: png
