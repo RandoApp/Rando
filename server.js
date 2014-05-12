@@ -22,6 +22,7 @@ var app = express();
 pairRandosService.startDemon();
 
 app.use(express.static(__dirname + '/static', {maxAge: config.app.cacheControl}));
+app.use(express.limit(config.app.limit.imageSize));
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.cookieParser());
@@ -29,7 +30,8 @@ app.use(express.cookieParser());
 app.post('/image/:token', function (req, res, next) {
     logger.data("Start process user request. POST /image. Token: ", req.params.token);
 
-    userService.forUserWithTokenWithoutSpam(req.params.token, function (err, user) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    userService.forUserWithTokenWithoutSpam(req.params.token, ip, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -57,7 +59,9 @@ app.post('/image/:token', function (req, res, next) {
 app.post('/report/:id/:token', function (req, res) {
     logger.data("Start process user request. POST /report. Id:", req.params.id ," Token: ", req.params.token);
 
-    userService.forUserWithToken(req.params.token, function (err, user) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    userService.forUserWithToken(req.params.token, ip, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -81,32 +85,6 @@ app.post('/report/:id/:token', function (req, res) {
     });
 });
 
-app.post('/bonappetit/:id/:token', function (req, res) {
-    logger.data("Start process user request. POST /bonappetit. Id:", req.params.id ," Token: ", req.params.token);
-
-    userService.forUserWithToken(req.params.token, function (err, user) {
-	if (err) {
-	    var response = Errors.toResponse(err);
-	    res.status(response.status);
-	    logger.data("POST /bonappetit DONE with error: ", response.code);
-	    res.send(response);
-	    return;
-	}
-
-	commentService.bonAppetit(user, req.params.id, function (err, response) {
-	    if (err) {
-		var response = Errors.toResponse(err);
-		res.status(response.status);
-		logger.data("POST /bonappetit DONE with error: ", response.code);
-		res.send(response);
-		return;
-	    }
-
-	    logger.data("POST /bonAppetit DONE");
-	    res.send(response);
-	});
-    });
-});
 
 app.post('/user', function(req, res) {
     logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
@@ -128,7 +106,9 @@ app.post('/user', function(req, res) {
 app.get('/user/:token', function (req, res) {
     logger.data("Start process user request. GET /user. Token: ", req.params.token);
     
-    userService.forUserWithToken(req.params.token, function (err, user) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    userService.forUserWithToken(req.params.token, ip, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -208,7 +188,9 @@ app.post('/google', function (req, res) {
 app.post('/logout/:token', function (req, res) {
     logger.data("Start process user request. POST /logout. Token: ", req.params.token);
 
-    userService.forUserWithToken(req.params.token, function (err, user) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    userService.forUserWithToken(req.params.token, ip,  function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -254,7 +236,9 @@ app.post('/log', function (req, res) {
 app.post('/log/:token', function (req, res) {
     logger.data("Start process user request. POST /log. Token: ", req.params.token);
 
-    userService.forUserWithToken(req.params.token, function (err, user) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    userService.forUserWithToken(req.params.token, ip, function (err, user) {
 	var email = "anonymous";
 	if (user) {
 	    email = user.email;

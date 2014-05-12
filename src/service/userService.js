@@ -7,12 +7,13 @@ var config = require("config");
 var Errors = require("../error/errors");
 
 module.exports = {
-    forUserWithToken: function (token, callback) {
+    forUserWithToken: function (token, ip, callback) {
 	if (!token) {
 	    callback(Errors.Unauthorized());
 	    return;
 	}
 
+	var self =  this;
 	userModel.getByToken(token, function (err, user) {
 	    if (err) {
 		logger.warn("[userService.forUserWithToken, ", token, "] Can't find user by token, because: ", err);
@@ -23,13 +24,15 @@ module.exports = {
 		callback(Errors.Unauthorized());
 		return;
 	    }
-		
+
+		self.updateIp(user, ip);
+
 	    logger.debug("[userService.forUserWithToken, ", token, "] Return user.");
 	    callback(null, user);
 	});
     },
-    forUserWithTokenWithoutSpam: function (token, callback) {
-		this.forUserWithToken(token, function (err, user) {
+    forUserWithTokenWithoutSpam: function (token, ip, callback) {
+		this.forUserWithToken(token, ip, function (err, user) {
 			if (user.ban && Date.now() <= user.ban) {
 				legger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
 				callback(Errors.Forbidden(user.ban));
@@ -61,6 +64,14 @@ module.exports = {
 			callback(null, user);
 		});
     },
+	updateIp: function (user, ip) {
+		if (!user.ip || (user.ip && user.ip != ip)) {
+			user.ip = ip;
+			logger.debug("[userService.updateIp, ", user.email, "] Update ip to: ", ip);
+			userModel.update(user);
+		}
+		logger.debug("[userService.updateIp, ", user.email, "] Don't update user ip, because this ip already exists: ", ip);
+	},
     destroyAuthToken: function (user, callback) {
 	user.authToken = "";
 	userModel.update(user);
