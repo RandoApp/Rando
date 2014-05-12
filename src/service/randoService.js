@@ -20,7 +20,7 @@ module.exports =  {
 	    function (done) {
 		if (!imagePath || !check(imagePath).notEmpty() || !location) {
 		    logger.warn("[randoService.saveImage, ", user.email, "] Incorect args. user: ", user.email, "; imagePath: ", imagePath, "; location: " , location);
-		    done(Errors.IncorrectFoodArgs());
+		    done(Errors.IncorrectArgs());
 		    return;
 		}
 		logger.debug("[randoService.saveImage, ", user.email, "] args validation done");

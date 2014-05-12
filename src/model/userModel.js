@@ -9,6 +9,8 @@ var User = mongoose.model("user", new mongoose.Schema({
     googleId: String,
     anonymousId: String,
     password: String,
+	ban: Number,
+	ip: String,
     randos: [{
 	user: {
 	    user: String,

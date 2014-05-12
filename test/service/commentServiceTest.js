@@ -54,11 +54,11 @@ describe('Comment service.', function () {
 
 	    commentService.findUserWithRando("55af543ad25434", "3333", function (err, user, rando) {
 		should.exist(err);
-		err.foodex.should.be.eql({
+		err.rando.should.be.eql({
 		    status: 400,
 		    code: 403,
-		    message: "Food not found",
-		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#comment"
+		    message: "Rando not found",
+			description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 		});
 		done();
 	    });
@@ -72,11 +72,11 @@ describe('Comment service.', function () {
 
 	    commentService.findUserWithRando("55af543ad25434", "3333", function (err, user, rando) {
 		should.exist(err);
-		err.foodex.should.be.eql({
+		err.rando.should.be.eql({
 		    status: 500,
 		    code: 501,
 		    message: "Internal Server Error",
-		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+			description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 		});
 		done();
 	    });
@@ -87,18 +87,18 @@ describe('Comment service.', function () {
 
 	    commentService.findUserWithRando("55af543ad25434", "3333", function (err, user, rando) {
 		should.exist(err);
-		err.foodex.should.be.eql({
+		err.rando.should.be.eql({
 		    status: 400,
 		    code: 402,
 		    message: "User not found",
-		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#comment"
+			description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 		});
 		done();
 	    });
 	});
     });
 
-    describe('UpdateFood.', function () {
+    describe('UpdateRando.', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
 	    done();
@@ -128,11 +128,11 @@ describe('Comment service.', function () {
 	    }, function (err, rando) {
 		updaterCalled.should.be.false;
 		should.exist(err);
-		err.foodex.should.be.eql({
+		err.rando.should.be.eql({
 		    status: 500,
 		    code: 501,
 		    message: "Internal Server Error",
-		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+			description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 		});
 		done();
 	    });

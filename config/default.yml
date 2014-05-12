@@ -7,6 +7,10 @@ app:
     reportedImageStub: http://rando4.me/image/image-reported-stub.png
     tokenLength: 21
     citiesJson: src/map/cities.json
+    limit:
+        time: 300000 #5 mins
+        images: 10 #10 images per 5 mins
+        ban: 10800000 #3 hours
     img:
         quality: 85 
         ext: jpg

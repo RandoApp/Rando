@@ -28,6 +28,39 @@ module.exports = {
 	    callback(null, user);
 	});
     },
+    forUserWithTokenWithoutSpam: function (token, callback) {
+		this.forUserWithToken(token, function (err, user) {
+			if (user.ban && Date.now() <= user.ban) {
+				legger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
+				callback(Errors.Forbidden(user.ban));
+				return;
+			}
+
+			var randos = user.randos;
+			if (randos.length > config.app.limit.images) {
+				randos.sort(function (rando1, rando2) {
+					return rando1.user.creation - rando2.user.creation;
+				});
+
+				var timeBetwenImagesLimit = randos[0].user.creation - randos[config.app.limit.images - 1].user.creation;
+				if (timeBetwenImagesLimit <= config.app.limit.time) {
+					user.ban = Date.now() + config.app.limit.ban;
+					userModel.update(user, function (err) {
+						if (err) {
+							legger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Can't update user for ban, because: ", err);
+						}
+
+						logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Spam found. Return error.");
+						callback(Errors.Forbidden(user.ban));
+						return;
+					});
+				}
+			}
+			
+			logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] User ok.  Return user.");
+			callback(null, user);
+		});
+    },
     destroyAuthToken: function (user, callback) {
 	user.authToken = "";
 	userModel.update(user);

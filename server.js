@@ -29,7 +29,7 @@ app.use(express.cookieParser());
 app.post('/image/:token', function (req, res, next) {
     logger.data("Start process user request. POST /image. Token: ", req.params.token);
 
-    userService.forUserWithToken(req.params.token, function (err, user) {
+    userService.forUserWithTokenWithoutSpam(req.params.token, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);

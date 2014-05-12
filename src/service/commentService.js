@@ -69,7 +69,7 @@ module.exports = {
 		return;
 	    } else if (!rando) {
 		logger.warn("[commentService.updateRando, ", user.email, "] Rando is not exist, after run findUserWithRando. userId: ", userId, " randoId: ", randoId);
-		callback(Errors.FoodForCommentNotFound());
+		callback(Errors.RandoForCommentNotFound());
 		return;
 	    }
 
@@ -94,7 +94,7 @@ module.exports = {
 		return;
 	    } else if (!user.randos || user.randos.length == 0) {
 		logger.debug("[commentService.findUserWithRando, ", user.email, "] User does not have rando");
-		callback(Errors.FoodForCommentNotFound());
+		callback(Errors.RandoForCommentNotFound());
 		return;
 	    }
 
