@@ -7,12 +7,13 @@ var config = require("config");
 var Errors = require("../error/errors");
 
 module.exports = {
-    forUserWithToken: function (token, callback) {
+    forUserWithToken: function (token, ip, callback) {
 	if (!token) {
 	    callback(Errors.Unauthorized());
 	    return;
 	}
 
+	var self =  this;
 	userModel.getByToken(token, function (err, user) {
 	    if (err) {
 		logger.warn("[userService.forUserWithToken, ", token, "] Can't find user by token, because: ", err);
@@ -23,10 +24,57 @@ module.exports = {
 		callback(Errors.Unauthorized());
 		return;
 	    }
-		
+
+	    self.updateIp(user, ip);
+
 	    logger.debug("[userService.forUserWithToken, ", token, "] Return user.");
 	    callback(null, user);
 	});
+    },
+    forUserWithTokenWithoutSpam: function (token, ip, callback) {
+		this.forUserWithToken(token, ip, function (err, user) {
+			if (user.ban && Date.now() <= user.ban) {
+				logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
+				callback(Errors.Forbidden(user.ban));
+				return;
+			}
+
+			var randos = user.randos;
+			if (randos.length > config.app.limit.images) {
+				randos.sort(function (rando1, rando2) {
+					return rando2.user.creation - rando1.user.creation;
+				});
+
+				var timeBetwenImagesLimit = randos[0].user.creation - randos[config.app.limit.images - 1].user.creation;
+				logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] first image creation: ", randos[0].user.creation, " last in limit image creation: ", randos[config.app.limit.images - 1].user.creation, " Time between Images limit: ", timeBetwenImagesLimit);
+
+				if (timeBetwenImagesLimit <= config.app.limit.time) {
+					user.ban = Date.now() + config.app.limit.ban;
+					userModel.update(user, function (err) {
+						if (err) {
+							logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Can't update user for ban, because: ", err);
+						}
+
+						logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Spam found. Return error.");
+						callback(Errors.Forbidden(user.ban));
+						return;
+					});
+				    return;
+				}
+			}
+			
+			logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] User ok.  Return user.");
+			callback(null, user);
+		});
+    },
+    updateIp: function (user, ip) {
+	if (!user.ip || (user.ip && user.ip != ip)) {
+		user.ip = ip;
+		logger.debug("[userService.updateIp, ", user.email, "] Update ip to: ", ip);
+		userModel.update(user);
+		return;
+	}
+	logger.debug("[userService.updateIp, ", user.email, "] Don't update user ip, because this ip already exists: ", ip);
     },
     destroyAuthToken: function (user, callback) {
 	user.authToken = "";
@@ -41,23 +89,43 @@ module.exports = {
 	}
 	async.each(user.randos, function (rando, done) {
 	    if (rando) {
-		logger.debug("[userService.getUser, ", user.email, "] Remove rando.user.userId and food.stranger.strangerId in food");
-		delete rando.user.user;
-		delete rando.stranger.user;
-		delete rando.user.location;
-		delete rando.stranger.location;
-		if (rando.stranger.report) {
-		    rando.stranger.imageURL = config.app.reportedImageStub; 
-		    rando.stranger.imageSizeURL.small = config.app.reportedImageStub; 
-		    rando.stranger.imageSizeURL.medium = config.app.reportedImageStub; 
-		    rando.stranger.imageSizeURL.large = config.app.reportedImageStub; 
-
-		    rando.stranger.mapURL = config.app.reportedImageStub; 
-		    rando.stranger.mapSizeURL.small = config.app.reportedImageStub; 
-		    rando.stranger.mapSizeURL.medium = config.app.reportedImageStub; 
-		    rando.stranger.mapSizeURL.large = config.app.reportedImageStub; 
+		logger.debug("[userService.getUser, ", user.email, "] Remove rando.user.userId and rando.stranger.strangerId in rando");
+		var randoJSON = {
+			stranger: {
+				creation: rando.stranger.creation,
+				randoId: rando.stranger.randoId,
+				report: rando.stranger.report,
+				imageURL: rando.stranger.imageURL,
+				imageSizeURL: rando.stranger.imageSizeURL,
+				mapURL: rando.stranger.mapURL,
+				mapSizeURL: rando.stranger.mapSizeURL
+			},
+			user: {
+				creation: rando.user.creation,
+				randoId: rando.user.randoId,
+				report: rando.user.report,
+				imageURL: rando.user.imageURL,
+				imageSizeURL: rando.user.imageSizeURL,
+				mapURL: rando.user.mapURL,
+				mapSizeURL: rando.user.mapSizeURL
+			}
 		}
-		userJSON.randos.push(rando);
+		if (rando.stranger.report) {
+		    randoJSON.stranger.imageURL = config.app.reportedImageStub; 
+		    randoJOSN.stranger.imageSizeURL.small = config.app.reportedImageStub; 
+		    randoJSON.stranger.imageSizeURL.medium = config.app.reportedImageStub; 
+		    randoJSON.stranger.imageSizeURL.large = config.app.reportedImageStub; 
+
+		    randoJSON.stranger.mapURL = config.app.reportedImageStub; 
+		    randoJSON.stranger.mapSizeURL.small = config.app.reportedImageStub; 
+		    randoJSON.stranger.mapSizeURL.medium = config.app.reportedImageStub; 
+		    randoJSON.stranger.mapSizeURL.large = config.app.reportedImageStub; 
+		}
+		//TODO: Remove this lines when all clients will be apdated
+		randoJSON.user.bonAppetit = 0;
+		randoJSON.stranger.bonAppetit = 0;
+		//TODO: Remove this lines when all clients will be apdated
+		userJSON.randos.push(randoJSON);
 	    }
 	    done();
 	}, function (err) {
@@ -69,7 +137,7 @@ module.exports = {
 	    callback(null, userJSON);
 	});
     },
-    findOrCreateByLoginAndPassword: function (email, password, callback) {
+    findOrCreateByLoginAndPassword: function (email, password, ip, callback) {
 	logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
 	if (!email || !password) {
@@ -89,6 +157,7 @@ module.exports = {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
 		if (self.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+			user.ip = ip;
 		    userModel.update(user, function (err) {
 			if (err) {
 			    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
@@ -106,7 +175,8 @@ module.exports = {
 		var user = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    email: email,
-		    password: self.generateHashForPassword(email, password)
+		    password: self.generateHashForPassword(email, password),
+			ip: ip
 		}
 
 		logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
@@ -132,7 +202,7 @@ module.exports = {
 	logger.data("[userService.isPasswordCorrect, ", user, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
 	return user.password == this.generateHashForPassword(user.email, password);
     },
-    findOrCreateAnonymous: function (id, callback) {
+    findOrCreateAnonymous: function (id, ip, callback) {
 	if (!id) {
 	    callback(Errors.IncorrectAnonymousId());
 	    return;
@@ -148,6 +218,7 @@ module.exports = {
 	    if (user) {
 		logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		user.ip = ip;
 		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
@@ -162,7 +233,8 @@ module.exports = {
 		var user = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    anonymousId: id,
-		    email: email
+		    email: email,
+			ip: ip
 		}
 		userModel.create(user, function (err, user) {
 		    if (err) {
@@ -176,7 +248,7 @@ module.exports = {
 	    }
 	});
     },
-    verifyFacebookAndFindOrCreateUser: function (id, email, token, callback) {
+    verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, callback) {
 	logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Start");
 
 	var self = this;
@@ -190,7 +262,7 @@ module.exports = {
 		logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Recive json: ", json);
 		if (json.email == email) {
 		    logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is equals");
-		    self.findOrCreateByFBData({email: email, id: id}, callback);
+		    self.findOrCreateByFBData({email: email, id: id, ip: ip}, callback);
 		} else {
 		    logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is not equals. Return incorrect args");
 		    callback(Errors.FBIncorrectArgs());
@@ -201,7 +273,7 @@ module.exports = {
 	    });
 	});
     },
-    verifyGoogleAndFindOrCreateUser: function (email, familyName, token, callback) {
+    verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, callback) {
 	logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
 
 	var self = this;
@@ -225,7 +297,7 @@ module.exports = {
 			logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
 			if (json.family_name = familyName) {
 				logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
-				self.findOrCreateByGoogleData(json.id, email, callback);
+				self.findOrCreateByGoogleData(json.id, email, ip, callback);
 			} else {
 				logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
 				callback(Errors.GoogleIncorrectArgs());
@@ -255,6 +327,7 @@ module.exports = {
 	    if (user) {
 		logger.warn("[userService.findOrCreateByFBData, ", user.id, "] User ", data.email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		user.ip = data.ip;
 		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByFBData, ", email, "] Can't update user with new authToken, because: ", err);
@@ -270,6 +343,7 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
 		    facebookId: data.id,
 		    email: data.email,
+			ip: data.ip
 		}
 
 		userModel.create(user, function (err, user) {
@@ -305,6 +379,7 @@ module.exports = {
 		logger.warn("[userService.findOrCreateByGoogleData, ", user.id, "] User ",email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.googleId = id;
+		user.ip = ip;
 		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't update user with new authToken, because: ", err);
@@ -320,6 +395,7 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
 		    googleId: id, 
 		    email: email,
+			ip: ip
 		}
 
 		userModel.create(user, function (err, user) {

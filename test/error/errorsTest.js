@@ -9,7 +9,7 @@ describe('Errors.', function () {
 		status: 500,
 		code: 500,
 		message: "Internal Server Error",
-		description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+	    description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 	    }
 
 	    var actual = Errors.toResponse(new Error("Some unknown error"));
@@ -17,12 +17,12 @@ describe('Errors.', function () {
 	    actual.should.be.eql(expected);
 	    done();
 	});
-	it('Error with foodex meta data should return only meta data', function (done) {
+	it('Error with rando meta data should return only meta data', function (done) {
 	    var expected = {
 		status: 500,
 		code: 501,
 		message: "Internal Server Error",
-		description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+	    description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 	    }
 
 	    var actual = Errors.toResponse(Errors.System(new Error("Some system error")));

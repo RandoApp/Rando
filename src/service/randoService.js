@@ -20,7 +20,7 @@ module.exports =  {
 	    function (done) {
 		if (!imagePath || !check(imagePath).notEmpty() || !location) {
 		    logger.warn("[randoService.saveImage, ", user.email, "] Incorect args. user: ", user.email, "; imagePath: ", imagePath, "; location: " , location);
-		    done(Errors.IncorrectFoodArgs());
+		    done(Errors.IncorrectArgs());
 		    return;
 		}
 		logger.debug("[randoService.saveImage, ", user.email, "] args validation done");
@@ -121,8 +121,7 @@ module.exports =  {
 				large: mapSizeURL.large 
 			    },
 			    creation: Date.now(),
-			    report: 0,
-			    bonAppetit: 0
+			    report: 0
 			},
 			stranger: {
 			    user: "",
@@ -144,8 +143,7 @@ module.exports =  {
 				large: ""
 			    },
 			    creation: 0,
-			    report: 0,
-			    bonAppetit: 0
+			    report: 0
 			}
 		    });
 

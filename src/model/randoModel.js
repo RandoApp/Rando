@@ -22,8 +22,7 @@ var Rando = mongoose.model("rando", new mongoose.Schema({
 	medium: String,
 	large: String
     },
-    report: Number,
-    bonAppetit: Number
+    report: Number
 }));
 
 module.exports = {
@@ -45,7 +44,6 @@ module.exports = {
 	    location: location,
 	    creation: creation,
 	    randoId: randoId,
-	    bonAppetit: 0,
 	    report: 0,
 	    imageURL: imageURL,
 	    imageSizeURL: {

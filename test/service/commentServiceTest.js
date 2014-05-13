@@ -26,8 +26,7 @@ describe('Comment service.', function () {
 			randoId: "3333",
 			imageURL: "http://rando4.me/image/3333",
 			mapURL: "http://rando4.me/image/4444",
-			report: 0,
-			bonAppetit: 0
+			report: 0
 		    },
 		    stranger: {
 			localtion: {
@@ -38,8 +37,7 @@ describe('Comment service.', function () {
 			randoId: "3333",
 			imageURL: "http://rando4.me/image/3333",
 			mapURL: "http://rando4.me/map/444",
-			report: 0,
-			bonAppetit: 0 
+			report: 0
 		    }
 		});
 
@@ -54,11 +52,11 @@ describe('Comment service.', function () {
 
 	    commentService.findUserWithRando("55af543ad25434", "3333", function (err, user, rando) {
 		should.exist(err);
-		err.foodex.should.be.eql({
+		err.rando.should.be.eql({
 		    status: 400,
 		    code: 403,
-		    message: "Food not found",
-		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#comment"
+		    message: "Rando not found",
+			description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 		});
 		done();
 	    });
@@ -72,11 +70,11 @@ describe('Comment service.', function () {
 
 	    commentService.findUserWithRando("55af543ad25434", "3333", function (err, user, rando) {
 		should.exist(err);
-		err.foodex.should.be.eql({
+		err.rando.should.be.eql({
 		    status: 500,
 		    code: 501,
 		    message: "Internal Server Error",
-		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+			description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 		});
 		done();
 	    });
@@ -87,18 +85,18 @@ describe('Comment service.', function () {
 
 	    commentService.findUserWithRando("55af543ad25434", "3333", function (err, user, rando) {
 		should.exist(err);
-		err.foodex.should.be.eql({
+		err.rando.should.be.eql({
 		    status: 400,
 		    code: 402,
 		    message: "User not found",
-		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#comment"
+			description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 		});
 		done();
 	    });
 	});
     });
 
-    describe('UpdateFood.', function () {
+    describe('UpdateRando.', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
 	    done();
@@ -128,58 +126,17 @@ describe('Comment service.', function () {
 	    }, function (err, rando) {
 		updaterCalled.should.be.false;
 		should.exist(err);
-		err.foodex.should.be.eql({
+		err.rando.should.be.eql({
 		    status: 500,
 		    code: 501,
 		    message: "Internal Server Error",
-		    description: "See https://github.com/dimhold/foodex/wiki/Errors/#system"
+			description: "See https://github.com/RandoApp/Rando/wiki/Errors"
 		});
 		done();
 	    });
 	});
     });
 
-    describe('Bon appetit.', function () {
-	afterEach(function (done) {
-	    mongooseMock.restore();
-	    done();
-	});
-
-	it('Successful bon appetit', function (done) {
-	    var user = {
-		id: "54dwf245d41",
-		randos:[{
-		    user: {
-			user: "524ea2324a590391a3e8b516",
-			randoId: "3333",
-			bonAppetit: 0
-		    },
-		    stranger: {
-			user: "724ea2324a590391a3e8b516",
-			randoId: "3333",
-			bonAppetit: 0 
-		    }
-		}],
-		save: function (callback) {
-		    if (callback) {
-			callback(null);
-		    }
-		}
-	    }
-
-	    mongooseMock.stubFindById(function(id, callback) {
-		callback(null, user);
-	    });
-
-	    commentService.bonAppetit("54dwf245d41", "3333", function (err) {
-		should.not.exist(err);
-		user.randos[0].stranger.bonAppetit.should.be.equal(1);
-		//findById stub return self user:
-		user.randos[0].user.bonAppetit.should.be.equal(1);
-		done();
-	    });
-	});
-    });
 
     describe('Report.', function () {
 	afterEach(function (done) {

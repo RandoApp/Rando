@@ -18,8 +18,7 @@ module.exports = {
 			randoId: "3333",
 			imageURL: "http://rando4.me/image/3333",
 			mapURL: "http://rando4.me/image/4444",
-			report: 0,
-			bonAppetit: 0
+			report: 0
 		    },
 		    stranger: {
 			localtion: {
@@ -30,8 +29,7 @@ module.exports = {
 			randoId: "3333",
 			imageURL: "http://rando4.me/image/3333",
 			mapURL: "http://rando4.me/map/444",
-			report: 0,
-			bonAppetit: 0 
+			report: 0
 		    }
 		}],
 		save: function (callback) {
@@ -67,7 +65,10 @@ module.exports = {
 		var user = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
-		    facebookId: "111111", authToken: "4kjafojif32oij4o32ij4o",
+		    facebookId: "111111",
+		    authToken: "4kjafojif32oij4o32ij4o",
+		    ban: "",
+		    ip: "127.0.0.2",
 		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -78,8 +79,7 @@ module.exports = {
 			    randoId: "3333",
 			    imageURL: "http://rando4.me/image/3333",
 			    mapURL: "http://rando4.me/image/4444",
-			    report: 0,
-			    bonAppetit: 0
+			    report: 0
 			},
 			stranger: {
 			    localtion: {
@@ -90,8 +90,7 @@ module.exports = {
 			    randoId: "3333",
 			    imageURL: "http://rando4.me/image/3333",
 			    mapURL: "http://rando4.me/map/444",
-			    report: 0,
-			    bonAppetit: 0 
+			    report: 0
 			}
 		    }],
 		    save: function (callback) {
@@ -117,6 +116,8 @@ module.exports = {
 		    email: email,
 		    facebookId: "111111",
 		    authToken: "4kjafojif32oij4o32ij4o",
+		    ban: "",
+		    ip: "127.0.0.2",
 		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -128,8 +129,7 @@ module.exports = {
 			    imageURL: "http://rando4.me/image/3333",
 			    creation: 123456789,
 			    mapURL: "http://rando4.me/image/4444",
-			    report: 0,
-			    bonAppetit: false
+			    report: 0
 			},
 			stranger: {
 			    localtion: {
@@ -140,8 +140,7 @@ module.exports = {
 			    randoId: "",
 			    imageURL: "",
 			    mapURL: "",
-			    report: 0,
-			    bonAppetit: 0 
+			    report: 0
 			}
 		    }]
 		};
@@ -162,12 +161,32 @@ module.exports = {
 		    email: email,
 		    authToken: "fiowmifj32432ojfe",
 		    facebookId: "111111",
+		    ban: "",
+		    ip: "127.0.0.2",
 		    randos: []
 		};
 		user.__proto__ = mongoose.model("user").prototype;
 
 		callback(null, user);
 	    };
+	}
+	sinon.stub(mongoose.Model, "findOne", stub);
+	return this;
+    },
+    stubFindOneWithBannedUser: function (resetTime) {
+	var stub = function (email, callback) {
+	    var user = {
+		id: "524ea2324a590391a3e8b516",
+		email: email,
+		ban: resetTime,
+		ip: "127.0.0.1",
+		authToken: "bannedToken",
+		facebookId: "111111",
+		randos: []
+	    };
+	    user.__proto__ = mongoose.model("user").prototype;
+
+	    callback(null, user);
 	}
 	sinon.stub(mongoose.Model, "findOne", stub);
 	return this;
@@ -198,6 +217,8 @@ module.exports = {
 		    email: "user@mail.ru",
 		    authToken: "4kjafojif32oij4o32ij4o",
 		    facebookId: "111111",
+		    ban: "",
+		    ip: "127.0.0.2",
 		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -208,8 +229,7 @@ module.exports = {
 			    randoId: "3333",
 			    imageURL: "http://rando4.me/image/3333",
 			    mapURL: "http://rando4.me/image/4444",
-			    report: 0,
-			    bonAppetit: 0
+			    report: 0
 			},
 			stranger: {
 			    localtion: {
@@ -220,8 +240,7 @@ module.exports = {
 			    randoId: "3333",
 			    imageURL: "http://rando4.me/image/3333",
 			    mapURL: "http://rando4.me/map/444",
-			    report: 0,
-			    bonAppetit: 0 
+			    report: 0
 			}
 		    }, {
 			user: {
@@ -233,8 +252,7 @@ module.exports = {
 			    randoId: "8888",
 			    imageURL: "http://rando4.me/image/8888",
 			    mapURL: "http://rando4.me/image/4444",
-			    report: 0,
-			    bonAppetit: 0
+			    report: 0
 			},
 			stranger: {
 			    localtion: {
@@ -245,8 +263,7 @@ module.exports = {
 			    randoId: "9999",
 			    imageURL: "http://rando4.me/image/9999",
 			    mapURL: "http://rando4.me/map/444",
-			    report: 0,
-			    bonAppetit: 0 
+			    report: 0
 			}
 		    }],
 		    save: function (callback) {

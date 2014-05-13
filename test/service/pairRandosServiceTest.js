@@ -403,8 +403,7 @@ describe('Pair Randos Service.', function () {
 				randoId: "3333",
 				randoURL: "http://api.randoex.com/rando/3333",
 				creation: 123456789,
-				mapURL: "http://api.randoex.com/rando/4444",
-				bonAppetit: false
+				mapURL: "http://api.randoex.com/rando/4444"
 			    },
 			    stranger: {
 				email: "",
@@ -413,8 +412,7 @@ describe('Pair Randos Service.', function () {
 				randoId: "",
 				randoURL: "",
 				mapURL: "",
-				report: false,
-				bonAppetit: false
+				report: false
 			    }
 			}]
 		    }
