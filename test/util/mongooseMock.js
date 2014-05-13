@@ -66,8 +66,9 @@ module.exports = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
 		    facebookId: "111111",
-			authToken: "4kjafojif32oij4o32ij4o",
-			ip: "127.0.0.2",
+		    authToken: "4kjafojif32oij4o32ij4o",
+		    ban: "",
+		    ip: "127.0.0.2",
 		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -164,6 +165,24 @@ module.exports = {
 
 		callback(null, user);
 	    };
+	}
+	sinon.stub(mongoose.Model, "findOne", stub);
+	return this;
+    },
+    stubFindOneWithBannedUser: function (resetTime) {
+	var stub = function (email, callback) {
+	    var user = {
+		id: "524ea2324a590391a3e8b516",
+		email: email,
+		ban: resetTime,
+		ip: "127.0.0.1",
+		authToken: "bannedToken",
+		facebookId: "111111",
+		randos: []
+	    };
+	    user.__proto__ = mongoose.model("user").prototype;
+
+	    callback(null, user);
 	}
 	sinon.stub(mongoose.Model, "findOne", stub);
 	return this;

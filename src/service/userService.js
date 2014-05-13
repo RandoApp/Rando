@@ -25,7 +25,7 @@ module.exports = {
 		return;
 	    }
 
-		self.updateIp(user, ip);
+	    self.updateIp(user, ip);
 
 	    logger.debug("[userService.forUserWithToken, ", token, "] Return user.");
 	    callback(null, user);
@@ -34,7 +34,7 @@ module.exports = {
     forUserWithTokenWithoutSpam: function (token, ip, callback) {
 		this.forUserWithToken(token, ip, function (err, user) {
 			if (user.ban && Date.now() <= user.ban) {
-				legger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
+				logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
 				callback(Errors.Forbidden(user.ban));
 				return;
 			}
@@ -42,21 +42,24 @@ module.exports = {
 			var randos = user.randos;
 			if (randos.length > config.app.limit.images) {
 				randos.sort(function (rando1, rando2) {
-					return rando1.user.creation - rando2.user.creation;
+					return rando2.user.creation - rando1.user.creation;
 				});
 
 				var timeBetwenImagesLimit = randos[0].user.creation - randos[config.app.limit.images - 1].user.creation;
+				logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] first image creation: ", randos[0].user.creation, " last in limit image creation: ", randos[config.app.limit.images - 1].user.creation, " Time between Images limit: ", timeBetwenImagesLimit);
+
 				if (timeBetwenImagesLimit <= config.app.limit.time) {
 					user.ban = Date.now() + config.app.limit.ban;
 					userModel.update(user, function (err) {
 						if (err) {
-							legger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Can't update user for ban, because: ", err);
+							logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Can't update user for ban, because: ", err);
 						}
 
 						logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Spam found. Return error.");
 						callback(Errors.Forbidden(user.ban));
 						return;
 					});
+				    return;
 				}
 			}
 			
@@ -64,15 +67,15 @@ module.exports = {
 			callback(null, user);
 		});
     },
-	updateIp: function (user, ip) {
-		if (!user.ip || (user.ip && user.ip != ip)) {
-			user.ip = ip;
-			logger.debug("[userService.updateIp, ", user.email, "] Update ip to: ", ip);
-			userModel.update(user);
-			return;
-		}
-		logger.debug("[userService.updateIp, ", user.email, "] Don't update user ip, because this ip already exists: ", ip);
-	},
+    updateIp: function (user, ip) {
+	if (!user.ip || (user.ip && user.ip != ip)) {
+		user.ip = ip;
+		logger.debug("[userService.updateIp, ", user.email, "] Update ip to: ", ip);
+		userModel.update(user);
+		return;
+	}
+	logger.debug("[userService.updateIp, ", user.email, "] Don't update user ip, because this ip already exists: ", ip);
+    },
     destroyAuthToken: function (user, callback) {
 	user.authToken = "";
 	userModel.update(user);

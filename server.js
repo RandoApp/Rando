@@ -197,7 +197,7 @@ app.post('/logout/:token', function (req, res) {
 
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    userService.forUserWithToken(req.params.token, ip,  function (err, user) {
+    userService.forUserWithToken(req.params.token, ip,	function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);

@@ -2,6 +2,8 @@ var should = require("should");
 var sinon = require("sinon");
 var userService = require("../../src/service/userService");
 var mongooseMock = require("../util/mongooseMock");
+var config = require("config");
+
 
 describe('User service.', function () {
     describe('Find or create user by login and password.', function () {
@@ -25,8 +27,7 @@ describe('User service.', function () {
 	});
 
 	it('Empty password should return Error', function () {
-	    userService.findOrCreateByLoginAndPassword("this@is.email", "", "127.0.0.1", function (err) {
-		should.exist(err);
+	    userService.findOrCreateByLoginAndPassword("this@is.email", "", "127.0.0.1", function (err) {should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 	    });
 	});
@@ -276,6 +277,128 @@ describe('User service.', function () {
 	    });
 
 	});
+    });
+
+    describe('For user token without spam.', function () {
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    done();
+	});
+
+	it('Banned user get Forbidden error', function (done) {
+	    var resetTime = Date.now() + config.app.limit.ban;
+	    mongooseMock.stubFindOneWithBannedUser(resetTime).stubSave();
+
+	    userService.forUserWithTokenWithoutSpam("bannedToken", "127.0.0.1", function (err, user) {
+		should.exists(err);
+		err.rando.should.be.eql({
+		    status: 403,
+		    code: 411,
+		    message: "Forbidden. Reset: " + resetTime,
+		    description: "See https://github.com/RandoApp/Rando/wiki/Errors"
+		});
+		done();
+	    });
+	});
+
+	it('Banned user with old reset time does not get Forbidden error', function (done) {
+	    var resetTime = Date.now() - 100;
+	    mongooseMock.stubFindOneWithBannedUser(resetTime).stubSave();
+
+	    userService.forUserWithTokenWithoutSpam("bannedToken", "127.0.0.1", function (err, user) {
+		should.not.exists(err);
+		should.exists(user);
+		done();
+	    });
+	});
+
+	it('User with not enough randos retun withot errors', function (done) {
+	    var resetTime = Date.now() - 100;
+	    mongooseMock.stubFindOne().stubSave();
+
+	    userService.forUserWithTokenWithoutSpam("bannedToken", "127.0.0.1", function (err, user) {
+		should.not.exists(err);
+		should.exists(user);
+		done();
+	    });
+	});
+
+	it('User with a lot of legal randos return without errors', function (done) {
+	    var randos = [];
+	    for (var i = 0; i < config.app.limit.images + 10; i++) {
+		var creation = Date.now() - i * 100000000;
+		randos.push({
+		    stranger: {
+			creation: creation
+		    },
+		    user: {
+			creation: creation
+		    }
+		});
+	    }
+
+	    mongooseMock.stubFindOne(function (token, callback) {
+		callback(null, {
+		    email: "user@mail.com",
+		    authToken: "token",
+		    ban: "",
+		    ip: "127.0.0.1",
+		    randos: randos,
+		    save: function (callback) {
+			if (callback) {
+			    callback(null);
+			};
+		    }
+		});
+	    }).stubSave();
+
+	    userService.forUserWithTokenWithoutSpam("token", "127.0.0.1", function (err, user) {
+		should.not.exists(err);
+		should.exists(user);
+		done();
+	    });
+	});
+
+	it('User with spam should get Forbidden error', function (done) {
+	    var randos = [];
+	    for (var i = 0; i < config.app.limit.images + 10; i++) {
+		var creation = Date.now() + i;
+		randos.push({
+		    stranger: {
+			creation: creation
+		    },
+		    user: {
+			creation: creation
+		    }
+		});
+	    }
+
+	    mongooseMock.stubFindOne(function (token, callback) {
+		callback(null, {
+		    email: "user@mail.com",
+		    authToken: "token",
+		    ban: "",
+		    ip: "127.0.0.1",
+		    randos: randos,
+		    save: function (callback) {
+			if (callback) {
+			    callback(null);
+			};
+		    }
+		});
+	    }).stubSave();
+
+
+	    userService.forUserWithTokenWithoutSpam("token", "127.0.0.1", function (err, user) {
+		should.exists(err);
+		err.rando.should.have.property("status", 403);
+		err.rando.should.have.property("code", 411);
+		err.rando.should.have.property("description", "See https://github.com/RandoApp/Rando/wiki/Errors");
+		err.rando.message.should.match(/^Forbidden. Reset: \d+$/);
+		done();
+	    });
+	});
+	
     });
 
 });
