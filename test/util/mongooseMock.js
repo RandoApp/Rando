@@ -65,7 +65,8 @@ module.exports = {
 		var user = {
 		    id: "524ea2324a590391a3e8b516",
 		    email: email,
-		    facebookId: "111111", authToken: "4kjafojif32oij4o32ij4o",
+		    facebookId: "111111",
+			authToken: "4kjafojif32oij4o32ij4o",
 			ip: "127.0.0.2",
 		    randos: [{
 			user: {

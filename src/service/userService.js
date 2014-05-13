@@ -69,6 +69,7 @@ module.exports = {
 			user.ip = ip;
 			logger.debug("[userService.updateIp, ", user.email, "] Update ip to: ", ip);
 			userModel.update(user);
+			return;
 		}
 		logger.debug("[userService.updateIp, ", user.email, "] Don't update user ip, because this ip already exists: ", ip);
 	},
@@ -85,23 +86,43 @@ module.exports = {
 	}
 	async.each(user.randos, function (rando, done) {
 	    if (rando) {
-		logger.debug("[userService.getUser, ", user.email, "] Remove rando.user.userId and food.stranger.strangerId in food");
-		delete rando.user.user;
-		delete rando.stranger.user;
-		delete rando.user.location;
-		delete rando.stranger.location;
-		if (rando.stranger.report) {
-		    rando.stranger.imageURL = config.app.reportedImageStub; 
-		    rando.stranger.imageSizeURL.small = config.app.reportedImageStub; 
-		    rando.stranger.imageSizeURL.medium = config.app.reportedImageStub; 
-		    rando.stranger.imageSizeURL.large = config.app.reportedImageStub; 
-
-		    rando.stranger.mapURL = config.app.reportedImageStub; 
-		    rando.stranger.mapSizeURL.small = config.app.reportedImageStub; 
-		    rando.stranger.mapSizeURL.medium = config.app.reportedImageStub; 
-		    rando.stranger.mapSizeURL.large = config.app.reportedImageStub; 
+		logger.debug("[userService.getUser, ", user.email, "] Remove rando.user.userId and rando.stranger.strangerId in rando");
+		var randoJSON = {
+			stranger: {
+				creation: rando.stranger.creation,
+				randoId: rando.stranger.randoId,
+				report: rando.stranger.report,
+				imageURL: rando.stranger.imageURL,
+				imageSizeURL: rando.stranger.imageSizeURL,
+				mapURL: rando.stranger.mapURL,
+				mapSizeURL: rando.stranger.mapSizeURL
+			},
+			user: {
+				creation: rando.user.creation,
+				randoId: rando.user.randoId,
+				report: rando.user.report,
+				imageURL: rando.user.imageURL,
+				imageSizeURL: rando.user.imageSizeURL,
+				mapURL: rando.user.mapURL,
+				mapSizeURL: rando.user.mapSizeURL
+			}
 		}
-		userJSON.randos.push(rando);
+		if (rando.stranger.report) {
+		    randoJSON.stranger.imageURL = config.app.reportedImageStub; 
+		    randoJOSN.stranger.imageSizeURL.small = config.app.reportedImageStub; 
+		    randoJSON.stranger.imageSizeURL.medium = config.app.reportedImageStub; 
+		    randoJSON.stranger.imageSizeURL.large = config.app.reportedImageStub; 
+
+		    randoJSON.stranger.mapURL = config.app.reportedImageStub; 
+		    randoJSON.stranger.mapSizeURL.small = config.app.reportedImageStub; 
+		    randoJSON.stranger.mapSizeURL.medium = config.app.reportedImageStub; 
+		    randoJSON.stranger.mapSizeURL.large = config.app.reportedImageStub; 
+		}
+		//TODO: Remove this lines when all clients will be apdated
+		randoJSON.user.bonAppetit = 0;
+		randoJSON.stranger.bonAppetit = 0;
+		//TODO: Remove this lines when all clients will be apdated
+		userJSON.randos.push(randoJSON);
 	    }
 	    done();
 	}, function (err) {
