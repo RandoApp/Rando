@@ -121,8 +121,7 @@ module.exports =  {
 				large: mapSizeURL.large 
 			    },
 			    creation: Date.now(),
-			    report: 0,
-			    bonAppetit: 0
+			    report: 0
 			},
 			stranger: {
 			    user: "",
@@ -144,8 +143,7 @@ module.exports =  {
 				large: ""
 			    },
 			    creation: 0,
-			    report: 0,
-			    bonAppetit: 0
+			    report: 0
 			}
 		    });
 
