@@ -11,35 +11,35 @@ describe('User service.', function () {
 	});
 
 	it('Invalid email should return Error', function () {
-	    userService.findOrCreateByLoginAndPassword("this is not email", "", function (err) {
+	    userService.findOrCreateByLoginAndPassword("this is not email", "", "127.0.0.1", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
 	it('Empty email should return Error', function () {
-	    userService.findOrCreateByLoginAndPassword("", "password", function (err) {
+	    userService.findOrCreateByLoginAndPassword("", "password", "127.0.0.1", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
 	it('Empty password should return Error', function () {
-	    userService.findOrCreateByLoginAndPassword("this@is.email", "", function (err) {
+	    userService.findOrCreateByLoginAndPassword("this@is.email", "", "127.0.0.1", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
 	it('Undefined email should return Error', function () {
-	    userService.findOrCreateByLoginAndPassword(null, "", function (err) {
+	    userService.findOrCreateByLoginAndPassword(null, "", "127.0.0.1", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 	    });
 	});
 
 	it('Undefined password should return Error', function () {
-	    userService.findOrCreateByLoginAndPassword("this@is.email", null, function (err) {
+	    userService.findOrCreateByLoginAndPassword("this@is.email", null, "127.0.0.1", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 	    });
@@ -48,7 +48,7 @@ describe('User service.', function () {
 	it('Correct email and password should not return Error', function (done) {
 	    mongooseMock.stubSave().stubFindOneWithNotFoundUser();
 
-	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err) {
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", "127.0.0.1", function (err) {
 		should.not.exist(err);
 		done();
 	    });
@@ -62,7 +62,7 @@ describe('User service.', function () {
 
 	    });
 
-	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err) {
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", "127.0.0.1", function (err) {
 		should.exist(err);
 		err.should.have.property("message", error);
 		done();
@@ -80,7 +80,7 @@ describe('User service.', function () {
 		callback(null, {user: "some user"});
 	    });
 
-	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password2", function (err) {
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password2", "127.0.0.1", function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 		done();
@@ -102,7 +102,7 @@ describe('User service.', function () {
 		});
 	    });
 
-	    userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", function (err, response) {
+	    userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", "127.0.0.1", function (err, response) {
 		should.not.exist(err);
 		response.should.have.property("token");
 		response.token.should.not.be.empty;
@@ -113,7 +113,7 @@ describe('User service.', function () {
 	it('New user should be created in data base and return token', function (done) {
 	    mongooseMock.stubFindOneWithNotFoundUser().stubSave();
 
-	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", function (err, response) {
+	    userService.findOrCreateByLoginAndPassword("email@mail.com", "password", "127.0.0.1", function (err, response) {
 		should.not.exist(err);
 		response.should.have.property("token");
 		response.token.should.not.be.empty;
@@ -160,7 +160,7 @@ describe('User service.', function () {
 	});
 
 	it('Wrong data without email from facebook', function (done) {
-	    userService.findOrCreateByFBData({email: null}, function (err) {
+	    userService.findOrCreateByFBData({email: null, ip: "127.0.0.1"}, function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 		done();
@@ -179,7 +179,7 @@ describe('User service.', function () {
 		callback(new Error("Data base error"));
 	    });
 
-	    userService.findOrCreateByFBData({email: "user@mail.com"}, function (err) {
+	    userService.findOrCreateByFBData({email: "user@mail.com", ip: "127.0.0.1"}, function (err) {
 		should.exist(err);
 		err.should.have.property("message", "Data base error");
 		done();
@@ -188,7 +188,7 @@ describe('User service.', function () {
 	it('User exist', function (done) {
 	    mongooseMock.stubFindOne();
 
-	    userService.findOrCreateByFBData({email: "user@mail.com"}, function (err, userId) {
+	    userService.findOrCreateByFBData({email: "user@mail.com", ip: "127.0.0.1"}, function (err, userId) {
 		should.not.exist(err);
 		should.exist(userId);
 		done();
@@ -197,7 +197,7 @@ describe('User service.', function () {
 	it('Create user', function (done) {
 	    mongooseMock.stubSave().stubFindOneWithNotFoundUser();
 
-	    userService.findOrCreateByFBData({email: "user@mail.com", id: "23131231"}, function (err, userId) {
+	    userService.findOrCreateByFBData({email: "user@mail.com", id: "23131231", ip: "127.0.0.1"}, function (err, userId) {
 		should.not.exist(err);
 		should.exist(userId);
 		done();
@@ -228,7 +228,7 @@ describe('User service.', function () {
 	});
 
 	it('Not defined id should return error', function (done) {
-	    userService.findOrCreateAnonymous(null, function (err, response) {
+	    userService.findOrCreateAnonymous(null, "127.0.0.1", function (err, response) {
 		should.exist(err);
 		err.should.have.property("message", "Id is not correct");
 		done();
@@ -241,7 +241,7 @@ describe('User service.', function () {
 		callback(new Error(error));
 	    });
 
-	    userService.findOrCreateAnonymous("efab3c3", function(err, response) {
+	    userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", function(err, response) {
 		should.exist(err);
 		err.should.have.property("message", error);
 		done();
@@ -251,7 +251,7 @@ describe('User service.', function () {
 	it('Anonymous user already exists', function (done) {
 	    mongooseMock.stubFindOne();
 
-	    userService.findOrCreateAnonymous("efab3c3", function(err, response) {
+	    userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", function(err, response) {
 		should.not.exist(err);
 		response.should.have.property("token");
 		response.token.should.not.be.empty;
@@ -268,7 +268,7 @@ describe('User service.', function () {
 		callback(null, this);
 	    });
 
-	    userService.findOrCreateAnonymous("efab3c3", function(err, response) {
+	    userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", function(err, response) {
 		should.not.exist(err);
 		response.should.have.property("token");
 		response.token.should.not.be.empty;

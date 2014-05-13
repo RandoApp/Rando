@@ -33,34 +33,6 @@ module.exports = {
 	    callback(null, {command: "report", result: "done"});
 	});
     },
-    bonAppetit: function (user, randoId, callback) {
-	logger.debug("[commentService.bonAppetit, ", user.email, "] Start bonAppetit for rando: ", randoId);
-	var self = this;
-
-	async.waterfall([
-	    function (done) {
-		self.updateRando(user.id, randoId, function (rando) {
-		    rando.stranger.bonAppetit = 1;
-		}, function(err, rando) {
-		    done(null, rando.stranger.user, rando.stranger.randoId);
-		});
-	    },
-	    function (strangerId, randoId, done) {
-		self.updateRando(strangerId, randoId, function (rando) {
-		    rando.user.bonAppetit = 1;
-		}, function() {
-		    done();
-		});
-	    },
-	], function (err) {
-	    if (err) {
-		logger.warn("[commentService.bonAppetit, ", user.email, "] Waterfall error: ", err);
-		callback(err);
-		return;
-	    }
-	    callback(null, {command: "bonAppetit", result: "done"});
-	});
-    },
     updateRando: function (userId, randoId, updater, callback) {
 	this.findUserWithRando(userId, randoId, function (err, user, rando) {
 	    if (err) {

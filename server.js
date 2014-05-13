@@ -31,6 +31,7 @@ app.post('/image/:token', function (req, res, next) {
     logger.data("Start process user request. POST /image. Token: ", req.params.token);
 
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
     userService.forUserWithTokenWithoutSpam(req.params.token, ip, function (err, user) {
 	if (err) {
 	    var response = Errors.toResponse(err);
@@ -89,7 +90,9 @@ app.post('/report/:id/:token', function (req, res) {
 app.post('/user', function(req, res) {
     logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
     
-    userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, function(err, response) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, ip, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -134,7 +137,9 @@ app.get('/user/:token', function (req, res) {
 app.post('/anonymous', function (req, res) {
     logger.data("Start process user request. POST /anonymous. id: ", req.body.id);
 
-    userService.findOrCreateAnonymous(req.body.id, function (err, response) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    userService.findOrCreateAnonymous(req.body.id, ip, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -152,7 +157,9 @@ app.post('/anonymous', function (req, res) {
 app.post('/facebook', function (req, res) {
     logger.data("Start process user request. POST /facebook. Id:", req.body.id ," Email: ", req.body.email, " FB Token length: ", req.body.token.length);
 
-    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, function (err, response) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, ip, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -170,7 +177,7 @@ app.post('/facebook', function (req, res) {
 app.post('/google', function (req, res) {
     logger.data("Start process user request. POST /google. Email: ", req.body.email, "Family name: ", req.body.family_name, " Google Token length: ", req.body.token.length);
 
-    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, function (err, response) {
+    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, ip, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);
@@ -218,7 +225,9 @@ app.post('/logout/:token', function (req, res) {
 app.post('/log', function (req, res) {
     logger.data("Start process user request. POST /log. Token: ", req.params.token);
     var email = "anonymous";
-    logService.storeLog(email, req.body, function (err, response) {
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    logService.storeLog(email, req.body, ip, function (err, response) {
 	if (err) {
 	    var response = Errors.toResponse(err);
 	    res.status(response.status);

@@ -113,7 +113,7 @@ module.exports = {
 	    callback(null, userJSON);
 	});
     },
-    findOrCreateByLoginAndPassword: function (email, password, callback) {
+    findOrCreateByLoginAndPassword: function (email, password, ip, callback) {
 	logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
 	if (!email || !password) {
@@ -133,6 +133,7 @@ module.exports = {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
 		if (self.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+			user.ip = ip;
 		    userModel.update(user, function (err) {
 			if (err) {
 			    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
@@ -150,7 +151,8 @@ module.exports = {
 		var user = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    email: email,
-		    password: self.generateHashForPassword(email, password)
+		    password: self.generateHashForPassword(email, password),
+			ip: ip
 		}
 
 		logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
@@ -176,7 +178,7 @@ module.exports = {
 	logger.data("[userService.isPasswordCorrect, ", user, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
 	return user.password == this.generateHashForPassword(user.email, password);
     },
-    findOrCreateAnonymous: function (id, callback) {
+    findOrCreateAnonymous: function (id, ip, callback) {
 	if (!id) {
 	    callback(Errors.IncorrectAnonymousId());
 	    return;
@@ -192,6 +194,7 @@ module.exports = {
 	    if (user) {
 		logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		user.ip = ip;
 		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
@@ -206,7 +209,8 @@ module.exports = {
 		var user = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    anonymousId: id,
-		    email: email
+		    email: email,
+			ip: ip
 		}
 		userModel.create(user, function (err, user) {
 		    if (err) {
@@ -220,7 +224,7 @@ module.exports = {
 	    }
 	});
     },
-    verifyFacebookAndFindOrCreateUser: function (id, email, token, callback) {
+    verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, callback) {
 	logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Start");
 
 	var self = this;
@@ -234,7 +238,7 @@ module.exports = {
 		logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Recive json: ", json);
 		if (json.email == email) {
 		    logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is equals");
-		    self.findOrCreateByFBData({email: email, id: id}, callback);
+		    self.findOrCreateByFBData({email: email, id: id, ip: ip}, callback);
 		} else {
 		    logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is not equals. Return incorrect args");
 		    callback(Errors.FBIncorrectArgs());
@@ -245,7 +249,7 @@ module.exports = {
 	    });
 	});
     },
-    verifyGoogleAndFindOrCreateUser: function (email, familyName, token, callback) {
+    verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, callback) {
 	logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
 
 	var self = this;
@@ -269,7 +273,7 @@ module.exports = {
 			logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
 			if (json.family_name = familyName) {
 				logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
-				self.findOrCreateByGoogleData(json.id, email, callback);
+				self.findOrCreateByGoogleData(json.id, email, ip, callback);
 			} else {
 				logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
 				callback(Errors.GoogleIncorrectArgs());
@@ -299,6 +303,7 @@ module.exports = {
 	    if (user) {
 		logger.warn("[userService.findOrCreateByFBData, ", user.id, "] User ", data.email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
+		user.ip = data.ip;
 		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByFBData, ", email, "] Can't update user with new authToken, because: ", err);
@@ -314,6 +319,7 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
 		    facebookId: data.id,
 		    email: data.email,
+			ip: data.ip
 		}
 
 		userModel.create(user, function (err, user) {
@@ -349,6 +355,7 @@ module.exports = {
 		logger.warn("[userService.findOrCreateByGoogleData, ", user.id, "] User ",email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.googleId = id;
+		user.ip = ip;
 		userModel.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't update user with new authToken, because: ", err);
@@ -364,6 +371,7 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
 		    googleId: id, 
 		    email: email,
+			ip: ip
 		}
 
 		userModel.create(user, function (err, user) {
