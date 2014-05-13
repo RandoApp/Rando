@@ -279,7 +279,7 @@ describe('User service.', function () {
 	});
     });
 
-    describe('For user token without spam.', function () {
+    describe('For user with token without spam.', function () {
 	afterEach(function (done) {
 	    mongooseMock.restore();
 	    done();
@@ -399,6 +399,143 @@ describe('User service.', function () {
 	    });
 	});
 	
+    });
+
+    describe('For user with token.', function () {
+	afterEach(function (done) {
+	    mongooseMock.restore();
+	    done();
+	});
+
+	it('Empty token should return Unauthorized error', function (done) {
+	    userService.forUserWithToken(undefined, "127.0.0.1", function (err, user) {
+		should.exist(err);
+		err.rando.should.be.eql({
+		    status: 401,
+		    code: 400,
+		    message: "Unauthorized",
+		    description: "You are not authorized. See https://github.com/RandoApp/Rando/wiki/Errors"
+		});
+		done();
+	    });
+	});
+
+	it('Not found user with token should return Unauthorized error', function (done) {
+	    mongooseMock.stubFindOneWithNotFoundUser().stubSave();
+
+	    userService.forUserWithToken("sometoken", "127.0.0.1", function (err, user) {
+		should.exist(err);
+		err.rando.should.be.eql({
+		    status: 401,
+		    code: 400,
+		    message: "Unauthorized",
+		    description: "You are not authorized. See https://github.com/RandoApp/Rando/wiki/Errors"
+		});
+		done();
+	    });
+	});
+
+	it('DB error should return System error', function (done) {
+	    var error = "Some db error";
+	    mongooseMock.stubFindOne(function (token, callback) {
+		callback(new Error(error));
+	    });
+
+	    userService.forUserWithToken("sometoken", "127.0.0.1", function (err, user) {
+		should.exist(err);
+		err.rando.should.be.eql({
+		    status: 500,
+		    code: 501,
+		    message: "Internal Server Error",
+		    description: "See https://github.com/RandoApp/Rando/wiki/Errors"
+		});
+		done();
+	    });
+	});
+
+	it('Exist user should be returend without error', function (done) {
+	    mongooseMock.stubFindOneWithEmptyUser().stubSave();
+
+	    userService.forUserWithToken("sometoken", "127.0.0.1", function (err, user) {
+		should.not.exist(err);
+		should.exist(user);
+		done();
+	    });
+	});
+    });
+
+    describe('Update ip.', function () {
+
+	it('User with same ip should not be updated', function (done) {
+	    var isSaveCalled = false;
+	    var user = {
+		ip: "127.0.0.1",
+		save: function () {
+		    isSaveCalled = true;
+		}
+	    }
+
+	    userService.updateIp(user, "127.0.0.1");
+
+	    isSaveCalled.should.be.false;
+	    done();
+	});
+
+	it('User with old ip should be updated with new ip', function (done) {
+	    var isSaveCalled = false;
+	    var user = {
+		ip: "127.0.0.3",
+		save: function () {
+		    isSaveCalled = true;
+		}
+	    }
+
+	    userService.updateIp(user, "127.0.0.1");
+
+	    isSaveCalled.should.be.true;
+	    user.ip.should.be.eql("127.0.0.1");
+	    done();
+	});
+
+	it('User without any ip should be updated with new ip', function (done) {
+	    var isSaveCalled = false;
+	    var user = {
+		save: function () {
+		    isSaveCalled = true;
+		}
+	    }
+
+	    userService.updateIp(user, "127.0.0.1");
+
+	    isSaveCalled.should.be.true;
+	    user.ip.should.be.eql("127.0.0.1");
+	    done();
+
+	});
+    });
+
+    describe('Destroy auth token.', function () {
+	it('AuthToken should be destroyed from user in db and return logout done as result', function (done) {
+	    var isSaveCalled = false;
+	    var user = {
+		authToken: "someToken",
+		save: function () {
+		    isSaveCalled = true;
+		}
+	    }
+	    userService.destroyAuthToken(user, function (err, result) {
+		should.not.exist(err);
+		isSaveCalled.should.be.true;
+		user.authToken.should.be.empty;
+
+		result.should.be.eql({
+		    command: "logout",
+		    result: "done"
+		});
+
+		done();
+	    });
+	});
     });
 
 });

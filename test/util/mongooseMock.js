@@ -116,6 +116,8 @@ module.exports = {
 		    email: email,
 		    facebookId: "111111",
 		    authToken: "4kjafojif32oij4o32ij4o",
+		    ban: "",
+		    ip: "127.0.0.2",
 		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
@@ -159,6 +161,8 @@ module.exports = {
 		    email: email,
 		    authToken: "fiowmifj32432ojfe",
 		    facebookId: "111111",
+		    ban: "",
+		    ip: "127.0.0.2",
 		    randos: []
 		};
 		user.__proto__ = mongoose.model("user").prototype;
@@ -213,6 +217,8 @@ module.exports = {
 		    email: "user@mail.ru",
 		    authToken: "4kjafojif32oij4o32ij4o",
 		    facebookId: "111111",
+		    ban: "",
+		    ip: "127.0.0.2",
 		    randos: [{
 			user: {
 			    user: "524ea2324a590391a3e8b516",
