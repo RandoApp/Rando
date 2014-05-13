@@ -12,7 +12,7 @@ module.exports = {
 	    function (name, done) {
 		var folderName = name.substr(0, config.app.static.folder.length);
 		var imagePaths = {
-		    origin: config.app.static.folder.image + folderName + "/" + name + "." + config.app.static.file.ext,
+		    origin: config.app.static.folder.image + config.app.img.folder.origin + folderName + "/" + name + "." + config.app.img.ext,
 		    small: config.app.static.folder.image + config.app.img.folder.small + folderName + "/" + name + "." + config.app.img.ext,
 		    medium: config.app.static.folder.image + config.app.img.folder.medium + folderName + "/" + name + "." + config.app.img.ext,
 		    large: config.app.static.folder.image + config.app.img.folder.large + folderName + "/" + name + "." + config.app.img.ext
