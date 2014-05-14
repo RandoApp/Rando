@@ -47,7 +47,7 @@ describe('Util.', function () {
 	    util.generateImageName(function (err, randoId, imageURLs) {
 		should.not.exist(err);
 		should.exist(randoId);
-		imageURLs.origin.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.png$/);
+		imageURLs.origin.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
 		imageURLs.small.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
 		imageURLs.medium.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);
 		imageURLs.large.should.match(/^[\w\d\/]*[\w\d]+\/[\w\d]+\.jpg$/);

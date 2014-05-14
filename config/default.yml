@@ -16,6 +16,7 @@ app:
         quality: 85 
         ext: jpg
         folder:
+            origin: origin/
             small: small/
             medium: medium/
             large: large/

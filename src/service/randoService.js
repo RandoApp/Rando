@@ -67,7 +67,7 @@ module.exports =  {
 	    },
 	    function (imagePaths, user, randoId, location, done) {
 		logger.debug("Generate imageURL");
-		var imageURL = config.app.url + imagePaths.origin;
+		var imageURL = config.app.url + imagePaths.large; 
 		var imageSizeURL = {
 		    small: config.app.url + imagePaths.small,
 		    medium: config.app.url + imagePaths.medium,
