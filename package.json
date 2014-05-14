@@ -20,7 +20,8 @@
     "validator": "2.1.x",
     "mv": "2.0.x",
     "mkdirp": "0.3.x",
-    "gm": "1.14.x"
+    "gm": "1.14.x",
+    "s3": "0.3.x"
   },
   "devDependencies": {
     "mocha": "*",

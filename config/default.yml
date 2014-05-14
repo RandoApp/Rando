@@ -54,3 +54,11 @@ app:
             name: static/
 db:
     url: mongodb://localhost/rando
+s3:
+    key: AccessKeyID #This is a stub.
+    secret: SecretAccessKey #This is a stub.
+    bucket:
+        img:
+            small: img.s.rando4me
+            medium: img.m.rando4me
+            large: img.l.rando4me

@@ -8,9 +8,9 @@ var randoModel = require("../model/randoModel");
 var userModel = require("../model/userModel");
 var mapService = require("./mapService");
 var imageService = require("./imageService");
+var s3Service = require("./s3Service");
 var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
-var mkdirp = require("mkdirp");
 
 module.exports =  {
     saveImage: function (user, imagePath, location, callback) {
@@ -66,14 +66,48 @@ module.exports =  {
 		});
 	    },
 	    function (imagePaths, user, randoId, location, done) {
-		logger.debug("Generate imageURL");
-		var imageURL = config.app.url + imagePaths.large; 
-		var imageSizeURL = {
-		    small: config.app.url + imagePaths.small,
-		    medium: config.app.url + imagePaths.medium,
-		    large: config.app.url + imagePaths.large
-		}
-		done(null, user, randoId, imageURL, imageSizeURL, location);
+                var imageSizeURL = {}; //will be filled after each size upload to S3
+
+                async.parallel({
+                    uploadSmall: function (parallelCallback) {
+                        s3Service.upload(imagePaths.small, "small", function (err, url) {
+                            if (err) {
+                                parallelCallback(err);
+                                return;
+                            }
+                            imageSizeURL.small = url;
+                            parallelCallback();
+                        });
+                    },
+                    uploadMedium: function (parallelCallback) {
+                        s3Service.upload(imagePaths.medium, "medium", function (err, url) {
+                            if (err) {
+                                parallelCallback(err);
+                                return;
+                            }
+                            imageSizeURL.medium = url;
+                            parallelCallback();
+                        });
+                    },
+                    uploadLarge: function (parallelCallback) {
+                        s3Service.upload(imagePaths.large, "large", function (err, url) {
+                            if (err) {
+                                parallelCallback(err);
+                                return;
+                            }
+                            imageSizeURL.large = url;
+                            parallelCallback();
+                        });
+                    }
+		}, function (err) {
+		    if (err) {
+			logger.error("[randoService.saveImage, ", user.email, "] Can not upload image to S3, because: ", err);
+			done(err);
+			return;
+		    }
+		    logger.debug("[randoService.saveImage, ", user.email, "] All images uplod to S3 successfully. Go to next step");
+		    done(null, user, randoId, imageSizeURL.large, imageSizeURL, location);
+		});
 	    },
 	    this.updateRando
 	], function (err, imageURL) {
