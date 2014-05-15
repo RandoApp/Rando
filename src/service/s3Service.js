@@ -52,6 +52,10 @@ module.exports = {
 	return imageLargeClient;
     },
     getS3FileName: function (file) {
-	return /[\w\d]+\.jpg$/.exec(file);
+        var s3File = /[\w\d]+\.jpg$/.exec(file);
+        if (Array.isArray(s3File)) {
+            return s3File[0];
+        }
+	return s3File;
     }
 };
