@@ -2,7 +2,7 @@ app:
     url: http://rando4.me/
     port: 8888
     cacheControl: 31557600000
-    secret: STUB,
+    secret: STUB
     anonymousEmailPosftix: rando4.me
     reportedImageStub: http://rando4.me/image/image-reported-stub.png
     tokenLength: 21

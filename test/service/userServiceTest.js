@@ -93,7 +93,7 @@ describe('User service.', function () {
 		callback(null, {
 		    id: "123456789",
 		    email: "user@mail.com",
-		    password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5", //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+		    password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5", //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
 		    authToken: "",
 		    save: function (callback) {
 			if (callback) {
