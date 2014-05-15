@@ -163,7 +163,9 @@ describe('User service.', function () {
 	it('Wrong data without email from facebook', function (done) {
 	    userService.findOrCreateByFBData({email: null, ip: "127.0.0.1"}, function (err) {
 		should.exist(err);
-
+		err.should.have.property("message", "Incorrect args");
+		done();
+	    });
 
 	});
 	it('No data from facebook', function (done) {
