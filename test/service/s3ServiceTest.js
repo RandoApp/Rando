@@ -1,5 +1,4 @@
 var should = require("should");
-var sinon = require("sinon");
 var config = require("config");
 var s3Service = require("../../src/service/s3Service");
 var s3 = require("s3");
@@ -25,26 +24,79 @@ describe('S3 service.', function () {
         });
     });
 
-    describe('Get Client.', function () {
-	it('Should return correct client with correct bucket', function (done) {
-            var smallClient = s3Service.getClient("small");
-            smallClient.knox.options.bucket.should.be.eql(config.s3.bucket.img.small);
-            var mediumClient = s3Service.getClient("medium");
-            mediumClient.knox.options.bucket.should.be.eql(config.s3.bucket.img.medium);
-            var largeCleint = s3Service.getClient("large");
-            largeCleint.knox.options.bucket.should.be.eql(config.s3.bucket.img.large);
-            done();
+    describe('Process uploader.', function () {
+	it('Should not return any error if file uploaded', function (done) {
+            var uploaderStub = {
+                on: function (event, onDone) {
+                    if (event == "end") {
+                        onDone(null, {});
+                    }
+                    return this;
+                }
+            };
+
+            s3Service.processUploader(uploaderStub, function (err, url) {
+                should.not.exist(err);
+                done();
+            });
         });
 
-	it('Unknown client type should return large client', function (done) {
-            var largeCleint = s3Service.getClient("some strange client that not exists");
-            largeCleint.knox.options.bucket.should.be.eql(config.s3.bucket.img.large);
+	it('Should return error if file uploaded with error', function (done) {
+            var error = "S3 Error";
+
+            var uploaderStub = {
+                on: function (event, onDone) {
+                    if (event == "error") {
+                        onDone(new Error(error));
+                    }
+                    return this;
+                }
+            };
+
+            s3Service.processUploader(uploaderStub, function (err, url) {
+                should.exist(err);
+                err.should.have.property("message", error);
+                done();
+            });
+        });
+
+	it('Should set porogress', function (done) {
+            var error = "S3 Error";
+
+            var uploaderStub = {
+                on: function (event, onDone) {
+                    if (event == "progress") {
+                        this.progressAmount = 10;
+                        this.progressTotal = 200;
+                    } else if (event == "end") {
+                        onDone();
+                    }
+                    return this;
+                }
+            };
+
+            s3Service.processUploader(uploaderStub, function (err, url) {
+                uploaderStub.should.have.property("progressAmount", 10);
+                uploaderStub.should.have.property("progressTotal", 200);
+                done();
+            });
+        });
+    });
+
+    describe('Build url.', function () {
+	it('Should return correct url', function (done) {
+            var url = s3Service.buildUrl("file123.jpg", "small");
+            url.should.be.eql("https://s3.amazonaws.com/img.s.rando4me/file123.jpg");
             done();
         });
     });
 
     describe('Upload.', function () {
-	it('Should return correct client with correct bucket', function (done) {
+	it('Should return correct url', function (done) {
+            s3Service.upload("not exist file", "not exist size", function (err, url) {
+                should.exists(err);
+                done();
+            });
         });
     });
 });

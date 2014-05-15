@@ -3,53 +3,53 @@ var config = require("config");
 var logger = require("../log/logger");
 var async = require("async");
 
-var headers = {
-    'Content-Type': 'image/jpg',
-    'x-amz-acl': 'public-read',
-    "Cache-Control": "public, max-age=" + config.app.cacheControl
-};
-
-var imageSmallClient = s3.createClient({
-    key: config.s3.key,
-    secret: config.s3.secret,
-    bucket: config.s3.bucket.img.small
-});
-
-var imageMediumClient = s3.createClient({
-    key: config.s3.key,
-    secret: config.s3.secret,
-    bucket: config.s3.bucket.img.medium
-});
-
-var imageLargeClient = s3.createClient({
-    key: config.s3.key,
-    secret: config.s3.secret,
-    bucket: config.s3.bucket.img.large
+var clinet = s3.createClient({
+    maxAsyncS3: Infinity,
+    s3RetryCount: 3,
+    s3RetryDelay: 1000,
+    s3Options: {
+        accessKeyId: config.s3.key,
+        secretAccessKey: config.s3.secret,
+    }
 });
 
 module.exports = {
     upload: function (file, size, callback) {
-	var client = this.getClient(size);
-	var uploader = client.upload(file, this.getS3FileName(file), headers);
-
-	uploader.on('progress', function (amountDone, amountTotal) {
-	    logger.debug("[s3Service.upload.progress] amountDone: ", amountDone, " amountTotal: ", amountTotal); 
-	}).on('end', function (url) {
-	    logger.data("[s3Service.upload.end] File ", file, " uploaded. Url: ", url);
-	    callback(null, url);
+	var uploader = clinet.uploadFile(this.buildParams(file, size));
+        this.processUploader(uploader, function (err) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            callback(null, this.buildUrl(file, size));
+        });
+    },
+    processUploader: function (uploader, callback) {
+	uploader.on('progress', function () {
+	    logger.debug("[s3Service.upload.progress] amount: ", uploader.progressAmount, " total: ", uploader.progressTotal); 
+	}).on('end', function (data) {
+	    logger.data("[s3Service.upload.end] File uploaded. data: ", data);
+	    callback();
 	}).on('error', function (err) {
-	    logger.error("[s3Service.upload.error] Can't upload file: ", file, " because: ", err);
+	    logger.error("[s3Service.upload.error] Can't upload file, because: ", err);
 	    callback(err);
 	});
     },
-    getClient: function (size) {
-	if (size == "small") {
-	    return imageSmallClient;
-	} else if (size == "medium") {
-	    return imageMediumClient;
-	} 
-
-	return imageLargeClient;
+    buildParams: function (file, size) {
+        return {
+            localFile: file,
+            s3Params: {
+                Bucket: config.s3.bucket.img[size],
+                Key: this.getS3FileName(file),
+                ContentType: "image/jpg",
+                CacheControl: "public, max-age=" + config.app.cacheControl,
+                ACL: "public-read",
+                StorageClass: "STANDARD"
+            }
+        };
+    },
+    buildUrl: function (file, size) {
+        return config.s3.url + config.s3.bucket.img[size] + "/" + file;
     },
     getS3FileName: function (file) {
         var s3File = /[\w\d]+\.jpg$/.exec(file);

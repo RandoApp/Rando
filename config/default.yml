@@ -57,6 +57,7 @@ db:
 s3:
     key: AccessKeyID #This is a stub.
     secret: SecretAccessKey #This is a stub.
+    url: https://s3.amazonaws.com/
     bucket:
         img:
             small: img.s.rando4me
