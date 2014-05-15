@@ -2,6 +2,7 @@ var should = require("should");
 var sinon = require("sinon");
 var randoService = require("../../src/service/randoService");
 var mapService = require("../../src/service/mapService");
+var s3Service = require("../../src/service/s3Service");
 var util = require("../../src/util/util");
 var fs = require("fs");
 var mongooseMock = require("../util/mongooseMock");
@@ -60,15 +61,16 @@ describe('Rando service.', function () {
 	    mongooseMock.stubSave(function (callback) {
 		callback(new Error(error));
 	    });
-	    sinon.stub(fs, "mkdir", function (p, mode, callback) {
-		fs.mkdir.restore();
-		callback(null);
-	    });
 	    sinon.stub(fs, "rename", function (source, dest, callback) {
 		fs.rename.restore();
 		callback(null);
 	    });
-
+	    sinon.stub(fs, "unlink", function (file, callback) {
+		callback(null);
+	    });
+            sinon.stub(s3Service, "upload", function (file, size, callback) {
+                callback(null, "http://rando4me/image/someimage.jpg");
+            });
 	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
 		callback();
 	    });
@@ -79,6 +81,33 @@ describe('Rando service.', function () {
 
 		gm.prototype.write.restore();
 		mongooseMock.restore();
+                s3Service.upload.restore();
+                fs.unlink.restore();
+		done();
+	    });
+	});
+
+	it('Error when upload image to S3', function (done) {
+	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
+
+	    var error = "S3 error";
+	    sinon.stub(fs, "rename", function (source, dest, callback) {
+		fs.rename.restore();
+		callback(null);
+	    });
+            sinon.stub(s3Service, "upload", function (file, size, callback) {
+                callback(new Error(error));
+            });
+	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
+		callback();
+	    });
+
+	    randoService.saveImage(mongooseMock.user(), "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
+		should.exist(err);
+		err.should.have.property("message", error);
+
+		gm.prototype.write.restore();
+                s3Service.upload.restore();
 		done();
 	    });
 	});
@@ -86,16 +115,16 @@ describe('Rando service.', function () {
 	it('Successful save image', function (done) {
 	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
 	    mongooseMock.stubSave().stubFindById();
-	    var mkDirCalled = false;
 	    var renameCalled = false;
-	    sinon.stub(fs, "mkdir", function (p, mode, callback) {
-		mkDirCalled = true;
-		fs.mkdir.restore();
-		callback(null);
-	    });
 	    sinon.stub(fs, "rename", function (source, dest, callback) {
 		renameCalled = true;
 		fs.rename.restore();
+		callback(null);
+	    });
+            sinon.stub(s3Service, "upload", function (file, size, callback) {
+                callback(null, "http://rando4me/image/someimage.jpg");
+            });
+	    sinon.stub(fs, "unlink", function (file, callback) {
 		callback(null);
 	    });
 	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
@@ -103,14 +132,15 @@ describe('Rando service.', function () {
 	    });
 
 	    randoService.saveImage(mongooseMock.user(), "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err, imageURL) {
-		mkDirCalled.should.be.true;
 		renameCalled.should.be.true;
 		should.not.exist(err);
 		should.exist(imageURL);
 
 
 		gm.prototype.write.restore();
+                s3Service.upload.restore();
 		mongooseMock.restore();
+		fs.unlink.restore();
 		done();
 	    });
 	});

@@ -2,7 +2,7 @@ app:
     url: http://rando4.me/
     port: 8888
     cacheControl: 31557600000
-    secret: Secret #This is a stub. 
+    secret: STUB,
     anonymousEmailPosftix: rando4.me
     reportedImageStub: http://rando4.me/image/image-reported-stub.png
     tokenLength: 21
@@ -54,3 +54,12 @@ app:
             name: static/
 db:
     url: mongodb://localhost/rando
+s3:
+    key: AccessKeyIdSTUB
+    secret: SecretAccessKeySTUB
+    url: https://s3.amazonaws.com/
+    bucket:
+        img:
+            small: img.s.rando4me
+            medium: img.m.rando4me
+            large: img.l.rando4me
