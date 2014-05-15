@@ -125,7 +125,7 @@ describe('User service.', function () {
 
     describe('Generate Hash for password.', function () {
 	it('Sha1 algorithm should work', function (done) {
-	    var expected = "7548a5ca114de42a25cc6d93e2ab74095b290ec5"; //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+	    var expected = "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5"; //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
 	    var actual = userService.generateHashForPassword("user@mail.com", "passwordForSha1");
 	    actual.should.be.equal(expected);
 	    done();
@@ -136,7 +136,7 @@ describe('User service.', function () {
 	it('Same passwords return true', function (done) {
 	    var user = {
 		email: "user@mail.com",
-		password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5" //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+		password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5" //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
 	    };
 	    var actual = userService.isPasswordCorrect("passwordForSha1", user);
 	    actual.should.be.true;
@@ -146,7 +146,7 @@ describe('User service.', function () {
 	it('Differents passwords return false', function (done) {
 	    var user = {
 		email: "user@mail.com",
-		password: "7548a5ca114de42a25cc6d93e2ab74095b290ec5" //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+		password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5" //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
 	    };
 	    var actual = userService.isPasswordCorrect("differentPassword", user);
 	    actual.should.be.false;
@@ -163,9 +163,7 @@ describe('User service.', function () {
 	it('Wrong data without email from facebook', function (done) {
 	    userService.findOrCreateByFBData({email: null, ip: "127.0.0.1"}, function (err) {
 		should.exist(err);
-		err.should.have.property("message", "Incorrect args");
-		done();
-	    });
+
 
 	});
 	it('No data from facebook', function (done) {
