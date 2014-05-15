@@ -11,6 +11,7 @@ var imageService = require("./imageService");
 var s3Service = require("./s3Service");
 var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
+var fs = require("fs");
 
 module.exports =  {
     saveImage: function (user, imagePath, location, callback) {
@@ -70,7 +71,7 @@ module.exports =  {
 
                 async.parallel({
                     uploadSmall: function (parallelCallback) {
-                        s3Service.upload(imagePaths.small, "small", function (err, url) {
+                        s3Service.upload(imagePaths, "small", function (err, url) {
                             if (err) {
                                 parallelCallback(err);
                                 return;
@@ -80,7 +81,7 @@ module.exports =  {
                         });
                     },
                     uploadMedium: function (parallelCallback) {
-                        s3Service.upload(imagePaths.medium, "medium", function (err, url) {
+                        s3Service.upload(imagePaths, "medium", function (err, url) {
                             if (err) {
                                 parallelCallback(err);
                                 return;
@@ -90,7 +91,7 @@ module.exports =  {
                         });
                     },
                     uploadLarge: function (parallelCallback) {
-                        s3Service.upload(imagePaths.large, "large", function (err, url) {
+                        s3Service.upload(imagePaths, "large", function (err, url) {
                             if (err) {
                                 parallelCallback(err);
                                 return;
@@ -105,10 +106,53 @@ module.exports =  {
 			done(err);
 			return;
 		    }
-		    logger.debug("[randoService.saveImage, ", user.email, "] All images uplod to S3 successfully. Go to next step");
-		    done(null, user, randoId, imageSizeURL.large, imageSizeURL, location);
+		    logger.debug("[randoService.saveImage, ", user.email, "] All images uploaded to S3 successfully. Go to next step");
+		    done(null, imagePaths, user, randoId, imageSizeURL.large, imageSizeURL, location);
 		});
 	    },
+            function (imagePaths, user, randoId, imageURL, imageSizeURL, location, done) {
+                async.parallel({
+                    rmSmall: function (parallelCallback) {
+                        var smallFile = config.app.static.folder.name + imagePaths.small;
+                        fs.unlink(smallFile, function (err) {
+                            if (err) {
+                                parallelCallback(err);
+                                return;
+                            }
+                            parallelCallback();
+                        });
+                    },
+                    rmMedium: function (parallelCallback) {
+                        var mediumFile = config.app.static.folder.name + imagePaths.medium;
+                        fs.unlink(mediumFile, function (err) {
+                            if (err) {
+                                parallelCallback(err);
+                                return;
+                            }
+                            parallelCallback();
+                        });
+                    },
+                    rmLarge: function (parallelCallback) {
+                        var largeFile = config.app.static.folder.name + imagePaths.large;
+                        fs.unlink(largeFile, function (err) {
+                            if (err) {
+                                parallelCallback(err);
+                                return;
+                            }
+                            parallelCallback();
+                        });
+                    }
+                }, function (err) {
+                    if (err) {
+			logger.error("[randoService.saveImage, ", user.email, "] Can not remove image from fs, because: ", err);
+                        done(err);
+                        return;
+                    };
+
+		    logger.debug("[randoService.saveImage, ", user.email, "] All tmp images deleted from fs. Go to next step");
+		    done(null, user, randoId, imageURL, imageSizeURL, location);
+                });
+            },
 	    this.updateRando
 	], function (err, imageURL) {
 	    if (err) {

@@ -14,14 +14,17 @@ var clinet = s3.createClient({
 });
 
 module.exports = {
-    upload: function (file, size, callback) {
-	var uploader = clinet.uploadFile(this.buildParams(file, size));
+    upload: function (files, size, callback) {
+        var self = this;
+        var params = this.buildParams(files, size);
+	var uploader = clinet.uploadFile(params);
         this.processUploader(uploader, function (err) {
             if (err) {
                 callback(err);
                 return;
             }
-            callback(null, this.buildUrl(file, size));
+            var url = s3.getPublicUrl(params.s3Params.Bucket, params.s3Params.Key);
+            callback(null, url);
         });
     },
     processUploader: function (uploader, callback) {
@@ -35,21 +38,18 @@ module.exports = {
 	    callback(err);
 	});
     },
-    buildParams: function (file, size) {
+    buildParams: function (files, size) {
         return {
-            localFile: file,
+            localFile: config.app.static.folder.name + files[size],
             s3Params: {
                 Bucket: config.s3.bucket.img[size],
-                Key: this.getS3FileName(file),
+                Key: this.getS3FileName(files[size]),
                 ContentType: "image/jpg",
                 CacheControl: "public, max-age=" + config.app.cacheControl,
                 ACL: "public-read",
                 StorageClass: "STANDARD"
             }
         };
-    },
-    buildUrl: function (file, size) {
-        return config.s3.url + config.s3.bucket.img[size] + "/" + file;
     },
     getS3FileName: function (file) {
         var s3File = /[\w\d]+\.jpg$/.exec(file);

@@ -83,14 +83,6 @@ describe('S3 service.', function () {
         });
     });
 
-    describe('Build url.', function () {
-	it('Should return correct url', function (done) {
-            var url = s3Service.buildUrl("file123.jpg", "small");
-            url.should.be.eql("https://s3.amazonaws.com/img.s.rando4me/file123.jpg");
-            done();
-        });
-    });
-
     describe('Upload.', function () {
 	it('Should return correct url', function (done) {
             s3Service.upload("not exist file", "not exist size", function (err, url) {

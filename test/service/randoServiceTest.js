@@ -65,6 +65,9 @@ describe('Rando service.', function () {
 		fs.rename.restore();
 		callback(null);
 	    });
+	    sinon.stub(fs, "unlink", function (file, callback) {
+		callback(null);
+	    });
             sinon.stub(s3Service, "upload", function (file, size, callback) {
                 callback(null, "http://rando4me/image/someimage.jpg");
             });
@@ -79,6 +82,7 @@ describe('Rando service.', function () {
 		gm.prototype.write.restore();
 		mongooseMock.restore();
                 s3Service.upload.restore();
+                fs.unlink.restore();
 		done();
 	    });
 	});
@@ -120,6 +124,9 @@ describe('Rando service.', function () {
             sinon.stub(s3Service, "upload", function (file, size, callback) {
                 callback(null, "http://rando4me/image/someimage.jpg");
             });
+	    sinon.stub(fs, "unlink", function (file, callback) {
+		callback(null);
+	    });
 	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
 		callback();
 	    });
@@ -133,6 +140,7 @@ describe('Rando service.', function () {
 		gm.prototype.write.restore();
                 s3Service.upload.restore();
 		mongooseMock.restore();
+		fs.unlink.restore();
 		done();
 	    });
 	});
