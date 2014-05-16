@@ -4,7 +4,7 @@ app:
     cacheControl: 31557600000
     secret: STUB
     anonymousEmailPosftix: rando4.me
-    reportedImageStub: http://rando4.me/image/image-reported-stub.png
+    reportedImageStub: http://s3.amazonaws.com/img.s.rando4me/reported.jpg
     tokenLength: 21
     citiesJson: src/map/cities.json
     limit:
