@@ -112,7 +112,7 @@ module.exports = {
 		}
 		if (rando.stranger.report) {
 		    randoJSON.stranger.imageURL = config.app.reportedImageStub; 
-		    randoJOSN.stranger.imageSizeURL.small = config.app.reportedImageStub; 
+		    randoJSON.stranger.imageSizeURL.small = config.app.reportedImageStub; 
 		    randoJSON.stranger.imageSizeURL.medium = config.app.reportedImageStub; 
 		    randoJSON.stranger.imageSizeURL.large = config.app.reportedImageStub; 
 
