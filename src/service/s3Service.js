@@ -23,7 +23,7 @@ module.exports = {
                 callback(err);
                 return;
             }
-            var url = s3.getPublicUrl(params.s3Params.Bucket, params.s3Params.Key);
+            var url = s3.getPublicUrl(params.s3Params.Bucket, params.s3Params.Key, true);
             callback(null, url);
         });
     },

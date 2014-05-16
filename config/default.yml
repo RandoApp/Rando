@@ -57,7 +57,6 @@ db:
 s3:
     key: AccessKeyIdSTUB
     secret: SecretAccessKeySTUB
-    url: https://s3.amazonaws.com/
     bucket:
         img:
             small: img.s.rando4me
