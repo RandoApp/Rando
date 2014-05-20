@@ -1,7 +1,6 @@
 var logger = require("../log/logger");
 var config = require("config");
 var async = require("async");
-var check = require("validator").check;
 var util = require("../util/util");
 var mv = require("mv");
 var randoModel = require("../model/randoModel");
@@ -19,7 +18,7 @@ module.exports =  {
 
 	async.waterfall([
 	    function (done) {
-		if (!imagePath || !check(imagePath).notEmpty() || !location) {
+		if (!imagePath || !location) {
 		    logger.warn("[randoService.saveImage, ", user.email, "] Incorect args. user: ", user.email, "; imagePath: ", imagePath, "; location: " , location);
 		    done(Errors.IncorrectArgs());
 		    return;

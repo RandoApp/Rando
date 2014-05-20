@@ -1,12 +1,10 @@
 var logger = require("../log/logger");
 var config = require("config");
 var async = require("async");
-var check = require("validator").check;
 var util = require("../util/util");
 var mv = require("mv");
 var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
-var mkdirp = require("mkdirp");
 
 module.exports =  {
     resize: function (size, imagePaths, randoId, imagePath, callback) {

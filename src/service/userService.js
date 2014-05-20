@@ -1,7 +1,6 @@
 var logger = require("../log/logger");
 var userModel = require("../model/userModel");
 var async = require("async");
-var check = require("validator").check;
 var crypto = require("crypto");
 var config = require("config");
 var Errors = require("../error/errors");
@@ -140,7 +139,7 @@ module.exports = {
     findOrCreateByLoginAndPassword: function (email, password, ip, callback) {
 	logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
-	if (!email || !password) {
+	if (!email || !/.+@.+\..+/.test(email) || !password) {
 	    logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
 	    callback(Errors.LoginAndPasswordIncorrectArgs());
 	    return;
