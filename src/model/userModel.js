@@ -79,8 +79,7 @@ module.exports = {
             if (callback) {
                 callback(err);
             }
-        };
-);
+        });
     },
     update: function (user, callback) {
 	logger.data("[userModel.update] Update user with  Email: ", user.email);
