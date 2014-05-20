@@ -9,23 +9,9 @@ module.exports = {
 	logger.debug("[commentService.report, ", user.email, "] Start report for rando: ", randoId);
 	var self = this;
 
-        async.parallel({
-            reportRandoForUser: function (done) {
-                for (var i = 0; i < user.randos.length; i++) {
-                    if (user.randos[i].stranger.randoId == randoId) {
-                        user.randos[i].stranger.report = 1;
-                        userModel.update(user);
-                        done();
-                        return;
-                    }
-                }
-            });
-           
-        });
-
 	async.waterfall([
 	    function (done) {
-		self.updateRando(user.email, randoId, function (rando) {
+		self.updateRando(user.id, randoId, function (rando) {
 		    rando.stranger.report = 1;
 		}, function (err, rando) {
 		    done(null, rando.stranger.user, rando.stranger.randoId);
@@ -47,7 +33,7 @@ module.exports = {
 	    callback(null, {command: "report", result: "done"});
 	});
     },
-    updateRando: function (userEmail, randoId, updater, callback) {
+    updateRando: function (userId, randoId, updater, callback) {
 	this.findUserWithRando(userId, randoId, function (err, user, rando) {
 	    if (err) {
 		logger.warn("[commentService.updateRando, ", userId, "] Error, when run findUserWithRando. userId: ", userId, " randoId: ", randoId, " error: ", err);

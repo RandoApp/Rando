@@ -3,7 +3,7 @@ var config = require("config");
 var logger = require("../log/logger");
 
 var User = mongoose.model("user", new mongoose.Schema({
-    email: String,
+    email: {type: String, unique: true, lowercase: true},
     authToken: String,
     facebookId: String,
     googleId: String,
@@ -14,18 +14,18 @@ var User = mongoose.model("user", new mongoose.Schema({
     randos: [{
 	user: {
 	    email: String,
+	    randoId: String,
+	    creation: Number,
 	    location: {
 		latitude: Number,
 		longitude: Number
 	    },
-	    randoId: String,
 	    imageURL: String,
 	    imageSizeURL: {
 		small: String,
 		medium: String,
 		large: String
 	    },
-	    creation: Number,
 	    mapURL: String,
 	    mapSizeURL: {
 		small: String,
@@ -36,11 +36,12 @@ var User = mongoose.model("user", new mongoose.Schema({
 	},
 	stranger: {
 	    email: String,
+	    randoId: String,
+	    creation: Number,
 	    location: {
 		latitude: Number,
 		longitude: Number
 	    },
-	    randoId: String,
 	    imageURL: String,
 	    imageSizeURL: {
 		small: String,
@@ -53,7 +54,6 @@ var User = mongoose.model("user", new mongoose.Schema({
 		medium: String,
 		large: String
 	    },
-	    creation: Number,
 	    report: Number
 	}
     }] 

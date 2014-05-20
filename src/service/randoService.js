@@ -25,7 +25,7 @@ module.exports =  {
 		    return;
 		}
 		logger.debug("[randoService.saveImage, ", user.email, "] args validation done");
-		done(null);
+		done();
 	    },
 	    function (done) {
 		util.generateImageName(done);

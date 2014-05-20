@@ -4,12 +4,12 @@ var logger = require("../log/logger");
 
 var Rando = mongoose.model("rando", new mongoose.Schema({
     email: String,
+    randoId: {type: String, unique: true},
+    creation: Number,
     location: {
 	latitude: Number,
 	longitude: Number
     },
-    creation: Number,
-    randoId: String,
     imageURL: String,
     imageSizeURL: {
 	small: String,
