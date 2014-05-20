@@ -16,21 +16,12 @@ module.exports = {
 		return;
 	    }
 
-            var randos = self.findAndPairRandos(randos);
-
-		if (randos.length >= 1 && oldRando && (Date.now() - randos[0].creation) >= config.app.demon.pairingTimeout) {
-		    randos.push(oldRando);
-		    randos.sort(function (rando1, rando2) {if (rando1 > rando2) return -1; else return 1;});
-		    self.findAndPairRandos(randos);
-		}
-	    });
+            if (randos) {
+                self.findAndPairRandos(randos);
+            }
 	});
     },
     findAndPairRandos: function (randos) {
-	if (!randos) {
-	    return [];
-	}
-
 	for (var i = 0; i < randos.length; i++) {
 	    var currentRando = randos[i];
 	    var rando = this.findRandoForUser(currentRando, randos);
@@ -38,8 +29,6 @@ module.exports = {
 		this.connectRandos(currentRando, rando);
 	    }
 	}
-
-	return randos;
     },
     findRandoForUser: function (rando, randos) {
 	logger.debug("Start findRandoForUser");
@@ -51,13 +40,24 @@ module.exports = {
 	return null;
     },
     connectRandos: function (rando1, rando2) {
-	this.processRandoForUser(rando1.email, rando2);
-	this.processRandoForUser(rando2.email, rando1);
+        var self = this;
+        async.parallel({
+            processUser1: function (done) {
+                self.processRandoForUser(rando1.email, rando2);
+            },
+            processUser2: function (done) {
+                self.processRandoForUser(rando2.email, rando1);
+            },
+        }, function (err) {
+            if (err) {
+                logger.warn("Can't porcess rando for users ", rando1.email, " and ", rando2.email, ", because: ", err);
+            }
+        });
     },
     processRandoForUser: function (email, rando) {
 	userModel.getByEmail(email, function (err, user) {
 	    if (err) {
-		logger.warn("Data base error when getByEmail: ", userId);
+		logger.warn("Data base error when getByEmail: ", email);
 		return;
 	    }
 

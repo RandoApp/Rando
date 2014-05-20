@@ -35,14 +35,18 @@ module.exports = {
 	logger.data("[randoModel.getAll]");
 	Rando.find({}, callback);
     },
-    remove: function (rando) {
+    remove: function (rando, callback) {
 	logger.data("[randoModel.remove] Try remove rando");
 	rando.remove(function (err) {
 	    if (err) {
 		logger.warn("[randoModel.remove] Can't remove rando, because: ", err); 
-		return;
-	    }
-	    logger.debug("[randoModel.remove] Rando removed. User: ", rando.email," randoId: ", rando.randoId);
+	    } else {
+                logger.debug("[randoModel.remove] Rando removed. User: ", rando.email," randoId: ", rando.randoId);
+            }
+
+            if (callback) {
+                callback(err);
+            }
 	});
     },
     update: function (rando, callback) {
@@ -50,10 +54,9 @@ module.exports = {
 	rando.save(function (err) {
 		if (err) {
 		    logger.warn("[randoModel.update] Can't update rando " , rando.randoId, " because: ", err);
-		    return;
-		}
-
-		logger.debug("[randoModel.update] Rando ", rando.randoId, " updated");
+		} else {
+                    logger.debug("[randoModel.update] Rando ", rando.randoId, " updated");
+                }
 
                 if (callback) {
                     callback(err);
