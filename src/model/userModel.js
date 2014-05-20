@@ -9,11 +9,11 @@ var User = mongoose.model("user", new mongoose.Schema({
     googleId: String,
     anonymousId: String,
     password: String,
-	ban: Number,
-	ip: String,
+    ban: Number,
+    ip: String,
     randos: [{
 	user: {
-	    user: String,
+	    email: String,
 	    location: {
 		latitude: Number,
 		longitude: Number
@@ -35,7 +35,7 @@ var User = mongoose.model("user", new mongoose.Schema({
 	    report: Number
 	},
 	stranger: {
-	    user: String,
+	    email: String,
 	    location: {
 		latitude: Number,
 		longitude: Number

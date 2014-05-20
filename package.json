@@ -21,7 +21,7 @@
     "mv": "2.0.x",
     "mkdirp": "0.5.x",
     "gm": "1.16.x",
-    "s3": "1.1.x"
+    "s3": "1.2.x"
   },
   "devDependencies": {
     "mocha": "*",

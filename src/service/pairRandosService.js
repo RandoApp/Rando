@@ -16,22 +16,7 @@ module.exports = {
 		return;
 	    }
 
-	    if (!randos) {
-		logger.warn("[pairImagesService.pairImages] Randos not found");
-		return;
-	    }
-
-	    var oldRando = null;
-	    async.filter(randos, function (rando, callback) {
-		if (rando.creation) {
-		    callback(true);
-		    return;
-		} else if (!oldRando) {
-		    oldRando = rando;
-		} 
-		callback(false);
-	    }, function (randosForPairs) {
-		var randos = self.findAndPairRandos(randosForPairs);
+            var randos = self.findAndPairRandos(randos);
 
 		if (randos.length >= 1 && oldRando && (Date.now() - randos[0].creation) >= config.app.demon.pairingTimeout) {
 		    randos.push(oldRando);
@@ -59,37 +44,44 @@ module.exports = {
     findRandoForUser: function (rando, randos) {
 	logger.debug("Start findRandoForUser");
 	for (var i = 0; i < randos.length; i++) {
-	    if (rando.user != randos[i].user) {
+	    if (rando.email != randos[i].email) {
 		return randos.splice(i, 1)[0];
 	    }
 	}
 	return null;
     },
     connectRandos: function (rando1, rando2) {
-	this.processRandoForUser(rando1.user, rando2);
-	this.processRandoForUser(rando2.user, rando1);
+	this.processRandoForUser(rando1.email, rando2);
+	this.processRandoForUser(rando2.email, rando1);
     },
-    processRandoForUser: function (userId, rando) {
-	logger.debug("Try find user by id: ", userId);
-	userModel.getById(userId, function (err, user) {
+    processRandoForUser: function (email, rando) {
+	userModel.getByEmail(email, function (err, user) {
 	    if (err) {
-		logger.warn("Data base error when getById: ", userId);
+		logger.warn("Data base error when getByEmail: ", userId);
 		return;
 	    }
 
 	    if (!user) {
-		logger.warn("User not found: ", userId);
+		logger.warn("User not found: ", email);
 		return;
 	    }
 
-	    logger.debug("Find user: ", user.email);
 	    for (var i = 0; i < user.randos.length; i++) {
-		if (!user.randos[i].stranger.user) {
+		if (!user.randos[i].stranger.email) {
 		    logger.debug("Rando for pairing found");
 		    user.randos[i].stranger = rando;
-		    userModel.update(user);
-		    randoModel.remove(rando);
-		    return;
+                    async.parallel({
+                        rmRando: function (done) {
+                            randoModel.remove(rando, done);
+                        },
+                        updateUser: function (done) {
+                            userModel.update(user, done);
+                        }
+                    }, function (err) {
+                        if (err) {
+                            logger.warn("Can't remove rando or/and update user, because: ", err);
+                        } 
+                    });
 		}
 	    }
 	});
