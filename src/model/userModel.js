@@ -87,7 +87,7 @@ module.exports = {
 	user.save(function (err) {
             if (err) {
                 logger.warn("[userModel.update] Can't update user with email: ", user.email, " because: ", err);
-            }, else {
+            } else {
                 logger.debug("[userModel.update] User updated. Email: ", user.email);
             }
 
