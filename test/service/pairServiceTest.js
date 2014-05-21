@@ -1,10 +1,107 @@
 var should = require("should");
 var sinon = require("sinon");
-var pairRandosService = require("../../src/service/pairRandosService");
+var pairService = require("../../src/service/pairService");
 var mongooseMock = require("../util/mongooseMock");
 
 describe('Pair Randos Service.', function () {
-    describe('Pair Randos.', function () {
+    describe('Rando To User.', function () {
+	it('Rando should be added to user if he has rando to pairing', function (done) {
+            mongooseMock.stubFindUserWithNotPairedRando(function(email, callback) {
+                callback(null, {
+                    email: "user@rando4.me",
+                    randos: [{user: {email: "user@rando4.me", randoId: "1"}, stranger: {email: "stranger2@rando4.me", randoId: "2"}},
+                             {user: {email: "user@rando4.me", randoId: "3"}, stranger: {email: "", randoId: ""}},
+                             {user: {email: "user@rando4.me", randoId: "4"}, stranger: {email: "stranger3@rando4.me", randoId: "5"}}]
+                });
+            });
+            var rando = {
+                email: "stranger@rando4.me",
+                randoId: "6"
+            };
+
+	    sinon.stub(pairService, "updateModels", function (user, rmRando) {
+                rmRando.should.be.eql(rando);
+                user.should.be.eql({
+                    email: "user@rando4.me",
+                    randos: [{user: {email: "user@rando4.me", randoId: "1"}, stranger: {email: "stranger2@rando4.me", randoId: "2"}},
+                             {user: {email: "user@rando4.me", randoId: "3"}, stranger: {email: "stranger@rando4.me", randoId: "6"}},
+                             {user: {email: "user@rando4.me", randoId: "4"}, stranger: {email: "stranger3@rando4.me", randoId: "5"}}]
+                });
+
+                mongooseMock.restore();
+                pairService.updateModels.restore();
+                done();
+	    });
+
+            pairService.randoToUser("user@rando4.me", rando);
+        });
+
+	it('Rando should be added to user if he has more than one rando to pairing', function (done) {
+            mongooseMock.stubFindUserWithNotPairedRando(function(email, callback) {
+                callback(null, {
+                    email: "user@rando4.me",
+                    randos: [{user: {email: "user@rando4.me", randoId: "1"}, stranger: {email: "stranger2@rando4.me", randoId: "6"}},
+                             {user: {email: "user@rando4.me", randoId: "2"}, stranger: {email: "", randoId: ""}},
+                             {user: {email: "user@rando4.me", randoId: "3"}, stranger: {email: "", randoId: ""}},
+                             {user: {email: "user@rando4.me", randoId: "4"}, stranger: {email: "stranger3@rando4.me", randoId: "7"}}]
+                });
+            });
+            var rando = {
+                email: "stranger@rando4.me",
+                randoId: "8"
+            };
+
+	    sinon.stub(pairService, "updateModels", function (user, rmRando) {
+                rmRando.should.be.eql(rando);
+                user.should.be.eql({
+                    email: "user@rando4.me",
+                    randos: [{user: {email: "user@rando4.me", randoId: "1"}, stranger: {email: "stranger2@rando4.me", randoId: "6"}},
+                             {user: {email: "user@rando4.me", randoId: "2"}, stranger: {email: "stranger@rando4.me", randoId: "8"}},
+                             {user: {email: "user@rando4.me", randoId: "3"}, stranger: {email: "", randoId: ""}},
+                             {user: {email: "user@rando4.me", randoId: "4"}, stranger: {email: "stranger3@rando4.me", randoId: "7"}}]
+                });
+
+                mongooseMock.restore();
+                pairService.updateModels.restore();
+                done();
+	    });
+
+            pairService.randoToUser("user@rando4.me", rando);
+        });
+        
+	it('UpdateModels should not be callled if user does not have rando to pairing', function (done) {
+            mongooseMock.stubFindUserWithNotPairedRando(function(email, callback) {
+                callback(null, {
+                    email: "user@rando4.me",
+                    randos: [{user: {email: "user@rando4.me", randoId: "1"}, stranger: {email: "stranger2@rando4.me", randoId: "6"}},
+                             {user: {email: "user@rando4.me", randoId: "2"}, stranger: {email: "stranger3@rando4.me", randoId: "7"}}]
+                });
+            });
+            var rando = {
+                email: "stranger@rando4.me",
+                randoId: "8"
+            };
+
+            var isUpdateModelsCalled = false;
+	    sinon.stub(pairService, "updateModels", function (user, rmRando) {
+                isUpdateModelsCalled = true;
+	    });
+
+            pairService.randoToUser("user@rando4.me", rando, function () {
+                isUpdateModelsCalled.should.be.false;
+                mongooseMock.restore();
+                pairService.updateModels.restore();
+                done();
+            });
+        });
+    });
+    
+    describe('Update models.', function () {
+	it('Rando should be added to user if he has rando to pairing', function (done) {
+        });
+    });
+    /*
+    describe('Pair.', function () {
 	beforeEach(function (done) {
 	    mongooseMock.restore();
 	    done();
@@ -26,122 +123,7 @@ describe('Pair Randos Service.', function () {
 	    }
 	    done();
 	});
-	it('connectRandos should trigger processRandoForUser with userId and rando as args', function (done) {
-	    sinon.stub(pairRandosService, "processRandoForUser", function (userId, rando) {
-		if (userId == 12345) {
-		    rando.should.be.eql({user: 56789});
-		    return;
-		}
 
-		if (userId == 56789) {
-		    rando.should.be.eql({user: 12345});
-		    return;
-		}
-
-		throw new Error("Unknown userId: " + userId + " in processRandoForUser function - force fail test");
-	    });
-
-	    pairRandosService.connectRandos({user: 12345}, {user: 56789});
-
-	    done();
-	});
-
-	it('pairRandos should pair old rando if randoTimeout', function (done) {
-	    var randosStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
-	    mongooseMock.stubFind(function (query, callback) {
-		callback(null, randosStub);
-	    });
-
-	    var findAndPairRandos = false;
-	    sinon.stub(pairRandosService, "findAndPairRandos", function (randos) {
-		if (randos.length != 2) {
-		    return [{creation: 12345}];
-		}
-
-		randos.should.be.eql([{creation: 0}, {creation: 12345}]);
-		done();
-		return [];
-	    });
-
-	    pairRandosService.pairImages();
-	});
-
-	it('pairRandos should NOT pair old rando if NOT randoTimeout', function (done) {
-	    var time = Date.now();
-	    var randosStub = [{creation: time}, {creation: 0}, {creation: time}, {creation: time}];
-	    mongooseMock.stubFind(function (query, callback) {
-		callback(null, randosStub);
-	    });
-
-	    var findAndPairRandos = false;
-	    sinon.stub(pairRandosService, "findAndPairRandos", function (randos) {
-		if (randos.length != 2) {
-		    done();
-		    return [{creation: time}];
-		}
-
-		throw new Error("pairRandosService called twice. Force fail test");
-	    });
-
-	    pairRandosService.pairImages();
-	});
-	it('pairRandos should NOT pair old rando if oldRando not exist', function (done) {
-	    var time = Date.now();
-	    var randosStub = [{creation: 53433}, {creation: 12345}, {creation: 48483}, {creation: 32323}];
-	    mongooseMock.stubFind(function (query, callback) {
-		callback(null, randosStub);
-	    });
-
-	    var findAndPairRandos = false;
-	    sinon.stub(pairRandosService, "findAndPairRandos", function (randos) {
-		if (randos.length != 2) {
-		    done();
-		    return [{creation: 12345}];
-		}
-
-		throw new Error("pairRandosService called twice. Force fail test");
-	    });
-
-	    pairRandosService.pairImages();
-	});
-
-	it('pairRandos should not pair old rando if findAndPairRandos return empty array', function (done) {
-	    var randosStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
-	    mongooseMock.stubFind(function (query, callback) {
-		callback(null, randosStub);
-	    });
-
-	    var findAndPairRandos = false;
-	    sinon.stub(pairRandosService, "findAndPairRandos", function (randos) {
-		if (randos.length != 2) {
-		    return [];
-		}
-
-		throw new Error("pairRandosService called twice. Force fail test");
-	    });
-
-	    pairRandosService.pairImages();
-	    done();
-	});
-
-	it('pairRandos should not pair old rando if findAndPairRandos return not zero array', function (done) {
-	    var randosStub = [{creation: 12345}, {creation: 0}, {creation: 45678}, {creation: 2345}];
-	    mongooseMock.stubFind(function (query, callback) {
-		callback(null, randosStub);
-	    });
-
-	    var findAndPairRandos = false;
-	    sinon.stub(pairRandosService, "findAndPairRandos", function (randos) {
-		if (randos.length != 2) {
-		    return [];
-		}
-
-		throw new Error("pairRandosService called twice. Force fail test");
-	    });
-
-	    pairRandosService.pairImages();
-	    done();
-	});
 
 	it('pairRandos should do nothing if data base error', function (done) {
 	    var error = "Database error";
@@ -430,32 +412,33 @@ describe('Pair Randos Service.', function () {
 	    done();
 	});
     });
+    */
 
     describe('Demon lifecycle.', function () {
 	it('Demon should start intervals and save intervalTimer', function(done) {
-	    pairRandosService.stopDemon();
-	    should.not.exist(pairRandosService.timer);
+	    pairService.stopDemon();
+	    should.not.exist(pairService.timer);
 
-	    pairRandosService.startDemon();
-	    should.exist(pairRandosService.timer);
+	    pairService.startDemon();
+	    should.exist(pairService.timer);
 	    done();
 	});
 
 	it('Demon should stop intervals and remove intervalTimer', function(done) {
-	    pairRandosService.startDemon();
-	    should.exist(pairRandosService.timer);
+	    pairService.startDemon();
+	    should.exist(pairService.timer);
 
-	    pairRandosService.stopDemon();
-	    should.not.exist(pairRandosService.timer);
+	    pairService.stopDemon();
+	    should.not.exist(pairService.timer);
 	    done();
 	});
 
 	it('Demon should do nonthing on stopDemon if startDemon not be called before', function(done) {
-	    pairRandosService.stopDemon();
-	    should.not.exist(pairRandosService.timer);
+	    pairService.stopDemon();
+	    should.not.exist(pairService.timer);
 
-	    pairRandosService.stopDemon();
-	    (null == pairRandosService.timer).should.be.true;
+	    pairService.stopDemon();
+	    (null == pairService.timer).should.be.true;
 	    done();
 	});
     });
