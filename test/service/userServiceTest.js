@@ -89,11 +89,13 @@ describe('User service.', function () {
 	});
 
 	it('Same passwords should return user', function (done) {
+            var configSecretForRestore = config.app.secret;
+            config.app.secret = "STUB";
 	    mongooseMock.stubFindOne(function (email, callback) {
 		callback(null, {
 		    id: "123456789",
 		    email: "user@mail.com",
-		    password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5", //echo -n "passwordForSha1user@mail.comSecret" | sha1sum
+                    password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5", //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
 		    authToken: "",
 		    save: function (callback) {
 			if (callback) {
@@ -107,6 +109,7 @@ describe('User service.', function () {
 		should.not.exist(err);
 		response.should.have.property("token");
 		response.token.should.not.be.empty;
+                config.app.secret = configSecretForRestore;
 		done();
 	    });
 	});
@@ -125,31 +128,41 @@ describe('User service.', function () {
 
     describe('Generate Hash for password.', function () {
 	it('Sha1 algorithm should work', function (done) {
+            var configSecretForRestore = config.app.secret;
+            config.app.secret = "STUB";
 	    var expected = "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5"; //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
 	    var actual = userService.generateHashForPassword("user@mail.com", "passwordForSha1");
 	    actual.should.be.equal(expected);
+            config.app.secret = configSecretForRestore;
 	    done();
 	});
     });
 
     describe('Is password correct.', function () {
 	it('Same passwords return true', function (done) {
+            var configSecretForRestore = config.app.secret;
+            config.app.secret = "STUB";
 	    var user = {
 		email: "user@mail.com",
 		password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5" //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
 	    };
 	    var actual = userService.isPasswordCorrect("passwordForSha1", user);
 	    actual.should.be.true;
+            config.app.secret = configSecretForRestore;
 	    done();
+
 	});
 
 	it('Differents passwords return false', function (done) {
+            var configSecretForRestore = config.app.secret;
+            config.app.secret = "STUB";
 	    var user = {
 		email: "user@mail.com",
 		password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5" //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
 	    };
 	    var actual = userService.isPasswordCorrect("differentPassword", user);
 	    actual.should.be.false;
+            config.app.secret = configSecretForRestore;
 	    done();
 	});
     });

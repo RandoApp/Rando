@@ -188,7 +188,7 @@ module.exports =  {
                         randoId: randoId,
                         imageURL: imageURL,
                         imageSizeURL: imageSizeURL,
-                        mapURL: mapURL,
+                        mapURL: mapSizeURL.large,
                         mapSizeURL: mapSizeURL
                     };
 

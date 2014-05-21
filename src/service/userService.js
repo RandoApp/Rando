@@ -140,7 +140,7 @@ module.exports = {
 	logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
 	if (!email || !/.+@.+\..+/.test(email) || !password) {
-	    logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
+	    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
 	    callback(Errors.LoginAndPasswordIncorrectArgs());
 	    return;
 	}
@@ -156,7 +156,7 @@ module.exports = {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
 		if (self.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
-			user.ip = ip;
+                    user.ip = ip;
 		    userModel.update(user, function (err) {
 			if (err) {
 			    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
@@ -175,11 +175,11 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    email: email,
 		    password: self.generateHashForPassword(email, password),
-			ip: ip
+                    ip: ip
 		}
 
 		logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
-		userModel.create(user, function (err, user) {
+		userModel.create(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't create user, because: ", err);
 			return;
@@ -233,15 +233,15 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    anonymousId: id,
 		    email: email,
-			ip: ip
+                    ip: ip
 		}
-		userModel.create(user, function (err, user) {
+		userModel.create(user, function (err) {
 		    if (err) {
-			logger.warn("[userService.findOrCreateAnonymous, ", user.id, "] Can't create user because: ", err);
+			logger.warn("[userService.findOrCreateAnonymous, ", user.email, "] Can't create user because: ", err);
 			callback(Errors.System(err));
 			return;
 		    }
-		    logger.data("[userService.findOrCreateAnonymous, ", user.id, "] Anonymous user created.");
+		    logger.data("[userService.findOrCreateAnonymous, ", user.email, "] Anonymous user created.");
 		    callback(null, {token: user.authToken});
 		});
 	    }
@@ -324,7 +324,7 @@ module.exports = {
 	    }
 
 	    if (user) {
-		logger.warn("[userService.findOrCreateByFBData, ", user.id, "] User ", data.email, " exist");
+		logger.warn("[userService.findOrCreateByFBData, ", user.email, "] User ", data.email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.ip = data.ip;
 		userModel.update(user, function (err) {
@@ -342,17 +342,17 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
 		    facebookId: data.id,
 		    email: data.email,
-			ip: data.ip
+                    ip: data.ip
 		}
 
-		userModel.create(user, function (err, user) {
+		userModel.create(user, function (err) {
 		    if (err) {
-			logger.warn("[userService.findOrCreateByFBData, ", user.id, "] Can't create user because: ", err);
+			logger.warn("[userService.findOrCreateByFBData, ", user.email, "] Can't create user because: ", err);
 			callback(Errors.System(err));
 			return;
 		    }
 
-		    logger.data("[userService.findOrCreateByFBData, ", user.id, "] User created: ", user);
+		    logger.data("[userService.findOrCreateByFBData, ", user.email, "] User created: ", user);
 		    callback(null, {token: user.authToken});
 		});
 	    }
@@ -375,7 +375,7 @@ module.exports = {
 	    }
 
 	    if (user) {
-		logger.warn("[userService.findOrCreateByGoogleData, ", user.id, "] User ",email, " exist");
+		logger.warn("[userService.findOrCreateByGoogleData, ", user.email, "] User ",email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.googleId = id;
 		user.ip = ip;
