@@ -14,6 +14,7 @@ describe('Pair Randos Service.', function () {
             pairService.pair(function (err) {
                 should.exists(err);
                 err.should.have.property("message", error);
+                mongooseMock.restore();
                 done();
             });
         });
@@ -24,13 +25,15 @@ describe('Pair Randos Service.', function () {
             });
 
             var isFindRandoForUserCalled = false;
-            sinon.stub(pairService, "findRandoForUser", function () {
+            sinon.stub(pairService, "findRandoForUserSync", function () {
                 isFindRandoForUserCalled = true;
             });
             
 
             pairService.pair(function () {
                 isFindRandoForUserCalled.should.be.false;
+                mongooseMock.restore();
+                pairService.findRandoForUserSync.restore();
                 done();
             });
 
@@ -40,7 +43,7 @@ describe('Pair Randos Service.', function () {
     describe('Find rando for user.', function () {
 	it('Should return null if all randos from one user', function (done) {
             var randos = [{email: "user@rando4.me"}, {email: "user@rando4.me"}];
-            var actual = pairService.findRandoForUser("user@rando4.me", randos);
+            var actual = pairService.findRandoForUserSync("user@rando4.me", randos);
             should.not.exists(actual);
             randos.should.be.eql([{email: "user@rando4.me"}, {email: "user@rando4.me"}]);
             done();
@@ -48,7 +51,7 @@ describe('Pair Randos Service.', function () {
 
 	it('Should return null if no randos', function (done) {
             var randos = [];
-            var actual = pairService.findRandoForUser("user@rando4.me", randos);
+            var actual = pairService.findRandoForUserSync("user@rando4.me", randos);
             should.not.exists(actual);
             randos.should.be.eql([]);
             done();
@@ -56,7 +59,7 @@ describe('Pair Randos Service.', function () {
 
 	it('Should return if no randos', function (done) {
             var randos = [{email: "user@rando4.me"}, {email: "stranger@rando4.me"}];
-            var actual = pairService.findRandoForUser("user@rando4.me", randos);
+            var actual = pairService.findRandoForUserSync("user@rando4.me", randos);
             actual.should.be.eql({email: "stranger@rando4.me"});
             randos.should.be.eql([{email: "user@rando4.me"}]);
             done();
@@ -64,7 +67,7 @@ describe('Pair Randos Service.', function () {
 
 	it('Should return first stranger rando', function (done) {
             var randos = [{email: "user@rando4.me"}, {email: "stranger1@rando4.me"}, {email: "stranger2@rando4.me"}];
-            var actual = pairService.findRandoForUser("user@rando4.me", randos);
+            var actual = pairService.findRandoForUserSync("user@rando4.me", randos);
             actual.should.be.eql({email: "stranger1@rando4.me"});
             randos.should.be.eql([{email: "user@rando4.me"}, {email: "stranger2@rando4.me"}]);
             done();

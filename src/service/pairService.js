@@ -16,20 +16,24 @@ module.exports = {
 		return;
 	    }
 
-            if (randos) {
-                for (var i = 0; i < randos.length; i++) {
-                    var currentRando = randos[i];
-                    var rando = self.findRandoForUser(currentRando.email, randos);
-                    if (rando) {
-                        self.connectRandos(currentRando, rando, callback);
-                    }
-                }
-            } else {
-                callback();
+            if (!randos) {
+                callback(new Error("Ranos not found"));
+                return;
             }
+
+            async.eachSeries(randos, function (rando, done) {
+                var pairRando = self.findRandoForUserSync(currentRando.email, randos);
+                if (pairRando) {
+                    self.connectRandos(rando, pairRando, function () {
+                        done();
+                    });
+                }
+            }, function (err) {
+                callback(err);
+            });
 	});
     },
-    findRandoForUser: function (email, randos) {
+    findRandoForUserSync: function (email, randos) {
 	for (var i = 0; i < randos.length; i++) {
 	    if (email != randos[i].email) {
 		return randos.splice(i, 1)[0];
