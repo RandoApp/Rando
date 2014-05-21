@@ -7,11 +7,12 @@ var async = require("async");
 
 module.exports = {
     timer: null,
-    pair: function () {
+    pair: function (callback) {
 	var self = this;
 	randoModel.getAll(function (err, randos) {
 	    if (err) {
 		logger.warn("[pairImagesService.pairImages] Can't get all randos: ", err);
+                callback(err);
 		return;
 	    }
 
@@ -20,9 +21,11 @@ module.exports = {
                     var currentRando = randos[i];
                     var rando = self.findRandoForUser(currentRando.email, randos);
                     if (rando) {
-                        self.connectRandos(currentRando, rando);
+                        self.connectRandos(currentRando, rando, callback);
                     }
                 }
+            } else {
+                callback();
             }
 	});
     },
@@ -45,7 +48,7 @@ module.exports = {
             },
         }, function (err) {
             if (err) {
-                logger.warn("Can't porcess rando for users ", rando1.email, " and ", rando2.email, ", because: ", err);
+                logger.warn("Can't connect randos for users ", rando1.email, " and ", rando2.email, ", because: ", err);
             }
             callback(err);
         });
@@ -55,11 +58,13 @@ module.exports = {
 	userModel.getByEmail(email, function (err, user) {
 	    if (err) {
 		logger.warn("Data base error when getByEmail: ", email);
+                callback(err);
 		return;
 	    }
 
 	    if (!user) {
 		logger.warn("User not found: ", email);
+                callback(new Error("User not found"));
 		return;
 	    }
 
@@ -95,7 +100,7 @@ module.exports = {
 	logger.info("Start pair randos demon with interval wakeup: ", config.app.demon.wakeup);
 	var self = this;
 	this.timer = setInterval(function () {
-	    self.pair();
+	    self.pair(function (err) {/*Pair done. Ok. Ignore.*/});
 	}, config.app.demon.wakeup);
     },
     stopDemon: function () {
