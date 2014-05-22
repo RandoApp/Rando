@@ -8,7 +8,7 @@ var randoService = require("./src/service/randoService");
 var logService = require("./src/service/logService");
 var mongodbConnection = require("./src/model/db").establishConnection();
 var Errors = require("./src/error/errors");
-var pairRandosService = require("./src/service/pairRandosService");
+var pairService = require("./src/service/pairService");
 var app = express();
 
 (function checkSources() {
@@ -19,7 +19,7 @@ var app = express();
 })();
 
 
-pairRandosService.startDemon();
+pairService.startDemon();
 
 app.use(express.static(__dirname + '/static', {maxAge: config.app.cacheControl}));
 app.use(express.limit(config.app.limit.imageSize));

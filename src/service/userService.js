@@ -1,7 +1,6 @@
 var logger = require("../log/logger");
 var userModel = require("../model/userModel");
 var async = require("async");
-var check = require("validator").check;
 var crypto = require("crypto");
 var config = require("config");
 var Errors = require("../error/errors");
@@ -33,6 +32,11 @@ module.exports = {
     },
     forUserWithTokenWithoutSpam: function (token, ip, callback) {
 		this.forUserWithToken(token, ip, function (err, user) {
+                        if (err) {
+                            callback(err);
+                            return;
+                        }
+
 			if (user.ban && Date.now() <= user.ban) {
 				logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
 				callback(Errors.Forbidden(user.ban));
@@ -89,7 +93,6 @@ module.exports = {
 	}
 	async.each(user.randos, function (rando, done) {
 	    if (rando) {
-		logger.debug("[userService.getUser, ", user.email, "] Remove rando.user.userId and rando.stranger.strangerId in rando");
 		var randoJSON = {
 			stranger: {
 				creation: rando.stranger.creation,
@@ -140,8 +143,8 @@ module.exports = {
     findOrCreateByLoginAndPassword: function (email, password, ip, callback) {
 	logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
-	if (!email || !password) {
-	    logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
+	if (!email || !/.+@.+\..+/.test(email) || !password) {
+	    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
 	    callback(Errors.LoginAndPasswordIncorrectArgs());
 	    return;
 	}
@@ -157,7 +160,7 @@ module.exports = {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
 		if (self.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
-			user.ip = ip;
+                    user.ip = ip;
 		    userModel.update(user, function (err) {
 			if (err) {
 			    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
@@ -176,11 +179,11 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    email: email,
 		    password: self.generateHashForPassword(email, password),
-			ip: ip
+                    ip: ip
 		}
 
 		logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
-		userModel.create(user, function (err, user) {
+		userModel.create(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't create user, because: ", err);
 			return;
@@ -199,7 +202,7 @@ module.exports = {
 	return sha1sum.digest("hex");
     },
     isPasswordCorrect: function (password, user) {
-	logger.data("[userService.isPasswordCorrect, ", user, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
+	logger.data("[userService.isPasswordCorrect, ", user.email, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
 	return user.password == this.generateHashForPassword(user.email, password);
     },
     findOrCreateAnonymous: function (id, ip, callback) {
@@ -234,15 +237,15 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    anonymousId: id,
 		    email: email,
-			ip: ip
+                    ip: ip
 		}
-		userModel.create(user, function (err, user) {
+		userModel.create(user, function (err) {
 		    if (err) {
-			logger.warn("[userService.findOrCreateAnonymous, ", user.id, "] Can't create user because: ", err);
+			logger.warn("[userService.findOrCreateAnonymous, ", user.email, "] Can't create user because: ", err);
 			callback(Errors.System(err));
 			return;
 		    }
-		    logger.data("[userService.findOrCreateAnonymous, ", user.id, "] Anonymous user created.");
+		    logger.data("[userService.findOrCreateAnonymous, ", user.email, "] Anonymous user created.");
 		    callback(null, {token: user.authToken});
 		});
 	    }
@@ -325,7 +328,7 @@ module.exports = {
 	    }
 
 	    if (user) {
-		logger.warn("[userService.findOrCreateByFBData, ", user.id, "] User ", data.email, " exist");
+		logger.warn("[userService.findOrCreateByFBData, ", user.email, "] User ", data.email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.ip = data.ip;
 		userModel.update(user, function (err) {
@@ -343,17 +346,17 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
 		    facebookId: data.id,
 		    email: data.email,
-			ip: data.ip
+                    ip: data.ip
 		}
 
-		userModel.create(user, function (err, user) {
+		userModel.create(user, function (err) {
 		    if (err) {
-			logger.warn("[userService.findOrCreateByFBData, ", user.id, "] Can't create user because: ", err);
+			logger.warn("[userService.findOrCreateByFBData, ", user.email, "] Can't create user because: ", err);
 			callback(Errors.System(err));
 			return;
 		    }
 
-		    logger.data("[userService.findOrCreateByFBData, ", user.id, "] User created: ", user);
+		    logger.data("[userService.findOrCreateByFBData, ", user.email, "] User created: ", user);
 		    callback(null, {token: user.authToken});
 		});
 	    }
@@ -376,7 +379,7 @@ module.exports = {
 	    }
 
 	    if (user) {
-		logger.warn("[userService.findOrCreateByGoogleData, ", user.id, "] User ",email, " exist");
+		logger.warn("[userService.findOrCreateByGoogleData, ", user.email, "] User ",email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.googleId = id;
 		user.ip = ip;

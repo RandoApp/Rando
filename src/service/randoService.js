@@ -1,7 +1,6 @@
 var logger = require("../log/logger");
 var config = require("config");
 var async = require("async");
-var check = require("validator").check;
 var util = require("../util/util");
 var mv = require("mv");
 var randoModel = require("../model/randoModel");
@@ -19,13 +18,13 @@ module.exports =  {
 
 	async.waterfall([
 	    function (done) {
-		if (!imagePath || !check(imagePath).notEmpty() || !location) {
+		if (!imagePath || !location) {
 		    logger.warn("[randoService.saveImage, ", user.email, "] Incorect args. user: ", user.email, "; imagePath: ", imagePath, "; location: " , location);
 		    done(Errors.IncorrectArgs());
 		    return;
 		}
 		logger.debug("[randoService.saveImage, ", user.email, "] args validation done");
-		done(null);
+		done();
 	    },
 	    function (done) {
 		util.generateImageName(done);
@@ -112,6 +111,16 @@ module.exports =  {
 	    },
             function (imagePaths, user, randoId, imageURL, imageSizeURL, location, done) {
                 async.parallel({
+                    rmOrigin: function (parallelCallback) {
+                        var originFile = config.app.static.folder.name + imagePaths.origin;
+                        fs.unlink(originFile, function (err) {
+                            if (err) {
+                                parallelCallback(err);
+                                return;
+                            }
+                            parallelCallback();
+                        });
+                    },
                     rmSmall: function (parallelCallback) {
                         var smallFile = config.app.static.folder.name + imagePaths.small;
                         fs.unlink(smallFile, function (err) {
@@ -168,22 +177,33 @@ module.exports =  {
     updateRando: function (user, randoId, imageURL, imageSizeURL, location, callback) {
 	logger.debug("[randoService.updateRando, ", user.email, "] Try update rando for: ", user.email, " location: ", location, " randoId: ", randoId, " url: ", imageURL, " image url: ", imageSizeURL);
 	var mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
+        var creation = Date.now();
 
 	async.parallel({
 		addRando: function (done) {
-		    randoModel.add(user.id, location, Date.now(), randoId, imageURL, imageSizeURL, mapSizeURL, function (err) {
-			if (err) {
-			    logger.warn("[randoService.updateRando.addRando, ", user.email, "] Can't add rando because: ", err);
-			    done(Errors.System(err));
-			    return;
-			}
-			done(null);
+                    var randoParams = {
+                        email: user.email,
+                        location: location,
+                        creation: creation,
+                        randoId: randoId,
+                        imageURL: imageURL,
+                        imageSizeURL: imageSizeURL,
+                        mapURL: mapSizeURL.large,
+                        mapSizeURL: mapSizeURL
+                    };
+
+		    randoModel.add(randoParams, function (err) {
+                            if (err) {
+                                logger.warn("[randoService.updateRando.addRando, ", user.email, "] Can't add rando because: ", err);
+                                done(Errors.System(err));
+                                return;
+                            }
+                            done();
 		})},
 		updateUser: function (done) {
-		    //TODO: Date.now in updateUser and addRando is differents. Use one time.
 		    user.randos.push({
 			user: {
-			    user: user.id,
+			    email: user.email,
 			    location: location,
 			    randoId: randoId,
 			    imageURL: imageURL,
@@ -198,11 +218,11 @@ module.exports =  {
 				medium: mapSizeURL.medium,
 				large: mapSizeURL.large 
 			    },
-			    creation: Date.now(),
+			    creation: creation,
 			    report: 0
 			},
 			stranger: {
-			    user: "",
+			    email: "",
 			    location: {
 				latitude: 0,
 				longitude: 0

@@ -3,29 +3,29 @@ var config = require("config");
 var logger = require("../log/logger");
 
 var User = mongoose.model("user", new mongoose.Schema({
-    email: String,
+    email: {type: String, unique: true, lowercase: true},
     authToken: String,
     facebookId: String,
     googleId: String,
     anonymousId: String,
     password: String,
-	ban: Number,
-	ip: String,
+    ban: Number,
+    ip: String,
     randos: [{
 	user: {
-	    user: String,
+	    email: String,
+	    randoId: String,
+	    creation: Number,
 	    location: {
 		latitude: Number,
 		longitude: Number
 	    },
-	    randoId: String,
 	    imageURL: String,
 	    imageSizeURL: {
 		small: String,
 		medium: String,
 		large: String
 	    },
-	    creation: Number,
 	    mapURL: String,
 	    mapSizeURL: {
 		small: String,
@@ -35,12 +35,13 @@ var User = mongoose.model("user", new mongoose.Schema({
 	    report: Number
 	},
 	stranger: {
-	    user: String,
+	    email: String,
+	    randoId: String,
+	    creation: Number,
 	    location: {
 		latitude: Number,
 		longitude: Number
 	    },
-	    randoId: String,
 	    imageURL: String,
 	    imageSizeURL: {
 		small: String,
@@ -53,7 +54,6 @@ var User = mongoose.model("user", new mongoose.Schema({
 		medium: String,
 		large: String
 	    },
-	    creation: Number,
 	    report: Number
 	}
     }] 
@@ -62,44 +62,39 @@ var User = mongoose.model("user", new mongoose.Schema({
 module.exports = {
     create: function (user, callback) {
 	if (!user) {
-	    logger.warn("[userModel.create] Hey, programmer! You forgot pass user arg to userModel.create! or passed user arg is undefined!");
-	    return;
-	} else if (!user.email) {
-	    logger.warn("[userModel.create] Hey, programmer! userModel.create must contains email value in arg object!");
-	    return;
-	}
-
-	if (!callback) {
-	    callback = function (err) {
-		if (err) {
-		    logger.warn("[userModel.create] Can't create user! Email: ", email, " because: ", err);
-		    return;
-		}
-
-		logger.debug("[userModel.create] User created with email: ", user.email);
-	    };
+            callback(new Error("User not exists"));
+            return;
 	}
 
 	logger.data("[userModel.create] Create user: Email: ", user.email);
 
 	var user = new User(user);
-	user.save(callback);
+	user.save(function (err) {
+            if (err) {
+                logger.warn("[userModel.create] Can't create user! Email: ", user.email, " because: ", err);
+            } else {
+                logger.debug("[userModel.create] User created with email: ", user.email);
+            }
+
+            if (callback) {
+                callback(err);
+            }
+        });
     },
     update: function (user, callback) {
 	logger.data("[userModel.update] Update user with  Email: ", user.email);
 
-	if (!callback) {
-	    callback = function (err) {
-		if (err) {
-		    logger.warn("[userModel.update] Can't update user with email: ", user.email, " because: ", err);
-		    return;
-		}
+	user.save(function (err) {
+            if (err) {
+                logger.warn("[userModel.update] Can't update user with email: ", user.email, " because: ", err);
+            } else {
+                logger.debug("[userModel.update] User updated. Email: ", user.email);
+            }
 
-		logger.debug("[userModel.update] User updated. Email: ", user.email);
-	    };
-	}
-
-	user.save(callback);
+            if (callback) {
+                callback(err);
+            }
+        });
     },
     getByEmail: function (email, callback) {
 	logger.data("[userModel.getByEmail] Try find user by email: ", email);

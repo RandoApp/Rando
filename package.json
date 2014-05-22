@@ -16,12 +16,10 @@
     "mongodb": "1.4.x",
     "mongoose": "3.8.x",
     "winston": "0.7.x",
-    "async": "0.8.x",
-    "validator": "2.1.x",
+    "async": "0.9.x",
     "mv": "2.0.x",
-    "mkdirp": "0.5.x",
     "gm": "1.16.x",
-    "s3": "1.1.x"
+    "s3": "1.2.x"
   },
   "devDependencies": {
     "mocha": "*",
