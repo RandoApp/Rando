@@ -40,36 +40,44 @@ describe('Pair Randos Service.', function () {
         });
     });
 
-    describe('Find rando for user.', function () {
-	it('Should return null if all randos from one user', function (done) {
-            var randos = [{email: "user@rando4.me"}, {email: "user@rando4.me"}];
-            var actual = pairService.findRandoForUserSync("user@rando4.me", randos);
-            should.not.exists(actual);
-            randos.should.be.eql([{email: "user@rando4.me"}, {email: "user@rando4.me"}]);
+    describe('Wrap randos with status..', function () {
+	it('Should wrap original randos with object with status field', function (done) {
+            var randos = [{email: "user@rando4.me"}, {email: "stranger@rando4.me"}];
+            var actual = pairService.wrapRandosWithStatusSync(randos);
+            actual.should.be.eql([{status: "pairing", rando: {email: "user@rando4.me"}}, {status: "pairing", rando: {email: "stranger@rando4.me"}}]);
             done();
         });
 
-	it('Should return null if no randos', function (done) {
+	it('Empty randos should return empty randosWithStatus', function (done) {
             var randos = [];
-            var actual = pairService.findRandoForUserSync("user@rando4.me", randos);
+            var actual = pairService.wrapRandosWithStatusSync(randos);
+            actual.should.be.eql([]);
+            done();
+        });
+    });
+
+    describe('Find rando for user.', function () {
+	it('Should return null if all randos from one user', function (done) {
+            var randos = [{status: "pairing", rando: {email: "user@rando4.me"}}, {status: "pairing", rando: {email: "user@rando4.me"}}];
+            var actual = pairService.findRandoForUserSync(randos[0], randos);
             should.not.exists(actual);
-            randos.should.be.eql([]);
+            randos.should.be.eql([{status: "pairing", rando: {email: "user@rando4.me"}}, {status: "pairing", rando: {email: "user@rando4.me"}}]);
             done();
         });
 
 	it('Should return if no randos', function (done) {
-            var randos = [{email: "user@rando4.me"}, {email: "stranger@rando4.me"}];
-            var actual = pairService.findRandoForUserSync("user@rando4.me", randos);
+            var randos = [{status: "pairing", rando: {email: "user@rando4.me"}}, {status: "pairing", rando: {email: "stranger@rando4.me"}}];
+            var actual = pairService.findRandoForUserSync(randos[0], randos);
             actual.should.be.eql({email: "stranger@rando4.me"});
-            randos.should.be.eql([{email: "user@rando4.me"}]);
+            randos.should.be.eql([{status: "paired", rando: {email: "user@rando4.me"}}, {status: "paired", rando: {email: "stranger@rando4.me"}}]);
             done();
         });
 
 	it('Should return first stranger rando', function (done) {
-            var randos = [{email: "user@rando4.me"}, {email: "stranger1@rando4.me"}, {email: "stranger2@rando4.me"}];
-            var actual = pairService.findRandoForUserSync("user@rando4.me", randos);
+            var randos = [{status: "pairing", rando: {email: "user@rando4.me"}}, {status: "pairing", rando: {email: "stranger1@rando4.me"}}, {status: "pairing", rando: {email: "stranger2@rando4.me"}}];
+            var actual = pairService.findRandoForUserSync(randos[0], randos);
             actual.should.be.eql({email: "stranger1@rando4.me"});
-            randos.should.be.eql([{email: "user@rando4.me"}, {email: "stranger2@rando4.me"}]);
+            randos.should.be.eql([{status: "paired", rando: {email: "user@rando4.me"}}, {status: "paired", rando: {email: "stranger1@rando4.me"}}, {status: "pairing", rando: {email: "stranger2@rando4.me"}}]);
             done();
         });
     });

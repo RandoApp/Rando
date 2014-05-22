@@ -203,7 +203,7 @@ module.exports =  {
 		updateUser: function (done) {
 		    user.randos.push({
 			user: {
-			    user: user.email,
+			    email: user.email,
 			    location: location,
 			    randoId: randoId,
 			    imageURL: imageURL,
@@ -222,7 +222,7 @@ module.exports =  {
 			    report: 0
 			},
 			stranger: {
-			    user: "",
+			    email: "",
 			    location: {
 				latitude: 0,
 				longitude: 0

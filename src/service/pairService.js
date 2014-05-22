@@ -17,31 +17,51 @@ module.exports = {
 	    }
 
             if (!randos) {
-                callback(new Error("Ranos not found"));
+                callback(new Error("Randos not found"));
                 return;
             }
 
-            async.eachSeries(randos, function (rando, done) {
-                var pairRando = self.findRandoForUserSync(currentRando.email, randos);
-                if (pairRando) {
-                    self.connectRandos(rando, pairRando, function () {
+
+            var randosWithStatus = self.wrapRandosWithStatusSync(randos);
+            async.eachSeries(randosWithStatus, function (randoWithStatus, done) {
+                var randoToPair = self.findRandoForUserSync(randoWithStatus, randosWithStatus);
+                if (randoToPair) {
+                    self.connectRandos(randoWithStatus.rando, randoToPair, function () {
                         done();
                     });
+                } else {
+                    done();
                 }
             }, function (err) {
                 callback(err);
             });
 	});
     },
-    findRandoForUserSync: function (email, randos) {
-	for (var i = 0; i < randos.length; i++) {
-	    if (email != randos[i].email) {
-		return randos.splice(i, 1)[0];
-	    }
-	}
+    wrapRandosWithStatusSync: function (randos) {
+        var randosWithStatus = [];
+        for (var i = 0; i < randos.length; i++) {
+            randosWithStatus.push({
+                status: "pairing",
+                rando: randos[i]
+            });
+        }
+        return randosWithStatus;
+    },
+    findRandoForUserSync: function (randoWithStatus, randosWithStatus) {
+        var PAIRED_STATUS = "paired";
+        if (randoWithStatus.status != PAIRED_STATUS) {
+            for (var i = 0; i < randosWithStatus.length; i++) {
+                if (randoWithStatus.rando.email != randosWithStatus[i].rando.email && randosWithStatus[i].status != PAIRED_STATUS) {
+                    randoWithStatus.status = PAIRED_STATUS;
+                    randosWithStatus[i].status = PAIRED_STATUS;
+                    return randosWithStatus[i].rando;
+                }
+            }
+        }
 	return null;
     },
     connectRandos: function (rando1, rando2, callback) {
+        logger.debug("[pairService.connectRandos] Pair:", rando1.email, " <--> ", rando2.email);
         var self = this;
         async.parallel({
             rando2ToUser1: function (done) {

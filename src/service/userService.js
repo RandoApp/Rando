@@ -32,6 +32,11 @@ module.exports = {
     },
     forUserWithTokenWithoutSpam: function (token, ip, callback) {
 		this.forUserWithToken(token, ip, function (err, user) {
+                        if (err) {
+                            callback(err);
+                            return;
+                        }
+
 			if (user.ban && Date.now() <= user.ban) {
 				logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
 				callback(Errors.Forbidden(user.ban));
@@ -88,7 +93,6 @@ module.exports = {
 	}
 	async.each(user.randos, function (rando, done) {
 	    if (rando) {
-		logger.debug("[userService.getUser, ", user.email, "] Remove rando.user.userId and rando.stranger.strangerId in rando");
 		var randoJSON = {
 			stranger: {
 				creation: rando.stranger.creation,
@@ -198,7 +202,7 @@ module.exports = {
 	return sha1sum.digest("hex");
     },
     isPasswordCorrect: function (password, user) {
-	logger.data("[userService.isPasswordCorrect, ", user, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
+	logger.data("[userService.isPasswordCorrect, ", user.email, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
 	return user.password == this.generateHashForPassword(user.email, password);
     },
     findOrCreateAnonymous: function (id, ip, callback) {
