@@ -61,7 +61,7 @@ module.exports = {
 	return null;
     },
     connectRandos: function (rando1, rando2, callback) {
-        logger.debug("[pairService.connectRandos] Pair:", rando1.email, " <--> ", rando2.email);
+        logger.info("[pairService.connectRandos] Pair:", rando1.email, "[randoId: ", rando1.randoId,"]   <-->   ", rando2.email, "[randoId: ", rando2.randoId,"]");
         var self = this;
         async.parallel({
             rando2ToUser1: function (done) {
