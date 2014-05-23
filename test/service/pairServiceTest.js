@@ -85,7 +85,7 @@ describe('Pair Randos Service.', function () {
     describe('Connect Randos.', function () {
 	it('Rando To User should be called twice in parallel', function (done) {
             var correctBehaviourСounter = 0;
-	    sinon.stub(pairService, "randoToUser", function (email, rando, callback) {
+	    sinon.stub(pairService, "randoToUser", function (email, userRandoId, rando, callback) {
                 if (email != rando.email) {
                     correctBehaviourСounter++;
                 }
@@ -101,7 +101,7 @@ describe('Pair Randos Service.', function () {
 
 	it('Error in randoToUser should return error in callback', function (done) {
             var error = "Error in RandoToUser";
-	    sinon.stub(pairService, "randoToUser", function (email, rando, callback) {
+	    sinon.stub(pairService, "randoToUser", function (email, userRandoId, rando, callback) {
                 callback(new Error(error));
 	    });
 
@@ -118,7 +118,7 @@ describe('Pair Randos Service.', function () {
 	it('User not found', function (done) {
             mongooseMock.stubFindOneWithNotFoundUser();
 
-            pairService.randoToUser("user@rando4.me", {}, function (err) {
+            pairService.randoToUser("user@rando4.me", 111, {}, function (err) {
                 should.exists(err);
                 err.should.have.property("message", "User not found");
                 mongooseMock.restore();
@@ -133,7 +133,7 @@ describe('Pair Randos Service.', function () {
                 callback(new Error(error));
             });
 
-            pairService.randoToUser("user@rando4.me", {}, function (err) {
+            pairService.randoToUser("user@rando4.me", 111, {}, function (err) {
                 should.exists(err);
                 err.should.have.property("message", error);
                 mongooseMock.restore();
@@ -141,8 +141,8 @@ describe('Pair Randos Service.', function () {
             });
         });
 
-	it('Rando should be added to user if he has rando to pairing', function (done) {
-            mongooseMock.stubFindUserWithNotPairedRando(function(email, callback) {
+	it('Rando should be added to user if he has one rando to pairing', function (done) {
+            mongooseMock.stubFindOne(function (email, callback) {
                 callback(null, {
                     email: "user@rando4.me",
                     randos: [{user: {email: "user@rando4.me", randoId: "1"}, stranger: {email: "stranger2@rando4.me", randoId: "2"}},
@@ -169,7 +169,7 @@ describe('Pair Randos Service.', function () {
                 done();
 	    });
 
-            pairService.randoToUser("user@rando4.me", rando);
+            pairService.randoToUser("user@rando4.me", 3, rando);
         });
 
 	it('Rando should be added to user if he has more than one rando to pairing', function (done) {
@@ -202,7 +202,40 @@ describe('Pair Randos Service.', function () {
                 done();
 	    });
 
-            pairService.randoToUser("user@rando4.me", rando);
+            pairService.randoToUser("user@rando4.me", 2, rando);
+        });
+
+	it('Rando should be added by randoId to user if he has more than one rando to pairing', function (done) {
+            mongooseMock.stubFindUserWithNotPairedRando(function(email, callback) {
+                callback(null, {
+                    email: "user@rando4.me",
+                    randos: [{user: {email: "user@rando4.me", randoId: "1"}, stranger: {email: "stranger2@rando4.me", randoId: "6"}},
+                             {user: {email: "user@rando4.me", randoId: "2"}, stranger: {email: "", randoId: ""}},
+                             {user: {email: "user@rando4.me", randoId: "3"}, stranger: {email: "", randoId: ""}},
+                             {user: {email: "user@rando4.me", randoId: "4"}, stranger: {email: "stranger3@rando4.me", randoId: "7"}}]
+                });
+            });
+            var rando = {
+                email: "stranger@rando4.me",
+                randoId: "8"
+            };
+
+	    sinon.stub(pairService, "updateModels", function (user, rmRando) {
+                rmRando.should.be.eql(rando);
+                user.should.be.eql({
+                    email: "user@rando4.me",
+                    randos: [{user: {email: "user@rando4.me", randoId: "1"}, stranger: {email: "stranger2@rando4.me", randoId: "6"}},
+                             {user: {email: "user@rando4.me", randoId: "2"}, stranger: {email: "", randoId: ""}},
+                             {user: {email: "user@rando4.me", randoId: "3"}, stranger: {email: "stranger@rando4.me", randoId: "8"}},
+                             {user: {email: "user@rando4.me", randoId: "4"}, stranger: {email: "stranger3@rando4.me", randoId: "7"}}]
+                });
+
+                mongooseMock.restore();
+                pairService.updateModels.restore();
+                done();
+	    });
+
+            pairService.randoToUser("user@rando4.me", 3, rando);
         });
         
 	it('UpdateModels should not be callled if user does not have rando to pairing', function (done) {
@@ -223,7 +256,7 @@ describe('Pair Randos Service.', function () {
                 isUpdateModelsCalled = true;
 	    });
 
-            pairService.randoToUser("user@rando4.me", rando, function () {
+            pairService.randoToUser("user@rando4.me", 2, rando, function () {
                 isUpdateModelsCalled.should.be.false;
                 mongooseMock.restore();
                 pairService.updateModels.restore();

@@ -61,14 +61,14 @@ module.exports = {
 	return null;
     },
     connectRandos: function (rando1, rando2, callback) {
-        logger.debug("[pairService.connectRandos] Pair:", rando1.email, " <--> ", rando2.email);
+        logger.info("[pairService.connectRandos] Pair:", rando1.email, "[randoId: ", rando1.randoId,"]   <-->   ", rando2.email, "[randoId: ", rando2.randoId,"]");
         var self = this;
         async.parallel({
             rando2ToUser1: function (done) {
-                self.randoToUser(rando1.email, rando2, done);
+                self.randoToUser(rando1.email, rando1.randoId, rando2, done);
             },
             rando1ToUser2: function (done) {
-                self.randoToUser(rando2.email, rando1, done);
+                self.randoToUser(rando2.email, rando2.randoId, rando1, done);
             },
         }, function (err) {
             if (err) {
@@ -77,7 +77,7 @@ module.exports = {
             callback(err);
         });
     },
-    randoToUser: function (email, rando, callback) {
+    randoToUser: function (email, userRandoId, rando, callback) {
         var self = this;
 	userModel.getByEmail(email, function (err, user) {
 	    if (err) {
@@ -93,7 +93,7 @@ module.exports = {
 	    }
 
             async.detect(user.randos, function (userRando, detectDone) {
-                detectDone(!userRando.stranger.email);
+                detectDone(userRando.user.randoId == userRandoId && !userRando.stranger.email);
             }, function (userRando) {
                 if (userRando) {
                     userRando.stranger = rando;
