@@ -362,7 +362,7 @@ module.exports = {
 	    }
 	});
     },
-    findOrCreateByGoogleData: function (id, email, callback) {
+    findOrCreateByGoogleData: function (id, email, ip, callback) {
 	logger.data("[userService.findOrCreateByGoogleData, ", email, "] Try find or create.");
 
 	if (!email) {
