@@ -49,8 +49,8 @@ module.exports = {
 					return rando2.user.creation - rando1.user.creation;
 				});
 
-				var timeBetwenImagesLimit = randos[0].user.creation - randos[config.app.limit.images - 1].user.creation;
-				logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] first image creation: ", randos[0].user.creation, " last in limit image creation: ", randos[config.app.limit.images - 1].user.creation, " Time between Images limit: ", timeBetwenImagesLimit);
+				var timeBetwenImagesLimit = Date.now() - randos[config.app.limit.images - 1].user.creation;
+				logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Now: ", Date.now(), " last in limit image creation: ", randos[config.app.limit.images - 1].user.creation, " Time between Images limit: ", timeBetwenImagesLimit);
 
 				if (timeBetwenImagesLimit <= config.app.limit.time) {
 					user.ban = Date.now() + config.app.limit.ban;
