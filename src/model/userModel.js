@@ -111,5 +111,19 @@ module.exports = {
     getAll: function (callback) {
 	logger.data("[userMode.getAll]");
 	User.find({}, callback);
+    },
+    getEmailsAndRandosNumberArray: function (callback) {
+        User.mapReduce({
+            map: function () {
+                emit(this.email, this.randos.length);
+            },
+            reduce: function (k, vals) {
+                return vals;
+            }
+        }, function (err, emails) {
+            callback(err, emails);
+        });
     }
 };
+
+
