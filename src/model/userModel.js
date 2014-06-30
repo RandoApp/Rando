@@ -1,6 +1,7 @@
 var mongoose = require("mongoose");
 var config = require("config");
 var logger = require("../log/logger");
+var async = require("async");
 
 var User = mongoose.model("user", new mongoose.Schema({
     email: {type: String, unique: true, lowercase: true},
@@ -121,7 +122,16 @@ module.exports = {
                 return vals;
             }
         }, function (err, emails) {
-            callback(err, emails);
+            async.each(emails, function (email, done) {
+                email.email = email["_id"];
+                email.randos = email.value;
+                delete email["_id"];
+                delete email.value;
+                console.log(JSON.stringify(email));
+                done();
+            }, function (err) {
+                callback(err, emails);
+            });
         });
     }
 };
