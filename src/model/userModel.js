@@ -127,7 +127,6 @@ module.exports = {
                 email.randos = email.value;
                 delete email["_id"];
                 delete email.value;
-                console.log(JSON.stringify(email));
                 done();
             }, function (err) {
                 callback(err, emails);
