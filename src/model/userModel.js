@@ -1,6 +1,7 @@
 var mongoose = require("mongoose");
 var config = require("config");
 var logger = require("../log/logger");
+var async = require("async");
 
 var User = mongoose.model("user", new mongoose.Schema({
     email: {type: String, unique: true, lowercase: true},
@@ -111,5 +112,27 @@ module.exports = {
     getAll: function (callback) {
 	logger.data("[userMode.getAll]");
 	User.find({}, callback);
+    },
+    getEmailsAndRandosNumberArray: function (callback) {
+        User.mapReduce({
+            map: function () {
+                emit(this.email, this.randos.length);
+            },
+            reduce: function (k, vals) {
+                return vals;
+            }
+        }, function (err, emails) {
+            async.each(emails, function (email, done) {
+                email.email = email["_id"];
+                email.randos = email.value;
+                delete email["_id"];
+                delete email.value;
+                done();
+            }, function (err) {
+                callback(err, emails);
+            });
+        });
     }
 };
+
+

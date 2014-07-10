@@ -270,6 +270,8 @@ app.post('/log/:token', function (req, res) {
     });
 });
 
+require("./admin/admin").init(app);
+
 app.listen(config.app.port, function () {
     logger.info('Express server listening on port ' + config.app.port);
 });
