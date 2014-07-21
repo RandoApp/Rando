@@ -33,7 +33,8 @@ var User = mongoose.model("user", new mongoose.Schema({
 		medium: String,
 		large: String
 	    },
-	    report: Number
+	    report: Number,
+            delete: Number
 	},
 	stranger: {
 	    email: String,
@@ -55,7 +56,8 @@ var User = mongoose.model("user", new mongoose.Schema({
 		medium: String,
 		large: String
 	    },
-	    report: Number
+	    report: Number,
+            delete: Number
 	}
     }] 
 }));

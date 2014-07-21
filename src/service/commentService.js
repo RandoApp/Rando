@@ -5,6 +5,62 @@ var mongoose = require("mongoose");
 var Errors = require("../error/errors");
 
 module.exports = {
+    delete: function (user, randoId, callback) {
+	logger.debug("[commentService.delete, ", user.email, "] Start delete rando: ", randoId);
+	var self = this;
+
+        async.detect(user.randos, function (rando, done) {
+            done(rando.user.randoId == randoId || rando.stranger.randoId == randoId);
+        }, function (rando) {
+            if (!rando) {
+                callback(Errors.RandoNotFound());
+                return;
+            }
+
+            logger.debug("[commentService.delete, ", user.email, "] Rando found. Delete rando.");
+            if (rando.stranger.randoId == randoId) {
+                rando.stranger.delete = 1;
+            } else {
+                rando.user.delete = 1;
+            }
+
+            userModel.update(user, function (err) {
+                if (err) {
+                    callback(Errors.System());
+                    return;
+                }
+                callback(null, {command: "delete", result: "done"});
+            });
+        });
+    },
+    unDelete: function (user, randoId, callback) {
+	logger.debug("[commentService.unDelete, ", user.email, "] Start unDelete rando: ", randoId);
+	var self = this;
+
+        async.detect(user.randos, function (rando, done) {
+            done(rando.user.randoId == randoId || rando.stranger.randoId == randoId);
+        }, function (rando) {
+            if (!rando) {
+                callback(Errors.RandoNotFound());
+                return;
+            }
+
+            logger.debug("[commentService.unDelete, ", user.email, "] Rando found. UnDelete rando.");
+            if (rando.stranger.randoId == randoId) {
+                rando.stranger.delete = 0;
+            } else {
+                rando.user.delete = 0;
+            }
+
+            userModel.update(user, function (err) {
+                if (err) {
+                    callback(Errors.System());
+                    return;
+                }
+                callback(null, {command: "undelete", result: "done"});
+            });
+        });
+    },
     report: function (user, randoId, callback) {
 	logger.debug("[commentService.report, ", user.email, "] Start report for rando: ", randoId);
 	var self = this;

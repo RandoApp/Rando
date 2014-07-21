@@ -101,6 +101,16 @@ module.exports =  {
 	}
 	return error;
     },
+    RandoNotFound: function () {
+	var error = new Error("Rando not found");
+	error.rando = {
+	    status: 400,
+	    code: 412,
+	    message: "Rando not found",
+	    description: "See https://github.com/RandoApp/Rando/wiki/Errors"
+	}
+	return error;
+    },
     System: function (err) {
 	err.rando = {
 	    status: 500,

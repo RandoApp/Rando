@@ -56,7 +56,7 @@ module.exports = {
 					user.ban = Date.now() + config.app.limit.ban;
 					userModel.update(user, function (err) {
 						if (err) {
-							logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Can't update user for ban, because: ", err);
+                                                    logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Can't update user for ban, because: ", err);
 						}
 
 						logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Spam found. Return error.");
