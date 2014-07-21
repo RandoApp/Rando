@@ -86,6 +86,35 @@ app.post('/report/:id/:token', function (req, res) {
     });
 });
 
+app.post('/delete/:id/:token', function (req, res) {
+    logger.data("Start process user request. POST /delete. Id:", req.params.id ," Token: ", req.params.token);
+
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    userService.forUserWithToken(req.params.token, ip, function (err, user) {
+	if (err) {
+	    var response = Errors.toResponse(err);
+	    res.status(response.status);
+	    logger.data("POST /delete DONE with error: ", response.code);
+	    res.send(response);
+	    return;
+	}
+
+	commentService.delete(user, req.params.id, function (err, response) {
+	    if (err) {
+		var response = Errors.toResponse(err);
+		res.status(response.status);
+		logger.data("POST /delete DONE with error: ", response.code);
+		res.send(response);
+		return;
+	    }
+
+	    logger.data("POST /delete DONE");
+	    res.send(response);
+	});
+    });
+});
+
 
 app.post('/user', function(req, res) {
     logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
