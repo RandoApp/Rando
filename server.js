@@ -3,6 +3,7 @@ var cluster = require("cluster");
 if (cluster.isMaster) {
     console.log("Star master");
 
+    var mongodbConnection = require("./src/model/db").establishConnection();
     var pairService = require("./src/service/pairService");
     pairService.startDemon();
 
