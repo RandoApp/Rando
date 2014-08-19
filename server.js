@@ -18,6 +18,7 @@ if (cluster.isMaster) {
     var commentService = require("./src/service/commentService");
     var randoService = require("./src/service/randoService");
     var logService = require("./src/service/logService");
+    var statusService = require("./src/service/statusService");
     var Errors = require("./src/error/errors");
     var app = express();
 
@@ -35,6 +36,12 @@ if (cluster.isMaster) {
             process.exit(1);
         }
     })();
+
+    app.get('/status', function (req, res) {
+        statusService.status(function (status) {
+            res.send(status);
+        });
+    });
 
     app.post('/image/:token', function (req, res, next) {
         logger.data("Start process user request. POST /image. Token: ", req.params.token);
