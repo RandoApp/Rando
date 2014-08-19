@@ -1,5 +1,5 @@
 var logger = require("../log/logger");
-var userModel = require("../model/userModel");
+var db = require("randoDB");
 var async = require("async");
 var crypto = require("crypto");
 var config = require("config");
@@ -13,7 +13,7 @@ module.exports = {
 	}
 
 	var self =  this;
-	userModel.getByToken(token, function (err, user) {
+	db.user.getByToken(token, function (err, user) {
 	    if (err) {
 		logger.warn("[userService.forUserWithToken, ", token, "] Can't find user by token, because: ", err);
 		callback(Errors.System(err));
@@ -54,7 +54,7 @@ module.exports = {
 
 				if (timeBetwenImagesLimit <= config.app.limit.time) {
 					user.ban = Date.now() + config.app.limit.ban;
-					userModel.update(user, function (err) {
+					db.user.update(user, function (err) {
 						if (err) {
                                                     logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Can't update user for ban, because: ", err);
 						}
@@ -75,14 +75,14 @@ module.exports = {
 	if (!user.ip || (user.ip && user.ip != ip)) {
 		user.ip = ip;
 		logger.debug("[userService.updateIp, ", user.email, "] Update ip to: ", ip);
-		userModel.update(user);
+		db.user.update(user);
 		return;
 	}
 	logger.debug("[userService.updateIp, ", user.email, "] Don't update user ip, because this ip already exists: ", ip);
     },
     destroyAuthToken: function (user, callback) {
 	user.authToken = "";
-	userModel.update(user);
+	db.user.update(user);
 	callback(null, {command: "logout", result: "done"});
     },
     getUser: function (user, callback) {
@@ -150,9 +150,9 @@ module.exports = {
 	}
 
 	var self = this;
-	userModel.getByEmail(email, function(err, user) {
+	db.user.getByEmail(email, function(err, user) {
 	    if (err) {
-		logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't userModel.getByEmail, because: ", err);
+		logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't db.user.getByEmail, because: ", err);
 		callback(Errors.System(err));
 		return;
 	    }
@@ -161,7 +161,7 @@ module.exports = {
 		if (self.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
                     user.ip = ip;
-		    userModel.update(user, function (err) {
+		    db.user.update(user, function (err) {
 			if (err) {
 			    logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
 			    callback(Errors.System(err));
@@ -183,7 +183,7 @@ module.exports = {
 		}
 
 		logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
-		userModel.create(user, function (err) {
+		db.user.create(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't create user, because: ", err);
 			return;
@@ -212,7 +212,7 @@ module.exports = {
 	}
 
 	var email =  id + "@" + config.app.anonymousEmailPosftix;
-	userModel.getByEmail(email, function(err, user) {
+	db.user.getByEmail(email, function(err, user) {
 	    if (err) {
 		callback(Errors.System(err));
 		return;
@@ -222,7 +222,7 @@ module.exports = {
 		logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.ip = ip;
-		userModel.update(user, function (err) {
+		db.user.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
 			callback(Errors.System(err));
@@ -239,7 +239,7 @@ module.exports = {
 		    email: email,
                     ip: ip
 		}
-		userModel.create(user, function (err) {
+		db.user.create(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateAnonymous, ", user.email, "] Can't create user because: ", err);
 			callback(Errors.System(err));
@@ -320,7 +320,7 @@ module.exports = {
 	    return;
 	}
 
-	userModel.getByEmail(data.email, function (err, user) {
+	db.user.getByEmail(data.email, function (err, user) {
 	    if (err) {
 		logger.warn("[userService.findOrCreateByFBData, ", data.email, "] Can't get user by email, because: ", err);
 		callback(Errors.System(err));
@@ -331,7 +331,7 @@ module.exports = {
 		logger.warn("[userService.findOrCreateByFBData, ", user.email, "] User ", data.email, " exist");
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.ip = data.ip;
-		userModel.update(user, function (err) {
+		db.user.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByFBData, ", email, "] Can't update user with new authToken, because: ", err);
 			callback(Errors.System(err));
@@ -349,7 +349,7 @@ module.exports = {
                     ip: data.ip
 		}
 
-		userModel.create(user, function (err) {
+		db.user.create(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByFBData, ", user.email, "] Can't create user because: ", err);
 			callback(Errors.System(err));
@@ -371,7 +371,7 @@ module.exports = {
 	    return;
 	}
 
-	userModel.getByEmail(email, function (err, user) {
+	db.user.getByEmail(email, function (err, user) {
 	    if (err) {
 		logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't get user by email, because: ", err);
 		callback(Errors.System(err));
@@ -383,7 +383,7 @@ module.exports = {
 		user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
 		user.googleId = id;
 		user.ip = ip;
-		userModel.update(user, function (err) {
+		db.user.update(user, function (err) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't update user with new authToken, because: ", err);
 			callback(Errors.System(err));
@@ -398,10 +398,10 @@ module.exports = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'), 
 		    googleId: id, 
 		    email: email,
-			ip: ip
+                    ip: ip
 		}
 
-		userModel.create(user, function (err, user) {
+		db.user.create(user, function (err, user) {
 		    if (err) {
 			logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't create user because: ", err);
 			callback(Errors.System(err));
