@@ -1,7 +1,6 @@
-var userModel = require("../model/userModel");
+var db = require("randoDB");
 var logger = require("../log/logger");
 var async = require("async");
-var mongoose = require("mongoose");
 var Errors = require("../error/errors");
 
 module.exports = {
@@ -24,7 +23,7 @@ module.exports = {
                 rando.user.delete = 1;
             }
 
-            userModel.update(user, function (err) {
+            db.user.update(user, function (err) {
                 if (err) {
                     callback(Errors.System());
                     return;
@@ -52,7 +51,7 @@ module.exports = {
                 rando.user.delete = 0;
             }
 
-            userModel.update(user, function (err) {
+            db.user.update(user, function (err) {
                 if (err) {
                     callback(Errors.System());
                     return;
@@ -106,12 +105,12 @@ module.exports = {
 
 	    updater(rando);
 
-	    userModel.update(user);
+	    db.user.update(user);
 	    callback(null, rando);
 	});
     },
     findUserWithRando: function (userId, randoId, callback) {
-	userModel.getById(userId, function (err, user) {
+	db.user.getById(userId, function (err, user) {
 	    if (err) {
 		logger.warn("[commentService.findUserWithRando, ", userId, "] Can't find user by id: ", userId);
 		callback(Errors.System(err));

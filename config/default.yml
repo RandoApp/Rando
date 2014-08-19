@@ -54,6 +54,9 @@ app:
             name: static/
 db:
     url: mongodb://localhost/rando
+    name: rando
+    host: localhost
+    port: 27017
 s3:
     key: AccessKeyIdSTUB
     secret: SecretAccessKeySTUB

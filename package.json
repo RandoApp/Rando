@@ -1,26 +1,24 @@
 {
-  "name": "foodex",
+  "name": "Rando",
   "version": "0.0.1",
-  "description": "Server side of foodex project. Foodex - share your food with random people around the world",
+  "description": "Server side of rando 4Me project.",
   "engine": {
     "node": ">=0.8.8"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dimhold/foodex.git"
+    "url": "https://github.com/RandoApp/Rando.git"
   },
   "dependencies": {
     "express": "3.x",
     "js-yaml": "3.0.x",
     "config": "0.4.x",
-    "mongodb": "1.4.x",
-    "mongoose": "3.8.x",
     "winston": "0.7.x",
     "async": "0.9.x",
     "mv": "2.0.x",
     "gm": "1.16.x",
     "s3": "1.2.x",
-    "diskspace": "0.1.x"
+    "randoDB": "git+https://github.com/RandoApp/Rando-db.git"
   },
   "devDependencies": {
     "mocha": "*",

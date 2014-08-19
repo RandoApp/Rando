@@ -3,10 +3,6 @@ var cluster = require("cluster");
 if (cluster.isMaster) {
     console.log("Star master");
 
-    var mongodbConnection = require("./src/model/db").establishConnection();
-    var pairService = require("./src/service/pairService");
-    pairService.startDemon();
-
     var cpuCount = require("os").cpus().length;
     for (var i = 0; i < cpuCount; i++) {
         cluster.fork();
@@ -14,7 +10,6 @@ if (cluster.isMaster) {
 } else {
     console.log("Star worker #" + cluster.worker.id);
 
-    var mongodbConnection = require("./src/model/db").establishConnection();
     var fs = require("fs");
     var express = require("express");
     var config = require("config");
@@ -23,8 +18,11 @@ if (cluster.isMaster) {
     var commentService = require("./src/service/commentService");
     var randoService = require("./src/service/randoService");
     var logService = require("./src/service/logService");
+    var statusService = require("./src/service/statusService");
     var Errors = require("./src/error/errors");
     var app = express();
+
+    require("randoDB").connect(config.db.url);
 
     app.use(express.static(__dirname + '/static', {maxAge: config.app.cacheControl}));
     app.use(express.limit(config.app.limit.imageSize));
@@ -38,6 +36,12 @@ if (cluster.isMaster) {
             process.exit(1);
         }
     })();
+
+    app.get('/status', function (req, res) {
+        statusService.status(function (status) {
+            res.send(status);
+        });
+    });
 
     app.post('/image/:token', function (req, res, next) {
         logger.data("Start process user request. POST /image. Token: ", req.params.token);
@@ -310,8 +314,6 @@ if (cluster.isMaster) {
             });
         });
     });
-
-    require("./admin/admin").init(app);
 
     app.listen(config.app.port, function () {
         logger.info('Express server listening on port ' + config.app.port);

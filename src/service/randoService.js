@@ -3,8 +3,7 @@ var config = require("config");
 var async = require("async");
 var util = require("../util/util");
 var mv = require("mv");
-var randoModel = require("../model/randoModel");
-var userModel = require("../model/userModel");
+var db = require("randoDB");
 var mapService = require("./mapService");
 var imageService = require("./imageService");
 var s3Service = require("./s3Service");
@@ -192,7 +191,7 @@ module.exports =  {
                         mapSizeURL: mapSizeURL
                     };
 
-		    randoModel.add(randoParams, function (err) {
+		    db.rando.add(randoParams, function (err) {
                             if (err) {
                                 logger.warn("[randoService.updateRando.addRando, ", user.email, "] Can't add rando because: ", err);
                                 done(Errors.System(err));
@@ -246,7 +245,7 @@ module.exports =  {
 		    });
 
 		    logger.data("[randoService.updateRando.updateUser, ", user.email, "] Try update user");
-		    userModel.update(user);
+		    db.user.update(user);
 		    done(null, imageURL);
 		}
 	    },
