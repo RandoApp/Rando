@@ -1,5 +1,6 @@
 app:
     url: http://rando4.me/
+    host: 127.0.0.1 #nodejs should be invisible from internet. Use proxy server, e.g.: nginx.
     port: 8888
     cacheControl: 31557600000
     secret: STUB

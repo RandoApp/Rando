@@ -315,7 +315,7 @@ if (cluster.isMaster) {
         });
     });
 
-    app.listen(config.app.port, function () {
-        logger.info('Express server listening on port ' + config.app.port);
+    app.listen(config.app.port, config.app.host, function () {
+        logger.info('Express server listening on port ' + config.app.port + ' and host: ' + config.app.host);
     });
 }
