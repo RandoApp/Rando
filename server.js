@@ -12,6 +12,10 @@ if (cluster.isMaster) {
 
     var fs = require("fs");
     var express = require("express");
+    var morgan  = require("morgan");
+    var bodyParser = require("body-parser");
+    var multer  = require("multer");
+    var serveStatic = require("serve-static");
     var config = require("config");
     var logger = require("./src/log/logger");
     var userService = require("./src/service/userService");
@@ -24,11 +28,10 @@ if (cluster.isMaster) {
 
     require("randoDB").connect(config.db.url);
 
-    app.use(express.static(__dirname + '/static', {maxAge: config.app.cacheControl}));
-    app.use(express.limit(config.app.limit.imageSize));
-    app.use(express.logger('dev'));
-    app.use(express.bodyParser());
-    app.use(express.cookieParser());
+    app.use(serveStatic(__dirname + '/static', {maxAge: config.app.cacheControl}));
+    app.use(morgan("combined"));
+    app.use(bodyParser.json());
+    app.use(multer({dest: '/tmp/'}));
 
     (function checkSources() {
         if (!fs.existsSync(config.app.citiesJson)) {
@@ -102,12 +105,13 @@ if (cluster.isMaster) {
         });
     });
 
-    app.post('/delete/:id/:token', function (req, res) {
-        logger.data("Start process user request. POST /delete. Id:", req.params.id ," Token: ", req.params.token);
+    app.post('/delete/:randoId', function (req, res) {
+        var token = req.query.token;
+        logger.data("Start process user request. POST /delete. Id:", req.params.id ," Token: ", token);
 
         var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-        userService.forUserWithToken(req.params.token, ip, function (err, user) {
+        userService.forUserWithToken(token, ip, function (err, user) {
             if (err) {
                 var response = Errors.toResponse(err);
                 res.status(response.status);
@@ -116,7 +120,7 @@ if (cluster.isMaster) {
                 return;
             }
 
-            commentService.delete(user, req.params.id, function (err, response) {
+            commentService.delete(user, req.params.randoId, function (err, response) {
                 if (err) {
                     var response = Errors.toResponse(err);
                     res.status(response.status);
