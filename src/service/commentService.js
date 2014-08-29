@@ -21,7 +21,7 @@ module.exports = {
             rando.delete = 1;
             db.user.update(user, function (err) {
                 if (err) {
-                    callback(Errors.System());
+                    callback(Errors.System(err));
                     return;
                 }
                 callback(null, {command: "delete", result: "done"});
