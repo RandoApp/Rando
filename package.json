@@ -15,6 +15,7 @@
     "multer": "0.x",
     "morgan": "1.x",
     "serve-static": "1.x",
+    "express-redirect": "1.x",
     "mongodb": "1.4.x",
     "js-yaml": "3.x",
     "config": "1.x",

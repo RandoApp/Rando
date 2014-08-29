@@ -16,6 +16,8 @@ if (cluster.isMaster) {
     var bodyParser = require("body-parser");
     var multer  = require("multer");
     var serveStatic = require("serve-static");
+    var access = require("./src/service/access");
+    var tokenConverter = require("./src/util/backwardCompatibility").tokenConverter;
     var config = require("config");
     var logger = require("./src/log/logger");
     var userService = require("./src/service/userService");
@@ -30,7 +32,7 @@ if (cluster.isMaster) {
 
     app.use(serveStatic(__dirname + '/static', {maxAge: config.app.cacheControl}));
     app.use(morgan("combined"));
-    app.use(bodyParser.json());
+    app.use(bodyParser());
     app.use(multer({dest: '/tmp/'}));
 
     (function checkSources() {
@@ -46,95 +48,39 @@ if (cluster.isMaster) {
         });
     });
 
-    app.post('/image/:token', function (req, res, next) {
-        logger.data("Start process user request. POST /image. Token: ", req.params.token);
+    app.post('/image', access, function (req, res) {
+        postImage(req.user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
+    });
 
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-        userService.forUserWithTokenWithoutSpam(req.params.token, ip, function (err, user) {
+    function postImage(user, filePath, location, res) {
+        randoService.saveImage(user, filePath, location, function (err, response) {
             if (err) {
                 var response = Errors.toResponse(err);
-                res.status(response.status);
-                logger.data("POST /image DONE with error: " + response.code);
-                res.send(response);
+                logger.data("POST /image DONE with error: ", response.code);
+                res.status(response.status).send(response);
                 return;
             }
 
-            randoService.saveImage(user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude},  function (err, response) {
-                if (err) {
-                    var response = Errors.toResponse(err);
-                    res.status(response.status);
-                    logger.data("POST /image DONE with error: ", response.code);
-                    res.send(response);
-                    return;
-                }
-
-                logger.data("POST /image DONE");
-                res.status(200);
-                res.send(response);
-            });
+            logger.data("POST /image DONE");
+            res.status(200).send(response);
         });
-    });
+    };
 
-    app.post('/report/:id/:token', function (req, res) {
-        logger.data("Start process user request. POST /report. Id:", req.params.id ," Token: ", req.params.token);
+    app.post('/delete/:randoId', access, function (req, res) {
+        logger.data("Start process user request. POST /delete. Id:", req.params.id ," for user: ", req.user);
 
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-        userService.forUserWithToken(req.params.token, ip, function (err, user) {
+        commentService.delete(req.user, req.params.randoId, function (err, response) {
             if (err) {
                 var response = Errors.toResponse(err);
-                res.status(response.status);
-                logger.data("POST /report DONE with error: ", response.code);
-                res.send(response);
-                return;
-            }
-
-            commentService.report(user, req.params.id, function (err, response) {
-                if (err) {
-                    var response = Errors.toResponse(err);
-                    res.status(response.status);
-                    logger.data("POST /report DONE with error: ", response.code);
-                    res.send(response);
-                    return;
-                }
-
-                logger.data("POST /report DONE");
-                res.send(response);
-            });
-        });
-    });
-
-    app.post('/delete/:randoId', function (req, res) {
-        var token = req.query.token;
-        logger.data("Start process user request. POST /delete. Id:", req.params.id ," Token: ", token);
-
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-        userService.forUserWithToken(token, ip, function (err, user) {
-            if (err) {
-                var response = Errors.toResponse(err);
-                res.status(response.status);
                 logger.data("POST /delete DONE with error: ", response.code);
-                res.send(response);
+                res.status(response.status).send(response);
                 return;
             }
 
-            commentService.delete(user, req.params.randoId, function (err, response) {
-                if (err) {
-                    var response = Errors.toResponse(err);
-                    res.status(response.status);
-                    logger.data("POST /delete DONE with error: ", response.code);
-                    res.send(response);
-                    return;
-                }
-
-                logger.data("POST /delete DONE");
-                res.send(response);
-            });
+            logger.data("POST /delete DONE");
+            res.send(response);
         });
     });
-
 
     app.post('/user', function(req, res) {
         logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
@@ -155,12 +101,13 @@ if (cluster.isMaster) {
         });
     });
 
-    app.get('/user/:token', function (req, res) {
-        logger.data("Start process user request. GET /user. Token: ", req.params.token);
+    app.get('/user', access, function (req, res) {
+        getUser(req, res);
+    });
 
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-        userService.forUserWithToken(req.params.token, ip, function (err, user) {
+    function getUser(req, res) {
+        logger.data("Start process user request. GET /user. for: ", req.user.email);
+        userService.getUser(req.user, function (err, user) {
             if (err) {
                 var response = Errors.toResponse(err);
                 res.status(response.status);
@@ -168,20 +115,10 @@ if (cluster.isMaster) {
                 res.send(response);
                 return;
             }
-
-            userService.getUser(user, function (err, user) {
-                if (err) {
-                    var response = Errors.toResponse(err);
-                    res.status(response.status);
-                    logger.data("GET /user DONE with error: ", response.code);
-                    res.send(response);
-                    return;
-                }
-                logger.data("GET /user DONE");
-                res.send(user);
-            });
+            logger.data("GET /user DONE");
+            res.send(user);
         });
-    });
+    };
 
     app.post('/anonymous', function (req, res) {
         logger.data("Start process user request. POST /anonymous. id: ", req.body.id);
@@ -243,35 +180,23 @@ if (cluster.isMaster) {
         });
     });
 
-    app.post('/logout/:token', function (req, res) {
-        logger.data("Start process user request. POST /logout. Token: ", req.params.token);
+    app.post('/logout', access, function (req, res) {
+        logout(req.user, res);
+    });
 
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-        userService.forUserWithToken(req.params.token, ip, function (err, user) {
+    function logout(user, res) {
+        userService.destroyAuthToken(user, function (err, response) {
             if (err) {
                 var response = Errors.toResponse(err);
-                res.status(response.status);
                 logger.data("POST /logout DONE with error: ", response.code);
-                res.send(response);
+                res.status(response.status).send(response);
                 return;
             }
 
-            userService.destroyAuthToken(user, function (err, response) {
-                if (err) {
-                    var response = Errors.toResponse(err);
-                    res.status(response.status);
-                    logger.data("POST /logout DONE with error: ", response.code);
-                    res.send(response);
-                    return;
-                }
-
-                logger.data("POST /logout DONE");
-                res.status(200);
-                res.send(response);
-            });
+            logger.data("POST /logout DONE");
+            res.status(200).send(response);
         });
-    });
+    };
 
     app.post('/log', function (req, res) {
         logger.data("Start process user request. POST /log. Token: ", req.params.token);
@@ -293,33 +218,67 @@ if (cluster.isMaster) {
         });
     });
 
-    app.post('/log/:token', function (req, res) {
-        logger.data("Start process user request. POST /log. Token: ", req.params.token);
-
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-        userService.forUserWithToken(req.params.token, ip, function (err, user) {
-            var email = "anonymous";
-            if (user) {
-                email = user.email;
-            }
-            logService.storeLog(email, req.body, function (err, response) {
-                if (err) {
-                    var response = Errors.toResponse(err);
-                    res.status(response.status);
-                    logger.data("POST /log DONE with error: ", response.code);
-                    res.send(response);
-                    return;
-                }
-
-                logger.data("POST /log DONE");
-                res.status(200);
-                res.send(response);
-            });
-        });
+    app.post('/log', access, function (req, res) {
+        log(req.user, req.body, res);
     });
 
-    app.listen(config.app.port, config.app.host, function () {
+    function log (user, reqBody, res) {
+        var email = "anonymous";
+        if (user) {
+            email = user.email;
+        }
+
+        logService.storeLog(email, reqBody, function (err, response) {
+            if (err) {
+                var response = Errors.toResponse(err);
+                logger.data("POST /log DONE with error: ", response.code);
+                res.status(response.status).send(response);
+                return;
+            }
+
+            logger.data("POST /log DONE");
+            res.status(200).send(response);
+        });
+    };
+
+             
+    //----------Delete this deprecation section, when all users will upgrade to up than 1.0.14 version----------
+
+    //@deprecated
+    app.post('/log/:token', tokenConverter, access, function (req, res) {
+        logger.warn("DEPRECATED API CALL: POST /log/:token");
+        log(req.user, req.body, res);
+    });
+
+    //@deprecated
+    app.post('/logout/:token', tokenConverter, access, function (req, res) {
+        logger.warn("DEPRECATED API CALL: POST /logout/:token");
+        logout(req.user, res);
+    });
+
+    //@deprecated
+    app.get('/user/:token', tokenConverter, access, function (req, res) {
+        logger.warn("DEPRECATED API CALL: GET /user/:token");
+        getUser(req, res);
+    });
+
+    //@deprecated
+    app.post('/report/:id/:token', function (req, res) {
+        logger.warn("DEPRECATED API CALL: POST/report/:id/:token");
+        logger.data("Start process user request. POST /report. Id:", req.params.id ," Token: ", req.params.token);
+        res.send();
+    });
+
+    //@deprecated
+    app.post('/image/:token', tokenConverter, access, function (req, res) {
+        logger.warn("DEPRECATED API CALL: POST /image/:token");
+        postImage(req.user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
+    });
+    //=========================================================================================================
+
+
+    app.listen(config.app.port, /*config.app.host,*/ function () {
         logger.info('Express server listening on port ' + config.app.port + ' and host: ' + config.app.host);
     });
+
 }

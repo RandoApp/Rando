@@ -198,7 +198,8 @@ module.exports =  {
                             return;
                         }
                         done();
-		})},
+                    });
+                },
 		updateUser: function (done) {
 		    user.gifts.push({
                         email: user.email,
