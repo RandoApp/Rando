@@ -48,7 +48,7 @@ if (cluster.isMaster) {
         });
     });
 
-    app.post('/image', access, function (req, res) {
+    app.post('/image', access.byToken, access.noSpam, function (req, res) {
         postImage(req.user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
     });
 
@@ -66,7 +66,7 @@ if (cluster.isMaster) {
         });
     };
 
-    app.post('/delete/:randoId', access, function (req, res) {
+    app.post('/delete/:randoId', access.byToken, function (req, res) {
         logger.data("Start process user request. POST /delete. Id:", req.params.id ," for user: ", req.user);
 
         commentService.delete(req.user, req.params.randoId, function (err, response) {
@@ -101,7 +101,7 @@ if (cluster.isMaster) {
         });
     });
 
-    app.get('/user', access, function (req, res) {
+    app.get('/user', access.byToken, function (req, res) {
         getUser(req, res);
     });
 
@@ -180,7 +180,7 @@ if (cluster.isMaster) {
         });
     });
 
-    app.post('/logout', access, function (req, res) {
+    app.post('/logout', access.byToken, function (req, res) {
         logout(req.user, res);
     });
 
@@ -218,7 +218,7 @@ if (cluster.isMaster) {
         });
     });
 
-    app.post('/log', access, function (req, res) {
+    app.post('/log', access.byToken, function (req, res) {
         log(req.user, req.body, res);
     });
 
@@ -245,19 +245,19 @@ if (cluster.isMaster) {
     //----------Delete this deprecation section, when all users will upgrade to up than 1.0.14 version----------
 
     //@deprecated
-    app.post('/log/:token', tokenConverter, access, function (req, res) {
+    app.post('/log/:token', tokenConverter, access.byToken, function (req, res) {
         logger.warn("DEPRECATED API CALL: POST /log/:token");
         log(req.user, req.body, res);
     });
 
     //@deprecated
-    app.post('/logout/:token', tokenConverter, access, function (req, res) {
+    app.post('/logout/:token', tokenConverter, access.byToken, function (req, res) {
         logger.warn("DEPRECATED API CALL: POST /logout/:token");
         logout(req.user, res);
     });
 
     //@deprecated
-    app.get('/user/:token', tokenConverter, access, function (req, res) {
+    app.get('/user/:token', tokenConverter, access.byToken, function (req, res) {
         logger.warn("DEPRECATED API CALL: GET /user/:token");
         getUser(req, res);
     });
@@ -270,7 +270,7 @@ if (cluster.isMaster) {
     });
 
     //@deprecated
-    app.post('/image/:token', tokenConverter, access, function (req, res) {
+    app.post('/image/:token', tokenConverter, access.byToken, access.noSpam, function (req, res) {
         logger.warn("DEPRECATED API CALL: POST /image/:token");
         postImage(req.user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
     });

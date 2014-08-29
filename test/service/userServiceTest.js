@@ -7,13 +7,10 @@ var config = require("config");
 
 describe('User service.', function () {
     describe('Find or create user by login and password.', function () {
-	afterEach(function (done) {
-	    mongooseMock.restore();
-	    done();
-	});
 
-	it('Invalid email should return Error', function () {
+	it('Should return error when email is invalid', function () {
 	    userService.findOrCreateByLoginAndPassword("this is not email", "", "127.0.0.1", function (err) {
+                err.should
 		should.exist(err);
 		err.should.have.property("message", "Incorrect args");
 	    });

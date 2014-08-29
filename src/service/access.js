@@ -2,7 +2,6 @@ var Errors = require("../error/errors");
 var db = require("randoDB");
 var logger = require("../log/logger");
 
-
 function checkAccess (req, res, next) {
     var ip = req.ip;
     var token = req.query.token || req.path.match(/.{42}$/g)[0];
@@ -32,8 +31,50 @@ function checkAccess (req, res, next) {
     });
 }
 
+
+function checkSpam (req, res, next) {
+    var user = req.user;
+    if (user.ban && Date.now() <= user.ban) {
+        logger.warn("[access.checkSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
+        sendForbidden(user.ban);
+        return;
+    }
+
+    var randos = user.gifts;
+    if (randos.length > config.app.limit.images) {
+        randos.sort(function (rando1, rando2) {
+            return rando2.creation - rando1.creation;
+        });
+
+        var timeBetwenImagesLimit = Date.now() - randos[config.app.limit.images - 1].creation;
+        logger.debug("[access.checkSpam, ", user.email, "] Now: ", Date.now(), " last in limit image creation: ", randos[config.app.limit.images - 1].creation, " Time between Images limit: ", timeBetwenImagesLimit);
+
+        if (timeBetwenImagesLimit <= config.app.limit.time) {
+            user.ban = Date.now() + config.app.limit.ban;
+            db.user.update(user, function (err) {
+                if (err) {
+                    logger.warn("[access.checkSpam, ", user.email, "] Can't update user for ban, because: ", err);
+                }
+
+                logger.debug("[access.checkSpam, ", user.email, "] Spam found. Return error.");
+                sendForbidden(user.ban);
+                return;
+            });
+            return;
+        }
+    }
+
+    logger.debug("[access.checkSpam, ", user.email, "] User ok. Go next.");
+    next();
+}
+
 function sendUnauthorized (res) {
     var response = Errors.toResponse(Errors.Unauthorized());
+    res.status(response.status).send(response);
+}
+
+function sendForbidden(ban) {
+    var response = Errors.toResponse(Errors.Forbidden(ban));
     res.status(response.status).send(response);
 }
 
@@ -46,4 +87,7 @@ function updateIp (user, ip) {
     }
 }
 
-module.exports = checkAccess; 
+module.exports = {
+    byToken: checkAccess,
+    noSpam: checkSpam
+};
