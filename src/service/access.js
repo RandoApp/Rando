@@ -36,7 +36,7 @@ function checkSpam (req, res, next) {
     var user = req.user;
     if (user.ban && Date.now() <= user.ban) {
         logger.warn("[access.checkSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
-        sendForbidden(user.ban);
+        sendForbidden(res, user.ban);
         return;
     }
 
@@ -57,7 +57,7 @@ function checkSpam (req, res, next) {
                 }
 
                 logger.debug("[access.checkSpam, ", user.email, "] Spam found. Return error.");
-                sendForbidden(user.ban);
+                sendForbidden(res, user.ban);
                 return;
             });
             return;
@@ -73,7 +73,7 @@ function sendUnauthorized (res) {
     res.status(response.status).send(response);
 }
 
-function sendForbidden(ban) {
+function sendForbidden(res, ban) {
     var response = Errors.toResponse(Errors.Forbidden(ban));
     res.status(response.status).send(response);
 }
