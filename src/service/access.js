@@ -1,11 +1,12 @@
 var Errors = require("../error/errors");
 var db = require("randoDB");
 var logger = require("../log/logger");
+var config = require("config");
 
 function checkAccess (req, res, next) {
     var ip = req.ip;
-    var token = req.query.token || req.path.match(/.{42}$/g)[0];
-    logger.debug("[access.checkAccess] start. token: ", token, " ip:", ip);
+    var token = req.query.token;
+    logger.debug("[access.checkAccess] start. token: ", token, " ip: ", ip);
     if (!token) {
         logger.debug("[access.checkAccess] No Token. Send Unauthorized");
         sendUnauthorized(res);

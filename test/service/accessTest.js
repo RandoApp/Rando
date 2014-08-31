@@ -7,17 +7,12 @@ var db = require("randoDB");
 
 describe('Access service.', function () {
     describe('No Spam.', function () {
-
 	it('Banned user get Forbidden error', function (done) {
             var resetTime = Date.now() + config.app.limit.ban;
             var user = {
                 email: "user@mail.com",
                 ban: resetTime,
-                ip: "127.0.0.1",
-                authToken: "bannedToken",
-                facebookId: "111111",
-                gifts: [],
-                receives: []
+                ip: "127.0.0.1"
             };
 
             access.noSpam({user: user}, {
@@ -39,214 +34,239 @@ describe('Access service.', function () {
 
 	it('Banned user with old reset time does not get Forbidden error', function (done) {
 	    var resetTime = Date.now() - 100;
-	    mongooseMock.stubFindOneWithBannedUser(resetTime).stubSave();
+            var user = {
+                email: "user@mail.com",
+                ban: resetTime,
+                ip: "127.0.0.1",
+                gifts: [],
+                receives: []
+            };
 
-	    userService.forUserWithTokenWithoutSpam("bannedToken", "127.0.0.1", function (err, user) {
-		should.not.exists(err);
-		should.exists(user);
-		done();
-	    });
+            access.noSpam({user: user}, {send: function () {
+                should.fail("Should not reponse.send be called");
+            }}, function () {
+                done();
+            });
 	});
 
-	it('User with not enough randos retun withot errors', function (done) {
+	it('User with not enough randos retun without errors', function (done) {
 	    var resetTime = Date.now() - 100;
-	    mongooseMock.stubFindOne().stubSave();
+            var user = {
+                email: "user@mail.com",
+                ban: resetTime,
+                ip: "127.0.0.1",
+                gifts: [{randoId: 1, creation: 100}, {randoId: 2, creation: 1000000}],
+                receives: []
+            };
 
-	    userService.forUserWithTokenWithoutSpam("bannedToken", "127.0.0.1", function (err, user) {
-		should.not.exists(err);
-		should.exists(user);
-		done();
-	    });
+            access.noSpam({user: user}, {send: function () {
+                should.fail("Should not reponse.send be called");
+            }}, function () {
+                done();
+            });
 	});
 
 	it('User with a lot of legal randos return without errors', function (done) {
-	    var randos = [];
+	    var gifts= [];
 	    for (var i = 0; i < config.app.limit.images + 10; i++) {
 		var creation = Date.now() - i * 100000000;
-		randos.push({
-		    stranger: {
-			creation: creation
-		    },
-		    user: {
-			creation: creation
-		    }
+		gifts.push({
+                    randoId: i,
+                    creation: creation
 		});
 	    }
 
-	    mongooseMock.stubFindOne(function (token, callback) {
-		callback(null, {
-		    email: "user@mail.com",
-		    authToken: "token",
-		    ban: "",
-		    ip: "127.0.0.1",
-		    randos: randos,
-		    save: function (callback) {
-			if (callback) {
-			    callback(null);
-			};
-		    }
-		});
-	    }).stubSave();
+            var user = {
+                email: "user@mail.com",
+                authToken: "token",
+                ban: "",
+                ip: "127.0.0.1",
+                gifts: gifts,
+                receives: []
+	    };
 
-	    userService.forUserWithTokenWithoutSpam("token", "127.0.0.1", function (err, user) {
-		should.not.exists(err);
-		should.exists(user);
-		done();
-	    });
+            access.noSpam({user: user}, {send: function () {
+                should.fail("Should not reponse.send be called");
+            }}, function () {
+                done();
+            });
 	});
 
 	it('User with spam should get Forbidden error', function (done) {
-	    var randos = [];
+	    var gifts = [];
 	    for (var i = 0; i < config.app.limit.images + 10; i++) {
 		var creation = Date.now() + i;
-		randos.push({
-		    stranger: {
-			creation: creation
-		    },
-		    user: {
-			creation: creation
-		    }
+		gifts.push({
+                    randoId: i,
+                    creation: creation
 		});
 	    }
 
-	    mongooseMock.stubFindOne(function (token, callback) {
-		callback(null, {
-		    email: "user@mail.com",
-		    authToken: "token",
-		    ban: "",
-		    ip: "127.0.0.1",
-		    randos: randos,
-		    save: function (callback) {
-			if (callback) {
-			    callback(null);
-			};
-		    }
-		});
-	    }).stubSave();
+            var user = {
+                email: "user@mail.com",
+                ban: "",
+                ip: "127.0.0.1",
+                gifts: gifts,
+                receives: []
+            };
 
+            sinon.stub(db.user, "update", function (user, callback) {
+                db.user.update.restore();
+                callback();
+            });
 
-	    userService.forUserWithTokenWithoutSpam("token", "127.0.0.1", function (err, user) {
-		should.exists(err);
-		err.rando.should.have.property("status", 403);
-		err.rando.should.have.property("code", 411);
-		err.rando.should.have.property("description", "See https://github.com/RandoApp/Rando/wiki/Errors");
-		err.rando.message.should.match(/^Forbidden. Reset: \d+$/);
-		done();
-	    });
+            access.noSpam({user: user}, {
+                status: function (status) {
+                    status.should.be.eql(403);
+                    return this;
+                },
+                send: function (response) {
+                    response.should.be.eql({
+                        status: 403,
+                        code: 411,
+                        message: "Forbidden. Reset: " + user.ban,
+                        description: "See https://github.com/RandoApp/Rando/wiki/Errors"
+                    });
+                    done();
+                }
+            }, function () {
+                should.fail("Should not next be called");
+            });
 	});
-	
     });
 
     describe('For user with token.', function () {
-	afterEach(function (done) {
-	    mongooseMock.restore();
-	    done();
-	});
-
 	it('Empty token should return Unauthorized error', function (done) {
-	    userService.forUserWithToken(undefined, "127.0.0.1", function (err, user) {
-		should.exist(err);
-		err.rando.should.be.eql({
-		    status: 401,
-		    code: 400,
-		    message: "Unauthorized",
-		    description: "You are not authorized. See https://github.com/RandoApp/Rando/wiki/Errors"
-		});
-		done();
-	    });
+            access.byToken({ip: "127.0.0.1", query: {}}, {
+                status: function(status) {
+                    status.should.be.eql(401);
+                    return this;
+                },
+                send: function (response) {
+                    response.should.be.eql(Errors.Unauthorized().rando);
+                    done();
+                }
+            }, function () {
+                should.fail("Should not next be called");
+            });
 	});
 
 	it('Not found user with token should return Unauthorized error', function (done) {
-	    mongooseMock.stubFindOneWithNotFoundUser().stubSave();
+            sinon.stub(db.user, "getByToken", function (token, callback) {
+                db.user.getByToken.restore();
+                callback();
+            });
 
-	    userService.forUserWithToken("sometoken", "127.0.0.1", function (err, user) {
-		should.exist(err);
-		err.rando.should.be.eql({
-		    status: 401,
-		    code: 400,
-		    message: "Unauthorized",
-		    description: "You are not authorized. See https://github.com/RandoApp/Rando/wiki/Errors"
-		});
-		done();
-	    });
+            access.byToken({query: {token: "12345"}, ip: "127.0.0.1"}, {
+                status: function(status) {
+                    status.should.be.eql(401);
+                    return this;
+                },
+                send: function (response) {
+                    response.should.be.eql(Errors.Unauthorized().rando);
+                    done()
+                }
+            }, function () {
+                should.fail("Should not next be called");
+            });
 	});
 
 	it('DB error should return System error', function (done) {
-	    var error = "Some db error";
-	    mongooseMock.stubFindOne(function (token, callback) {
-		callback(new Error(error));
-	    });
+            sinon.stub(db.user, "getByToken", function (token, callback) {
+                db.user.getByToken.restore();
+                callback(new Error("DB error"));
+            });
 
-	    userService.forUserWithToken("sometoken", "127.0.0.1", function (err, user) {
-		should.exist(err);
-		err.rando.should.be.eql({
-		    status: 500,
-		    code: 501,
-		    message: "Internal Server Error",
-		    description: "See https://github.com/RandoApp/Rando/wiki/Errors"
-		});
-		done();
-	    });
+            access.byToken({query: {token: "12345"}, ip: "127.0.0.1"}, {
+                status: function(status) {
+                    status.should.be.eql(500);
+                    return this;
+                },
+                send: function (response) {
+                    response.should.be.eql(Errors.System(new Error()).rando);
+                    done();
+                }
+            }, function () {
+                should.fail("Should not next be called");
+            });
 	});
 
 	it('Exist user should be returend without error', function (done) {
-	    mongooseMock.stubFindOneWithEmptyUser().stubSave();
+            var user = {email: "user@mail.com"};
+            sinon.stub(db.user, "getByToken", function (token, callback) {
+                db.user.getByToken.restore();
+                callback(null, user);
+            });
 
-	    userService.forUserWithToken("sometoken", "127.0.0.1", function (err, user) {
-		should.not.exist(err);
-		should.exist(user);
-		done();
-	    });
+            sinon.stub(db.user, "update", function (user, callback) {
+                db.user.update.restore();
+            });
+
+            var req = {query: {token: "12345"}, ip: "127.0.0.1"};
+
+            access.byToken(req, {
+                send: function (response) {
+                    should.fail("Should not send be called");
+                }
+            }, function () {
+                req.user.should.be.eql(user);
+                done();
+            });
 	});
     });
 
     describe('Update ip.', function () {
-
 	it('User with same ip should not be updated', function (done) {
-	    var isSaveCalled = false;
-	    var user = {
-		ip: "127.0.0.1",
-		save: function () {
-		    isSaveCalled = true;
-		}
-	    }
+            var user = {email: "user@mail.com", ip: "127.0.0.1"};
+            sinon.stub(db.user, "getByToken", function (token, callback) {
+                db.user.getByToken.restore();
+                callback(null, user);
+            });
 
-	    userService.updateIp(user, "127.0.0.1");
+            sinon.stub(db.user, "update", function (user, callback) {
+                should.fail("Should not db.user.update be called");
+            });
 
-	    isSaveCalled.should.be.false;
-	    done();
+            access.byToken({query: {token: "123"}, ip: "127.0.0.1"}, {}, function () {
+                db.user.update.restore();
+                done();
+            });
 	});
 
 	it('User with old ip should be updated with new ip', function (done) {
-	    var isSaveCalled = false;
-	    var user = {
-		ip: "127.0.0.3",
-		save: function () {
-		    isSaveCalled = true;
-		}
-	    }
+            var user = {email: "user@mail.com", ip: "127.1.1.1"};
+            sinon.stub(db.user, "getByToken", function (token, callback) {
+                db.user.getByToken.restore();
+                callback(null, user);
+            });
 
-	    userService.updateIp(user, "127.0.0.1");
+            sinon.stub(db.user, "update", function (user, callback) {
+                db.user.update.restore();
+                user.ip.should.be.eql("127.0.0.1");
+                done();
+            });
 
-	    isSaveCalled.should.be.true;
-	    user.ip.should.be.eql("127.0.0.1");
-	    done();
+            access.byToken({query: {token: "123"}, ip: "127.0.0.1"}, {}, function () {
+                //do nothing
+            });
 	});
 
 	it('User without any ip should be updated with new ip', function (done) {
-	    var isSaveCalled = false;
-	    var user = {
-		save: function () {
-		    isSaveCalled = true;
-		}
-	    }
+            var user = {email: "user@mail.com"};
+            sinon.stub(db.user, "getByToken", function (token, callback) {
+                db.user.getByToken.restore();
+                callback(null, user);
+            });
 
-	    userService.updateIp(user, "127.0.0.1");
+            sinon.stub(db.user, "update", function (user, callback) {
+                db.user.update.restore();
+                user.ip.should.be.eql("127.0.0.1");
+                done();
+            });
 
-	    isSaveCalled.should.be.true;
-	    user.ip.should.be.eql("127.0.0.1");
-	    done();
-
+            access.byToken({query: {token: "123"}, ip: "127.0.0.1"}, {}, function () {
+                //do nothing
+            });
 	});
     });
 });
