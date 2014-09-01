@@ -23,7 +23,7 @@
     "async": "0.9.x",
     "mv": "2.0.x",
     "gm": "1.16.x",
-    "s3": "1.2.x",
+    "s3": "4.1.x",
     "randoDB": "git+https://github.com/RandoApp/Rando-db.git"
   },
   "devDependencies": {
