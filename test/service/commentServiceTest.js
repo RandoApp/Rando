@@ -7,15 +7,15 @@ var Errors = require("../../src/error/errors");
 describe('Comment service.', function () {
     describe('Delete.', function () {
 
-	it('Delete flag should be set to 1 in gifts', function (done) {
+	it('Delete flag should be set to 1 in out', function (done) {
             var user = {
                 email: "user@mail.com",
-                gifts:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
-                receives:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
+                out:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
+                in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
             };
 
             sinon.stub(db.user, "update", function (user, callback) {
-                user.gifts[1].delete.should.equal(1);
+                user.out[1].delete.should.equal(1);
                 db.user.update.restore();
                 done();
             });
@@ -23,15 +23,15 @@ describe('Comment service.', function () {
             commentService.delete(user, 456, function (err, response) {/*doesn't matter*/});
         });
 
-	it('Delete flag should be set to 1 in receives', function (done) {
+	it('Delete flag should be set to 1 in in', function (done) {
             var user = {
                 email: "user@mail.com",
-                gifts:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
-                receives:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
+                out:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
+                in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
             };
 
             sinon.stub(db.user, "update", function (user, callback) {
-                user.receives[0].delete.should.equal(1);
+                user.in[0].delete.should.equal(1);
                 db.user.update.restore();
                 done();
             });
@@ -42,8 +42,8 @@ describe('Comment service.', function () {
 	it('Should return rando not found error when cannot detect rando', function (done) {
             var user = {
                 email: "user@mail.com",
-                gifts:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
-                receives:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
+                out:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
+                in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
             };
 
             commentService.delete(user, 111, function (err, response) {
@@ -52,11 +52,11 @@ describe('Comment service.', function () {
             });
         });
 
-	it('Should return rando not found error when gifts and recives arrays is empty', function (done) {
+	it('Should return rando not found error when out and recives arrays is empty', function (done) {
             var user = {
                 email: "user@mail.com",
-                gifts:[],
-                receives:[]
+                out:[],
+                in:[]
             };
 
             commentService.delete(user, 111, function (err, response) {
@@ -68,8 +68,8 @@ describe('Comment service.', function () {
 	it('Should return system error when db return error', function (done) {
             var user = {
                 email: "user@mail.com",
-                gifts:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
-                receives:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
+                out:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
+                in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
             };
 
             sinon.stub(db.user, "update", function (user, callback) {
@@ -86,8 +86,8 @@ describe('Comment service.', function () {
 	it('Service should return json response if all ok', function (done) {
             var user = {
                 email: "user@mail.com",
-                gifts:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
-                receives:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
+                out:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
+                in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
             };
 
             sinon.stub(db.user, "update", function (user, callback) {

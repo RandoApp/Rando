@@ -41,7 +41,7 @@ function checkSpam (req, res, next) {
         return;
     }
 
-    var randos = user.gifts;
+    var randos = user.out;
     if (randos.length > config.app.limit.images) {
         randos.sort(function (rando1, rando2) {
             return rando2.creation - rando1.creation;

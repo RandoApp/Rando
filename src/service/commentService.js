@@ -6,7 +6,7 @@ var Errors = require("../error/errors");
 module.exports = {
     delete: function (user, randoId, callback) {
 	logger.debug("[commentService.delete, ", user.email, "] Start delete rando: ", randoId);
-        var randos = user.gifts.concat(user.receives);
+        var randos = user.out.concat(user.in);
 
         async.detect(randos, function (rando, done) {
             done(rando.randoId == randoId);

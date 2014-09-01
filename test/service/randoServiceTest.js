@@ -68,7 +68,7 @@ describe('Rando service.', function () {
 		callback();
 	    });
 
-	    randoService.saveImage({email: "user@mail.com", gifts:[], receives:[]}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
+	    randoService.saveImage({email: "user@mail.com", out:[], in:[]}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
 		err.rando.should.be.eql(Errors.System(new Error()).rando);
 
 		gm.prototype.write.restore();
@@ -92,7 +92,7 @@ describe('Rando service.', function () {
 		callback();
 	    });
 
-	    randoService.saveImage({email: "user@mail.com", gifts:[], receives:[]}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
+	    randoService.saveImage({email: "user@mail.com", out:[], in:[]}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
 		err.rando.should.be.eql(Errors.System(new Error()).rando);
 
 		gm.prototype.write.restore();
@@ -128,7 +128,7 @@ describe('Rando service.', function () {
 		callback();
 	    });
 
-	    randoService.saveImage({email: "user@mail.com", gifts:[], receives:[]}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err, imageURL) {
+	    randoService.saveImage({email: "user@mail.com", out:[], in:[]}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err, imageURL) {
 		renameCalled.should.be.true;
 		should.not.exist(err);
 		should.exist(imageURL);

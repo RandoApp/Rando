@@ -191,13 +191,13 @@ describe('User service.', function () {
     //TODO: !!!!!!!make assertion more strongly!!!!!!!!
     describe('Get user.', function () {
 	it('Get user successfully', function (done) {
-	    userService.getUser({email: "user@mail.com", gifts: [{randoId: 123}], receives: [{randoId: 456}]}, function (err, user) {
+	    userService.getUser({email: "user@mail.com", out: [{randoId: 123}], in: [{randoId: 456}]}, function (err, user) {
 		should.not.exist(err);
 		should.exist(user);
 		//TODO: make assertion more strongly;
 		user.should.have.property("email", "user@mail.com");
-		user.gifts.should.not.be.empty;
-		user.receives.should.not.be.empty;
+		user.out.should.not.be.empty;
+		user.in.should.not.be.empty;
 		done();
 	    });
 	});
