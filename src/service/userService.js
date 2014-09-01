@@ -28,20 +28,20 @@ module.exports = {
         var self = this;
 	var userJSON = {
 	    email: user.email,
-	    gifts: [],
-            receives: []
+	    in: [],
+            out: []
 	};
 
         async.parallel({
-            buildGifts: function (parallelDone) {
-                async.each(user.gifts, function (rando, done) {
-                    userJSON.gifts.push( self.buildRandoSync(rando) );
+            buildOut: function (parallelDone) {
+                async.each(user.out, function (rando, done) {
+                    userJSON.out.push( self.buildRandoSync(rando) );
                     done();
                 }, parallelDone);
             },
-            buildReceives: function (parallelDone) {
-                async.each(user.receives, function (rando, done) {
-                    userJSON.receives.push( self.buildRandoSync(rando) );
+            buildIn: function (parallelDone) {
+                async.each(user.in, function (rando, done) {
+                    userJSON.in.push( self.buildRandoSync(rando) );
                     done();
                 }, parallelDone);
             }

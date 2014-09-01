@@ -5,38 +5,38 @@ module.exports = {
     //compatible with for 1.0.14 version and less.
     makeUserBackwardCompaitble: function (user, callback) {
         logger.debug("[backwardCompatibility.makeUserBackwardCompatible, ", user.email, "]");
-        user.randos = this.makeRandosArraySync(user.gifts, user.receives);
+        user.randos = this.makeRandosArraySync(user.out, user.in);
         callback(null, user);
     },
-    makeRandosArraySync: function (gifts, receives) {
+    makeRandosArraySync: function (outs, ins) {
         var randos = [];
-        for (var i = 0; i < gifts.length; i++) {
+        for (var i = 0; i < outs.length; i++) {
             var randoPair = {
-                user: gifts[i],
+                user: outs[i],
             };
 
-            if (receives[i]) {
-                randoPair.stranger = receives[i];
+            if (ins[i]) {
+                randoPair.stranger = ins[i];
             } else {
                 randoPair.stranger = {
                     email: "",
                     location: {
                         latitude: 0,
                         longitude: 0
-                        },
+                    },
                     randoId: "",
                     imageURL: "",
                     imageSizeURL: {
                         small: "",
                         medium: "",
                         large: ""
-                        },
+                    },
                     mapURL: "",
                     mapSizeURL: {
                         small: "",
                         medium: "",
                         large: ""
-                        },
+                    },
                     creation: 0
                 };
             }

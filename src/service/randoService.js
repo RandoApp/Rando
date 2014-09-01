@@ -201,7 +201,7 @@ module.exports =  {
                     });
                 },
 		updateUser: function (done) {
-		    user.gifts.push({
+		    user.out.push({
                         email: user.email,
                         location: location,
                         randoId: randoId,

@@ -38,8 +38,8 @@ describe('Access service.', function () {
                 email: "user@mail.com",
                 ban: resetTime,
                 ip: "127.0.0.1",
-                gifts: [],
-                receives: []
+                out: [],
+                in: []
             };
 
             access.noSpam({user: user}, {send: function () {
@@ -55,8 +55,8 @@ describe('Access service.', function () {
                 email: "user@mail.com",
                 ban: resetTime,
                 ip: "127.0.0.1",
-                gifts: [{randoId: 1, creation: 100}, {randoId: 2, creation: 1000000}],
-                receives: []
+                out: [{randoId: 1, creation: 100}, {randoId: 2, creation: 1000000}],
+                in: []
             };
 
             access.noSpam({user: user}, {send: function () {
@@ -67,10 +67,10 @@ describe('Access service.', function () {
 	});
 
 	it('User with a lot of legal randos return without errors', function (done) {
-	    var gifts= [];
+	    var out = [];
 	    for (var i = 0; i < config.app.limit.images + 10; i++) {
 		var creation = Date.now() - i * 100000000;
-		gifts.push({
+		out.push({
                     randoId: i,
                     creation: creation
 		});
@@ -81,8 +81,8 @@ describe('Access service.', function () {
                 authToken: "token",
                 ban: "",
                 ip: "127.0.0.1",
-                gifts: gifts,
-                receives: []
+                out: out,
+                in: []
 	    };
 
             access.noSpam({user: user}, {send: function () {
@@ -93,10 +93,10 @@ describe('Access service.', function () {
 	});
 
 	it('User with spam should get Forbidden error', function (done) {
-	    var gifts = [];
+	    var out = [];
 	    for (var i = 0; i < config.app.limit.images + 10; i++) {
 		var creation = Date.now() + i;
-		gifts.push({
+		out.push({
                     randoId: i,
                     creation: creation
 		});
@@ -106,8 +106,8 @@ describe('Access service.', function () {
                 email: "user@mail.com",
                 ban: "",
                 ip: "127.0.0.1",
-                gifts: gifts,
-                receives: []
+                out: out,
+                in: []
             };
 
             sinon.stub(db.user, "update", function (user, callback) {
