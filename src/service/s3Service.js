@@ -2,6 +2,7 @@ var s3 = require("s3");
 var config = require("config");
 var logger = require("../log/logger");
 var async = require("async");
+var Errors = require("../error/errors");
 
 var clinet = s3.createClient({
     maxAsyncS3: Infinity,
@@ -20,7 +21,7 @@ module.exports = {
 	var uploader = clinet.uploadFile(params);
         this.processUploader(uploader, function (err) {
             if (err) {
-                callback(err);
+                callback(Errors.System(err));
                 return;
             }
             var url = s3.getPublicUrl(params.s3Params.Bucket, params.s3Params.Key, true);
@@ -35,7 +36,7 @@ module.exports = {
 	    callback();
 	}).on('error', function (err) {
 	    logger.error("[s3Service.upload.error] Can't upload file, because: ", err);
-	    callback(err);
+	    callback(Errors.System(err));
 	});
     },
     buildParams: function (files, size) {

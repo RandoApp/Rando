@@ -3,6 +3,7 @@ var crypto = require("crypto");
 var fs = require("fs");
 var async = require("async");
 var logger = require("../log/logger");
+var Errors = require("../error/errors");
 
 module.exports = {
     generateImageName: function (callback) {
@@ -22,7 +23,7 @@ module.exports = {
 	    function (err, name, imagePaths) {
 		if (err) {
 		    logger.warn("genereImageName fail with error: ", err);
-		    callback(err);
+		    callback(Errors.System(err));
 		    return;
 		}
 
@@ -34,7 +35,7 @@ module.exports = {
 	crypto.pseudoRandomBytes(config.app.static.file.length, function(ex, buf) {
 	    if (ex) {
 		logger.warn("Can't genererateUniqueName: ", ex);
-		callback(ex);
+		callback(Errors.System(ex));
 		return;
 	    }
 

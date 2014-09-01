@@ -192,57 +192,34 @@ module.exports =  {
                     };
 
 		    db.rando.add(randoParams, function (err) {
-                            if (err) {
-                                logger.warn("[randoService.updateRando.addRando, ", user.email, "] Can't add rando because: ", err);
-                                done(Errors.System(err));
-                                return;
-                            }
-                            done();
-		})},
+                        if (err) {
+                            logger.warn("[randoService.updateRando.addRando, ", user.email, "] Can't add rando because: ", err);
+                            done(Errors.System(err));
+                            return;
+                        }
+                        done();
+                    });
+                },
 		updateUser: function (done) {
-		    user.randos.push({
-			user: {
-			    email: user.email,
-			    location: location,
-			    randoId: randoId,
-			    imageURL: imageURL,
-			    imageSizeURL: {
-				small: imageSizeURL.small,
-				medium: imageSizeURL.medium,
-				large: imageSizeURL.large 
-			    },
-			    mapURL: mapSizeURL.large,
-			    mapSizeURL: {
-				small: mapSizeURL.small,
-				medium: mapSizeURL.medium,
-				large: mapSizeURL.large 
-			    },
-			    creation: creation,
-			    report: 0
-			},
-			stranger: {
-			    email: "",
-			    location: {
-				latitude: 0,
-				longitude: 0
-			    },
-			    randoId: "",
-			    imageURL: "",
-			    imageSizeURL: {
-				small: "",
-				medium: "",
-				large: ""
-			    },
-			    mapURL: "",
-			    mapSizeURL: {
-				small: "",
-				medium: "",
-				large: ""
-			    },
-			    creation: 0,
-			    report: 0
-			}
-		    });
+		    user.gifts.push({
+                        email: user.email,
+                        location: location,
+                        randoId: randoId,
+                        imageURL: imageURL,
+                        imageSizeURL: {
+                            small: imageSizeURL.small,
+                            medium: imageSizeURL.medium,
+                            large: imageSizeURL.large 
+                        },
+                        mapURL: mapSizeURL.large,
+                        mapSizeURL: {
+                            small: mapSizeURL.small,
+                            medium: mapSizeURL.medium,
+                            large: mapSizeURL.large 
+                        },
+                        creation: creation,
+                        delete: 0
+                    });
 
 		    logger.data("[randoService.updateRando.updateUser, ", user.email, "] Try update user");
 		    db.user.update(user);

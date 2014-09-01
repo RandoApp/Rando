@@ -1,144 +1,66 @@
 var logger = require("../log/logger");
 var db = require("randoDB");
 var async = require("async");
-var crypto = require("crypto");
 var config = require("config");
+var crypto = require("crypto");
 var Errors = require("../error/errors");
+var backwardCompatibility = require("../util/backwardCompatibility");
+var passwordUtil = require("../util/password");
 
 module.exports = {
-    forUserWithToken: function (token, ip, callback) {
-	if (!token) {
-	    callback(Errors.Unauthorized());
-	    return;
-	}
-
-	var self =  this;
-	db.user.getByToken(token, function (err, user) {
-	    if (err) {
-		logger.warn("[userService.forUserWithToken, ", token, "] Can't find user by token, because: ", err);
-		callback(Errors.System(err));
-		return;
-	    } else if (!user) {
-		logger.warn("[userService.forUserWithToken, ", token, "] Can't find user by token because user from db is empty");
-		callback(Errors.Unauthorized());
-		return;
-	    }
-
-	    self.updateIp(user, ip);
-
-	    logger.debug("[userService.forUserWithToken, ", token, "] Return user.");
-	    callback(null, user);
-	});
-    },
-    forUserWithTokenWithoutSpam: function (token, ip, callback) {
-		this.forUserWithToken(token, ip, function (err, user) {
-                        if (err) {
-                            callback(err);
-                            return;
-                        }
-
-			if (user.ban && Date.now() <= user.ban) {
-				logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Banned user send request. Ban to: ", user.ban);
-				callback(Errors.Forbidden(user.ban));
-				return;
-			}
-
-			var randos = user.randos;
-			if (randos.length > config.app.limit.images) {
-				randos.sort(function (rando1, rando2) {
-					return rando2.user.creation - rando1.user.creation;
-				});
-
-				var timeBetwenImagesLimit = Date.now() - randos[config.app.limit.images - 1].user.creation;
-				logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Now: ", Date.now(), " last in limit image creation: ", randos[config.app.limit.images - 1].user.creation, " Time between Images limit: ", timeBetwenImagesLimit);
-
-				if (timeBetwenImagesLimit <= config.app.limit.time) {
-					user.ban = Date.now() + config.app.limit.ban;
-					db.user.update(user, function (err) {
-						if (err) {
-                                                    logger.warn("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Can't update user for ban, because: ", err);
-						}
-
-						logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] Spam found. Return error.");
-						callback(Errors.Forbidden(user.ban));
-						return;
-					});
-				    return;
-				}
-			}
-			
-			logger.debug("[userService.forUserWithTokenWithoutSpam, ", user.email, "] User ok.  Return user.");
-			callback(null, user);
-		});
-    },
-    updateIp: function (user, ip) {
-	if (!user.ip || (user.ip && user.ip != ip)) {
-		user.ip = ip;
-		logger.debug("[userService.updateIp, ", user.email, "] Update ip to: ", ip);
-		db.user.update(user);
-		return;
-	}
-	logger.debug("[userService.updateIp, ", user.email, "] Don't update user ip, because this ip already exists: ", ip);
-    },
     destroyAuthToken: function (user, callback) {
 	user.authToken = "";
 	db.user.update(user);
 	callback(null, {command: "logout", result: "done"});
     },
+    buildRandoSync: function (rando) {
+        return { 
+            creation: rando.creation,
+            randoId: rando.randoId,
+            imageURL: rando.imageURL,
+            imageSizeURL: rando.imageSizeURL,
+            mapURL: rando.mapURL,
+            mapSizeURL: rando.mapSizeURL
+        };
+    },
     getUser: function (user, callback) {
 	logger.debug("[userService.getUser, ", user.email, "] Try get user");
+        var self = this;
 	var userJSON = {
 	    email: user.email,
-	    randos: []
-	}
-	async.each(user.randos, function (rando, done) {
-	    if (rando) {
-		var randoJSON = {
-			stranger: {
-				creation: rando.stranger.creation,
-				randoId: rando.stranger.randoId,
-				report: rando.stranger.report,
-				imageURL: rando.stranger.imageURL,
-				imageSizeURL: rando.stranger.imageSizeURL,
-				mapURL: rando.stranger.mapURL,
-				mapSizeURL: rando.stranger.mapSizeURL
-			},
-			user: {
-				creation: rando.user.creation,
-				randoId: rando.user.randoId,
-				report: rando.user.report,
-				imageURL: rando.user.imageURL,
-				imageSizeURL: rando.user.imageSizeURL,
-				mapURL: rando.user.mapURL,
-				mapSizeURL: rando.user.mapSizeURL
-			}
-		}
-		if (rando.stranger.report) {
-		    randoJSON.stranger.imageURL = config.app.reportedImageStub; 
-		    randoJSON.stranger.imageSizeURL.small = config.app.reportedImageStub; 
-		    randoJSON.stranger.imageSizeURL.medium = config.app.reportedImageStub; 
-		    randoJSON.stranger.imageSizeURL.large = config.app.reportedImageStub; 
+	    gifts: [],
+            receives: []
+	};
 
-		    randoJSON.stranger.mapURL = config.app.reportedImageStub; 
-		    randoJSON.stranger.mapSizeURL.small = config.app.reportedImageStub; 
-		    randoJSON.stranger.mapSizeURL.medium = config.app.reportedImageStub; 
-		    randoJSON.stranger.mapSizeURL.large = config.app.reportedImageStub; 
-		}
-		//TODO: Remove this lines when all clients will be apdated
-		randoJSON.user.bonAppetit = 0;
-		randoJSON.stranger.bonAppetit = 0;
-		//TODO: Remove this lines when all clients will be apdated
-		userJSON.randos.push(randoJSON);
-	    }
-	    done();
+        async.parallel({
+            buildGifts: function (parallelDone) {
+                async.each(user.gifts, function (rando, done) {
+                    userJSON.gifts.push( self.buildRandoSync(rando) );
+                    done();
+                }, parallelDone);
+            },
+            buildReceives: function (parallelDone) {
+                async.each(user.receives, function (rando, done) {
+                    userJSON.receives.push( self.buildRandoSync(rando) );
+                    done();
+                }, parallelDone);
+            }
 	}, function (err) {
 	    if (err) {
-		logger.warn("[userService.getUser, ", userId, "] Error when each randos for: ", user);
+		logger.warn("[userService.getUser, ", userId, "] Error when each randos in parallel for : ", user);
 		callback(Errors.System(err));
 		return;
-	    }
-	    callback(null, userJSON);
-	});
+            }
+
+            backwardCompatibility.makeUserBackwardCompaitble(userJSON, function (err, compatibleUserJSON) {
+                if (err) {
+                    logger.warn("[userService.getUser, ", userId, "] Error when make user backward compaitble");
+                    callback(Errors.System(err));
+                    return;
+                }
+                callback(null, compatibleUserJSON);
+            });
+        });
     },
     findOrCreateByLoginAndPassword: function (email, password, ip, callback) {
 	logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
@@ -158,7 +80,7 @@ module.exports = {
 	    }
 	    if (user) {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
-		if (self.isPasswordCorrect(password, user)) {
+		if (passwordUtil.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
                     user.ip = ip;
 		    db.user.update(user, function (err) {
@@ -178,7 +100,7 @@ module.exports = {
 		var user = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    email: email,
-		    password: self.generateHashForPassword(email, password),
+		    password: passwordUtil.generateHashForPassword(email, password, config.app.secret),
                     ip: ip
 		}
 
@@ -194,16 +116,6 @@ module.exports = {
 		});
 	    }
 	});
-    },
-    generateHashForPassword: function (email, password) {
-	logger.data("[userService.generateHashForPassword, ", email, "] Try generate hash.");
-	var sha1sum = crypto.createHash("sha1");
-	sha1sum.update(password + email + config.app.secret);
-	return sha1sum.digest("hex");
-    },
-    isPasswordCorrect: function (password, user) {
-	logger.data("[userService.isPasswordCorrect, ", user.email, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
-	return user.password == this.generateHashForPassword(user.email, password);
     },
     findOrCreateAnonymous: function (id, ip, callback) {
 	if (!id) {
@@ -261,7 +173,7 @@ module.exports = {
 	    path: '/' + id + '?fields=id,email&access_token=' + token
 	}, function(resp) {
 	    resp.on('data', function(chunk) {
-		var json = JSON.parse(chunk.toString("utf8"));
+                var json = JSON.parse(chunk.toString("utf8"));
 		logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Recive json: ", json);
 		if (json.email == email) {
 		    logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is equals");
@@ -287,27 +199,27 @@ module.exports = {
 	    port: config.app.google.port,
 	    path: config.app.google.path + token
 	}, function(resp) {
-		resp.on('data', function (chunk) {
-			googleJson += chunk.toString("utf8");
-		}).on('end', function (chunk) {
-			try {
-				var json = JSON.parse(googleJson);
-			} catch (e) {
-				logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Bad JSON: ", e.message);
-				callback(Errors.GoogleError());
-				return;
-			}
-			logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
-			if (json.family_name = familyName) {
-				logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
-				self.findOrCreateByGoogleData(json.id, email, ip, callback);
-			} else {
-				logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
-				callback(Errors.GoogleIncorrectArgs());
-			}
+            resp.on('data', function (chunk) {
+                googleJson += chunk.toString("utf8");
+            }).on('end', function (chunk) {
+                try {
+                        var json = JSON.parse(googleJson);
+                } catch (e) {
+                    logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Bad JSON: ", e.message);
+                    callback(Errors.GoogleError());
+                    return;
+                }
+                logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
+                if (json.family_name = familyName) {
+                    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
+                    self.findOrCreateByGoogleData(json.id, email, ip, callback);
+                } else {
+                    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
+                    callback(Errors.GoogleIncorrectArgs());
+                }
 	    }).on("error", function (e) {
-			logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
-			callback(Errors.GoogleError());
+                logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
+                callback(Errors.GoogleError());
 	    });
 	});
     },
@@ -347,7 +259,7 @@ module.exports = {
 		    facebookId: data.id,
 		    email: data.email,
                     ip: data.ip
-		}
+		};
 
 		db.user.create(user, function (err) {
 		    if (err) {
