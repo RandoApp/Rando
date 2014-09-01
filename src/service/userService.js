@@ -1,10 +1,11 @@
 var logger = require("../log/logger");
 var db = require("randoDB");
 var async = require("async");
-var crypto = require("crypto");
 var config = require("config");
+var crypto = require("crypto");
 var Errors = require("../error/errors");
 var backwardCompatibility = require("../util/backwardCompatibility");
+var passwordUtil = require("../util/password");
 
 module.exports = {
     destroyAuthToken: function (user, callback) {
@@ -79,7 +80,7 @@ module.exports = {
 	    }
 	    if (user) {
 		logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
-		if (self.isPasswordCorrect(password, user)) {
+		if (passwordUtil.isPasswordCorrect(password, user)) {
 		    user.authToken = crypto.randomBytes(config.app.tokenLength).toString('hex');
                     user.ip = ip;
 		    db.user.update(user, function (err) {
@@ -99,7 +100,7 @@ module.exports = {
 		var user = {
 		    authToken: crypto.randomBytes(config.app.tokenLength).toString('hex'),
 		    email: email,
-		    password: self.generateHashForPassword(email, password),
+		    password: passwordUtil.generateHashForPassword(email, password, config.app.secret),
                     ip: ip
 		}
 
@@ -115,16 +116,6 @@ module.exports = {
 		});
 	    }
 	});
-    },
-    generateHashForPassword: function (email, password) {
-	logger.data("[userService.generateHashForPassword, ", email, "] Try generate hash.");
-	var sha1sum = crypto.createHash("sha1");
-	sha1sum.update(password + email + config.app.secret);
-	return sha1sum.digest("hex");
-    },
-    isPasswordCorrect: function (password, user) {
-	logger.data("[userService.isPasswordCorrect, ", user.email, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
-	return user.password == this.generateHashForPassword(user.email, password);
     },
     findOrCreateAnonymous: function (id, ip, callback) {
 	if (!id) {
@@ -268,7 +259,7 @@ module.exports = {
 		    facebookId: data.id,
 		    email: data.email,
                     ip: data.ip
-		}
+		};
 
 		db.user.create(user, function (err) {
 		    if (err) {
