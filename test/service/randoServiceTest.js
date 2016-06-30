@@ -12,6 +12,39 @@ var Errors = require("../../src/error/errors");
 describe('Rando service.', function () {
     describe('Save image.', function () {
 
+	 	//restore all stubs because we can have a case:
+	 	//Call parralel two funtions and both use stubs. One of stub can be frozen and break next test.
+    	afterEach(function() {
+    	 	if (db.rando.add.restore) {
+    	 		db.rando.add.restore();
+    	 	}
+
+
+    	 	if (db.user.update.restore) {
+    	 		db.user.update.restore();
+    	 	}
+
+    	 	if (fs.rename.restore) {
+    	 		fs.rename.restore();
+    	 	}
+
+    	 	if (fs.unlink.restore) {
+    	 		fs.unlink.restore();
+    	 	}
+
+    	 	if (s3Service.upload.restore) {
+    	 		s3Service.upload.restore();
+    	 	}
+
+    	 	if (gm.prototype.write.restore) {
+    	 		gm.prototype.write.restore();
+    	 	}
+
+    	 	if (util.generateImageName.restore) {
+    	 		util.generateImageName.restore();
+    	 	}
+    	 });
+
 	it('Should return incorrect args error when rando path is undefined', function (done) {
 	    randoService.saveImage({email: "user@mail.com"}, null, {latitude: "32", longitude: "23"}, function (err) {
                 err.should.eql(Errors.IncorrectArgs());
@@ -29,9 +62,8 @@ describe('Rando service.', function () {
 	it('Should return system error when Generate Image Name return error', function (done) {
 	    var called = false;
 	    sinon.stub(util, "generateImageName", function (callback) {
-		called = true;
-		util.generateImageName.restore();
-		callback(Errors.System(new Error()));
+			called = true;
+			callback(Errors.System(new Error()));
 	    });
 
 	    randoService.saveImage({user: "user@mail.com"}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
@@ -45,35 +77,30 @@ describe('Rando service.', function () {
 	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
 
             sinon.stub(db.rando, "add", function (rando, callback) {
-                db.rando.add.restore();
                 callback(new Error("Some db error"));
             });
 
             sinon.stub(db.user, "update", function (user) {
                 //do nothing
-                db.user.update.restore();
             });
 
 	    sinon.stub(fs, "rename", function (source, dest, callback) {
-		fs.rename.restore();
-		callback(null);
+			callback(null);
 	    });
 	    sinon.stub(fs, "unlink", function (file, callback) {
-		callback(null);
+			callback(null);
 	    });
-            sinon.stub(s3Service, "upload", function (file, size, callback) {
-                callback(null, "http://rando4me/image/someimage.jpg");
-            });
+        sinon.stub(s3Service, "upload", function (file, size, callback) {
+            callback(null, "http://rando4me/image/someimage.jpg");
+        });
+	    
 	    sinon.stub(gm.prototype.__proto__, "write", function (path, callback) {
-		callback();
+			callback();
 	    });
 
 	    randoService.saveImage({email: "user@mail.com", out:[], in:[]}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
 		err.rando.should.be.eql(Errors.System(new Error()).rando);
 
-		gm.prototype.write.restore();
-                s3Service.upload.restore();
-                fs.unlink.restore();
 		done();
 	    });
 	});
@@ -82,8 +109,7 @@ describe('Rando service.', function () {
 	    mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
 
 	    sinon.stub(fs, "rename", function (source, dest, callback) {
-		fs.rename.restore();
-		callback(null);
+			callback(null);
 	    });
             sinon.stub(s3Service, "upload", function (file, size, callback) {
                 callback(Errors.System(new Error("S3 error")));
@@ -95,8 +121,6 @@ describe('Rando service.', function () {
 	    randoService.saveImage({email: "user@mail.com", out:[], in:[]}, "/tmp/some-image.png", {latitude: "32", longitude: "23"}, function (err) {
 		err.rando.should.be.eql(Errors.System(new Error()).rando);
 
-		gm.prototype.write.restore();
-                s3Service.upload.restore();
 		done();
 	    });
 	});
@@ -133,10 +157,6 @@ describe('Rando service.', function () {
 		should.not.exist(err);
 		should.exist(imageURL);
 
-
-		gm.prototype.write.restore();
-                s3Service.upload.restore();
-		fs.unlink.restore();
 		done();
 	    });
 	});

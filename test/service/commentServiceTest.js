@@ -15,6 +15,7 @@ describe('Comment service.', function () {
             };
 
             sinon.stub(db.user, "update", function (user, callback) {
+                console.log("Stubbed user.update(): " + user.out[1].delete);
                 user.out[1].delete.should.equal(1);
                 db.user.update.restore();
                 done();
@@ -78,7 +79,7 @@ describe('Comment service.', function () {
             });
 
             commentService.delete(user, 123, function (err, response) {
-                err.should.be.eql(Errors.System(new Error()));
+                err.should.be.eql(Errors.System(new Error("Some db error")));
                 done();
             });
         });

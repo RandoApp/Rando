@@ -16,8 +16,10 @@ var clinet = s3.createClient({
 
 module.exports = {
     upload: function (files, size, callback) {
+        logger.trace("[s3Service.upload]"); 
         var self = this;
         var params = this.buildParams(files, size);
+        logger.trace("[s3Service.upload]", " Params generated: ", params); 
 	var uploader = clinet.uploadFile(params);
         this.processUploader(uploader, function (err) {
             if (err) {
@@ -29,6 +31,7 @@ module.exports = {
         });
     },
     processUploader: function (uploader, callback) {
+    logger.trace("[s3Service.processUploader]"); 
 	uploader.on('progress', function () {
 	    logger.debug("[s3Service.upload.progress] amount: ", uploader.progressAmount, " total: ", uploader.progressTotal); 
 	}).on('end', function (data) {
@@ -40,6 +43,7 @@ module.exports = {
 	});
     },
     buildParams: function (files, size) {
+        logger.trace("[s3Service.buildParams]"); 
         return {
             localFile: config.app.static.folder.name + files[size],
             s3Params: {

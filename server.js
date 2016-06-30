@@ -15,7 +15,6 @@ if (cluster.isMaster) {
     var morgan  = require("morgan");
     var bodyParser = require("body-parser");
     var multer  = require("multer");
-    var serveStatic = require("serve-static");
     var access = require("./src/service/access");
     var tokenConverter = require("./src/util/backwardCompatibility").tokenConverter;
     var config = require("config");
@@ -27,13 +26,14 @@ if (cluster.isMaster) {
     var statusService = require("./src/service/statusService");
     var Errors = require("./src/error/errors");
     var app = express();
+    var upload = multer({ dest: '/tmp/' })
+
 
     require("randoDB").connect(config.db.url);
 
-    app.use(serveStatic(__dirname + '/static', {maxAge: config.app.cacheControl}));
+    app.use(express.static(__dirname + '/static', {maxAge: config.app.cacheControl}));
     app.use(morgan("combined"));
     app.use(bodyParser());
-    app.use(multer({dest: '/tmp/'}));
 
     (function checkSources() {
         if (!fs.existsSync(config.app.citiesJson)) {
@@ -48,8 +48,8 @@ if (cluster.isMaster) {
         });
     });
 
-    app.post('/image', access.byToken, access.noSpam, function (req, res) {
-        postImage(req.user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
+    app.post('/image', access.byToken, access.noSpam, upload.single('image') , function (req, res) {
+        postImage(req.user, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
     });
 
     function postImage(user, filePath, location, res) {
