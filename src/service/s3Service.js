@@ -38,7 +38,7 @@ module.exports = {
       logger.data("[s3Service.upload.end] File uploaded. data: ", data);
       callback();
     }).on("error", function (err) {
-      logger.error("[s3Service.upload.error] Can"t upload file, because: ", err);
+      logger.error("[s3Service.upload.error] Can't upload file, because: ", err);
       callback(Errors.System(err));
     });
   },
