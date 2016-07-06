@@ -15,7 +15,6 @@ describe('Comment service.', function () {
             };
 
             sinon.stub(db.user, "update", function (user, callback) {
-                console.log("Stubbed user.update(): " + user.out[1].delete);
                 user.out[1].delete.should.equal(1);
                 db.user.update.restore();
                 done();

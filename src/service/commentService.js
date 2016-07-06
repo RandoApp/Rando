@@ -10,7 +10,7 @@ module.exports = {
 
         async.find(randos, function (rando, done) {
             logger.trace("[commentService.delete, ", user.email, "]", "Try find rando. rando.randoId[", rando.randoId, "] == randoId[", randoId, "]");
-            done(null, rando.randoId == randoId);
+            done(null, rando.randoId === randoId);
         }, function (error, rando) {
             logger.trace("[commentService.delete, ", user.email, "]", "Processing found rando: ", rando);
             if (!rando) {

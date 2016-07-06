@@ -19,7 +19,6 @@ describe('Rando service.', function () {
     	 		db.rando.add.restore();
     	 	}
 
-
     	 	if (db.user.update.restore) {
     	 		db.user.update.restore();
     	 	}
