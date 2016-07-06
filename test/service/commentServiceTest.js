@@ -78,7 +78,7 @@ describe('Comment service.', function () {
             });
 
             commentService.delete(user, 123, function (err, response) {
-                err.should.be.eql(Errors.System(new Error()));
+                err.should.be.eql(Errors.System(new Error("Some db error")));
                 done();
             });
         });

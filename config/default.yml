@@ -42,8 +42,8 @@ app:
         file: rando.log
         handleException: true
         level:
-            console: debug
-            file: debug 
+            console: info
+            file: info
     static:
         file:
             ext: png

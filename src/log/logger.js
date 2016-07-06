@@ -9,21 +9,8 @@ module.exports = new (winston.Logger)({
 	    handleException: config.app.log.handleException,
 	    level: config.app.log.level.file,
 	    timestamp: true
-	})
-    ],
-    levels: {
-	debug: 0,
-	info: 1,
-	data: 2,
-	warn: 3,
-	error: 4 
-    },
-    colors: {
-	debug: "grey",
-	info: "green",
-	data: "blue",
-	warn: "yellow",
-	error: "red"
-    },
+	})],
+    levels: { error: 0, warn: 1, data: 2, info: 3, debug: 4, trace: 5 },
+    colors: { error: "red", warn: "yellow", data: "blue", info: "green", debug: "grey", trace: "cyan" },
     exitOnError: false
 });
