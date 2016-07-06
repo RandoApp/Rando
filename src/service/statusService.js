@@ -7,86 +7,86 @@ var http = require("http");
 var config = require("config");
 
 module.exports = {
-    status: function (callback) {
-        async.parallel([
-            dbStatus,
-            s3Status,
-            componentsStatus,
-            fsStatus
-        ], function (err, statuses) {
-            var status = {created: new Date()};
+  status: function (callback) {
+    async.parallel([
+      dbStatus,
+      s3Status,
+      componentsStatus,
+      fsStatus
+      ], function (err, statuses) {
+        var status = {created: new Date()};
 
-            for (var i = 0; i < statuses.length; i++) {
-                for (var attr in statuses[i]) {
-                    status[attr] = statuses[i][attr];
-                }
-            }
-            callback(status);
-        });
-    }
+        for (var i = 0; i < statuses.length; i++) {
+          for (var attr in statuses[i]) {
+            status[attr] = statuses[i][attr];
+          }
+        }
+        callback(status);
+      });
+  }
 };
 
 function dbStatus (callback) {
-    var db = new Db(config.db.name, new Server(config.db.host, config.db.port), {safe: true});
-    db.open(function(err, db) {
-        if (err) {
-            callback(null, {db: "fail"});
-            return;
-        }
+  var db = new Db(config.db.name, new Server(config.db.host, config.db.port), {safe: true});
+  db.open(function(err, db) {
+    if (err) {
+      callback(null, {db: "fail"});
+      return;
+    }
 
-        db.admin().serverStatus(function (err, info) {
-            if (err || info.ok != 1) {
-                callback(null, {db: "fail"});
-            } else {
-                callback(null, {db: "ok"});
-            }
-            db.close();
-        });
+    db.admin().serverStatus(function (err, info) {
+      if (err || info.ok != 1) {
+        callback(null, {db: "fail"});
+      } else {
+        callback(null, {db: "ok"});
+      }
+      db.close();
     });
+  });
 }
 
 function componentsStatus (callback) {
-    exec("convert -version", function (err, stdout, stderr) {
-        if (err || stderr) {
-            callback(null, {components: "fail"});
-            return;
-        }
-        callback(null, {components: "ok"});
-    });
+  exec("convert -version", function (err, stdout, stderr) {
+    if (err || stderr) {
+      callback(null, {components: "fail"});
+      return;
+    }
+    callback(null, {components: "ok"});
+  });
 }
 
 function fsStatus (callback) {
-    async.series({
-        canWrite: function (done) {
-            fs.writeFile("/tmp/rando-status-test.txt", "Check fs status", done);
-        },
-        canRead: function (done) {
-            fs.readFile("/tmp/rando-status-test.txt", function (err, data) {
-                if (err || data != "Check fs status") {
-                    done(new Error("Can not read file"));
-                    return;
-                }
-                done();
-            });
-        },
-        canDelete: function (done) {
-            fs.unlink("/tmp/rando-status-test.txt", done);
+  async.series({
+    canWrite: function (done) {
+      fs.writeFile("/tmp/rando-status-test.txt", "Check fs status", done);
+    },
+    canRead: function (done) {
+      fs.readFile("/tmp/rando-status-test.txt", function (err, data) {
+        if (err || data != "Check fs status") {
+          done(new Error("Can not read file"));
+          return;
         }
-    }, function (err) {
-        if (err) {
-            callback(null, {fs: "fail"});
-        } else {
-            callback(null, {fs: "ok"});
-        }
-    });
+        done();
+      });
+    },
+    canDelete: function (done) {
+      fs.unlink("/tmp/rando-status-test.txt", done);
+    }
+  }, function (err) {
+    if (err) {
+      callback(null, {fs: "fail"});
+    } else {
+      callback(null, {fs: "ok"});
+    }
+  });
 }
 
 function s3Status (callback ) {
-    http.get("http://s3.amazonaws.com/img.s.rando4me/reported.jpg", function (res) {
-        if (res.statusCode == 200) {
-            callback(null, {s3: "ok"});
-        } else {
-            callback(null, {s3: "fail"});
-        }
-    })
+  http.get("http://s3.amazonaws.com/img.s.rando4me/reported.jpg", function (res) {
+    if (res.statusCode == 200) {
+      callback(null, {s3: "ok"});
+    } else {
+      callback(null, {s3: "fail"});
+    }
+  })
 }
