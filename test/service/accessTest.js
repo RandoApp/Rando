@@ -137,7 +137,7 @@ describe("Access service.", function () {
 
 describe("For user with token.", function () {
   it("Should return Unauthorized error when authorization header is passed", function (done) {
-    access.byToken({ip: "127.0.0.1", headers: {}, connection: {remoteAddress : '127.0.0.1' } } , {
+    access.byToken({ip: "127.0.0.1", headers: {}, connection: {remoteAddress : "127.0.0.1" } } , {
       status: function(status) {
         status.should.be.eql(401);
         return this;
