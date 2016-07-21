@@ -14,7 +14,7 @@ function checkAccess (req, res, next) {
     return;
   }
 
-  var authHeaderSplit = authHeader.split(' ');
+  var authHeaderSplit = authHeader.split(" ");
   if (authHeaderSplit.length !==2 ||  authHeaderSplit[0]!=="Token"){
     logger.debug("[access.checkAccess] Bad to token format. Send Unauthorized");
     sendUnauthorized(res);
