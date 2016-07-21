@@ -216,7 +216,7 @@ describe("For user with token.", function () {
     sinon.stub(db.user, "update", function (user, callback) {
       db.user.update.restore();
       user.firebaseInstanceIds.length.should.be.eql(1);
-      user.firebaseInstanceIds[0].instanceId.should.be.eql('FirebaseInstanceId12345');
+      user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId12345");
       user.firebaseInstanceIds[0].active.should.be.eql(true);
     });
 
