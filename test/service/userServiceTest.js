@@ -293,4 +293,38 @@ describe("Destroy auth token.", function () {
   });
 });
 
+describe("FirebaseInstanceId operations. ", function () {
+  it("Should deactivate FirebaseInstanceId and don't change others when id exists" , function (done) {
+    var firebaseInstanceId = "FirebaseInstanceId1";
+    var user = {
+      authToken: "someToken",
+      firebaseInstanceIds: [{
+        instanceId: firebaseInstanceId,
+        active: true,
+        createdDate: 100,
+        lastUsedDate: 200
+    },
+    {
+        instanceId: "firebaseInstanceId2",
+        active: false,
+        createdDate: 300,
+        lastUsedDate: 400
+    }]};
+
+    userService.deactivateFirebaseInstanceId(user,firebaseInstanceId);
+
+    user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);
+    user.firebaseInstanceIds[0].active.should.be.false;
+    user.firebaseInstanceIds[0].createdDate.should.be.eql(100);
+    user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(200);
+
+    user.firebaseInstanceIds[1].instanceId.should.be.eql("firebaseInstanceId2");
+    user.firebaseInstanceIds[1].active.should.be.false;
+    user.firebaseInstanceIds[1].createdDate.should.be.eql(300);
+    user.firebaseInstanceIds[1].lastUsedDate.should.be.eql(400);
+
+    done();
+  });
+});
+
 });
