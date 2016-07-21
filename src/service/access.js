@@ -4,15 +4,25 @@ var logger = require("../log/logger");
 var config = require("config");
 
 function checkAccess (req, res, next) {
-  var ip = req.ip;
-  var token = req.query.token;
-  logger.debug("[access.checkAccess] start. token: ", token, " ip: ", ip);
-  if (!token) {
-    logger.debug("[access.checkAccess] No Token. Send Unauthorized");
+  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  
+  var authHeader = req.headers.authorization || 
+  logger.debug("[access.checkAccess] start. Authorization header: ", authHeader, " ip: ", ip);
+  if (!authHeader) {
+    logger.debug("[access.checkAccess] Authorization header. Send Unauthorized");
     sendUnauthorized(res);
     return;
   }
 
+  var authHeaderSplit = authHeader.split(' ');
+
+  if (authHeaderSplit.length !==2 ||  authHeaderSplit[0]!=="Token"){
+    logger.debug("[access.checkAccess] Bad to token format. Send Unauthorized");
+    sendUnauthorized(res);
+    return;
+  }
+
+  var token = authHeaderSplit[1];
   db.user.getByToken(token, function (err, user) {
     if (err) {
       logger.warn("[access.checkAccess] Error when db.user.getByToken: ", err);
@@ -25,13 +35,14 @@ function checkAccess (req, res, next) {
       return;
     }
 
-    logger.debug("[access.checkAccess] Log in: ", user.email , " <== ", token);
-    updateIp(user, ip);
+    var firebaseInstanceId = req.get("FirebaseInstanceId");
+    logger.debug("[access.checkAccess] Log in: ", user.email , " <== ", token," FirebaseInstanceId: ", firebaseInstanceId);
+    updateIpAndFirebaseInstanceId(user, ip, firebaseInstanceId);
+    db.user.update(user);
     req.user = user;
     next();
   });
 }
-
 
 function checkSpam (req, res, next) {
   var user = req.user;
@@ -79,13 +90,26 @@ function sendForbidden(res, ban) {
   res.status(response.status).send(response);
 }
 
-function updateIp (user, ip) {
+function updateIpAndFirebaseInstanceId (user, ip, firebaseInstanceId) {
   if (!user.ip || (user.ip && user.ip != ip)) {
     logger.debug("[access.updateIp] Update to new ip[", ip ,"] for user: ", user.email);
     user.ip = ip;
-    db.user.update(user);
-    return;
   }
+  var firebaseInstanceIdSet = false;
+  if (firebaseInstanceId) {
+    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
+        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
+            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
+            user.firebaseInstanceIds[i].active = true;
+            firebaseInstanceIdSet = true;
+        }
+    }
+    if (!firebaseInstanceIdSet){
+      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
+      firebaseInstanceIdSet = true;
+    }
+  }
+  return;
 }
 
 module.exports = {
