@@ -223,8 +223,9 @@ describe("For user with token.", function () {
     var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
     
     sinon.stub(req, "get", function (header){
-      if (header === "FirebaseInstanceId")
-      return 'FirebaseInstanceId12345';
+      if (header === "FirebaseInstanceId") {
+        return 'FirebaseInstanceId12345';
+      }
     });
 
     access.byToken(req, {
