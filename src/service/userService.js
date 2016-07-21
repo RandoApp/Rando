@@ -325,5 +325,22 @@ findOrCreateByGoogleData: function (id, email, ip, callback) {
       });
     }
   });
+},
+addOrUpdateFirebaseInstanceId: function(user, firebaseInstanceId) {
+  var firebaseInstanceIdSet = false;
+  if (firebaseInstanceId) {
+    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
+        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
+            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
+            user.firebaseInstanceIds[i].active = true;
+            firebaseInstanceIdSet = true;
+        }
+    }
+    if (!firebaseInstanceIdSet){
+      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
+      firebaseInstanceIdSet = true;
+    }
+  }
+  return;
 }
 };

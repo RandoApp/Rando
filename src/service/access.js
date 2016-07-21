@@ -2,6 +2,24 @@ var Errors = require("../error/errors");
 var db = require("randoDB");
 var logger = require("../log/logger");
 var config = require("config");
+var userService = require("./userService");
+
+function sendUnauthorized (res) {
+  var response = Errors.toResponse(Errors.Unauthorized());
+  res.status(response.status).send(response);
+}
+
+function sendForbidden(res, ban) {
+  var response = Errors.toResponse(Errors.Forbidden(ban));
+  res.status(response.status).send(response);
+}
+
+function updateIp (user, ip) {
+  if (!user.ip || (user.ip && user.ip != ip)) {
+    logger.debug("[access.updateIp] Update to new ip[", ip ,"] for user: ", user.email);
+    user.ip = ip;
+  }
+}
 
 function checkAccess (req, res, next) {
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
@@ -35,8 +53,11 @@ function checkAccess (req, res, next) {
     }
 
     var firebaseInstanceId = req.get("FirebaseInstanceId");
+    if (firebaseInstanceId){
+      userService.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
+    }
     logger.debug("[access.checkAccess] Log in: ", user.email , " <== ", token," FirebaseInstanceId: ", firebaseInstanceId);
-    updateIpAndFirebaseInstanceId(user, ip, firebaseInstanceId);
+    updateIp(user, ip);
     db.user.update(user);
     req.user = user;
     next();
@@ -78,48 +99,6 @@ function checkSpam (req, res, next) {
   logger.debug("[access.checkSpam, ", user.email, "] User ok. Go next.");
   next();
 }
-
-function sendUnauthorized (res) {
-  var response = Errors.toResponse(Errors.Unauthorized());
-  res.status(response.status).send(response);
-}
-
-function sendForbidden(res, ban) {
-  var response = Errors.toResponse(Errors.Forbidden(ban));
-  res.status(response.status).send(response);
-}
-
-function updateIp (user, ip) {
-  if (!user.ip || (user.ip && user.ip != ip)) {
-    logger.debug("[access.updateIp] Update to new ip[", ip ,"] for user: ", user.email);
-    user.ip = ip;
-  }
-}
-
-function updateFirebaseInstanceId (user, firebaseInstanceId) {
-  var firebaseInstanceIdSet = false;
-  if (firebaseInstanceId) {
-    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
-        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
-            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
-            user.firebaseInstanceIds[i].active = true;
-            firebaseInstanceIdSet = true;
-        }
-    }
-    if (!firebaseInstanceIdSet){
-      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
-      firebaseInstanceIdSet = true;
-    }
-  }
-  return;
-}
-
-function updateIpAndFirebaseInstanceId (user, ip, firebaseInstanceId) {
-  updateIp(user, ip);
-  updateFirebaseInstanceId(user, firebaseInstanceId);
-}
-
-
 
 module.exports = {
   byToken: checkAccess,
