@@ -89,11 +89,14 @@ function sendForbidden(res, ban) {
   res.status(response.status).send(response);
 }
 
-function updateIpAndFirebaseInstanceId (user, ip, firebaseInstanceId) {
+function updateIp (user, ip) {
   if (!user.ip || (user.ip && user.ip != ip)) {
     logger.debug("[access.updateIp] Update to new ip[", ip ,"] for user: ", user.email);
     user.ip = ip;
   }
+}
+
+function updateFirebaseInstanceId (user, firebaseInstanceId) {
   var firebaseInstanceIdSet = false;
   if (firebaseInstanceId) {
     for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
@@ -110,6 +113,13 @@ function updateIpAndFirebaseInstanceId (user, ip, firebaseInstanceId) {
   }
   return;
 }
+
+function updateIpAndFirebaseInstanceId (user, ip, firebaseInstanceId) {
+  updateIp(user, ip);
+  updateFirebaseInstanceId(user, firebaseInstanceId);
+}
+
+
 
 module.exports = {
   byToken: checkAccess,
