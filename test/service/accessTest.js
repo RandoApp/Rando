@@ -157,7 +157,7 @@ describe("For user with token.", function () {
       callback();
     });
 
-    access.byToken ( {headers: { authorization: 'Token 12345'}, connection: {remoteAddress : '127.0.0.1' }}, {
+    access.byToken ( {headers: { authorization: 'Token 12345'}, connection: {remoteAddress : "127.0.0.1" }}, {
       status: function(status) {
         status.should.be.eql(401);
         return this;
@@ -172,7 +172,7 @@ describe("For user with token.", function () {
   });
 
  it("Should return Unauthorized error when empty token passed", function (done) {
-  access.byToken ( {headers: { authorization: 'Token'}, connection: {remoteAddress : '127.0.0.1' }}, {
+  access.byToken ( {headers: { authorization: 'Token'}, connection: {remoteAddress : "127.0.0.1" }}, {
       status: function(status) {
         status.should.be.eql(401);
         return this;
@@ -192,7 +192,7 @@ describe("For user with token.", function () {
       callback(new Error("DB error"));
     });
 
-    access.byToken({headers: { authorization: 'Token 12345'}, connection: {remoteAddress : '127.0.0.1' }}, {
+    access.byToken({headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }}, {
       status: function(status) {
         status.should.be.eql(500);
         return this;
@@ -220,7 +220,7 @@ describe("For user with token.", function () {
       user.firebaseInstanceIds[0].active.should.be.eql(true);
     });
 
-    var req = {headers: { authorization: 'Token 12345'}, connection: {remoteAddress : '127.0.0.1' }, get : function(){}};
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
     
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId")
@@ -239,7 +239,7 @@ describe("For user with token.", function () {
 });
 
 it("Should return existing user without error and add FirebaseInstanceId", function (done) {
-    var user = {email: "user@mail.com", firebaseInstanceIds: [{instanceId: '12345', active: true}]};
+    var user = {email: "user@mail.com", firebaseInstanceIds: [{instanceId: "12345", active: true}]};
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
       callback(null, user);
@@ -248,15 +248,15 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
     sinon.stub(db.user, "update", function (user, callback) {
       db.user.update.restore();
       user.firebaseInstanceIds.length.should.be.eql(2);
-      user.firebaseInstanceIds[1].instanceId.should.be.eql('FirebaseInstanceId12345');
+      user.firebaseInstanceIds[1].instanceId.should.be.eql("FirebaseInstanceId12345");
       user.firebaseInstanceIds[1].active.should.be.eql(true);
     });
 
-    var req = {headers: { authorization: 'Token 12345'}, connection: {remoteAddress : '127.0.0.1' }, get : function(){}};
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
     
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId")
-      return 'FirebaseInstanceId12345';
+      return "FirebaseInstanceId12345";
     });
 
     access.byToken(req, {
@@ -270,7 +270,7 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
   });
 
 it("Should return existing user without error and add FirebaseInstanceId", function (done) {
-    var user = {email: "user@mail.com", firebaseInstanceIds: [{instanceId: 'FirebaseInstanceId12345', active: true, lastUsedDate: 2, createdDate: 1}]};
+    var user = {email: "user@mail.com", firebaseInstanceIds: [{instanceId: "FirebaseInstanceId12345", active: true, lastUsedDate: 2, createdDate: 1}]};
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
       callback(null, user);
@@ -279,12 +279,12 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
     sinon.stub(db.user, "update", function (user, callback) {
       db.user.update.restore();
       user.firebaseInstanceIds.length.should.be.eql(1);
-      user.firebaseInstanceIds[0].instanceId.should.be.eql('FirebaseInstanceId12345');
+      user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId12345");
       user.firebaseInstanceIds[0].active.should.be.eql(true);
       user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(2);
     });
 
-    var req = {headers: { authorization: 'Token 12345'}, connection: {remoteAddress : '127.0.0.1' }, get : function(){}};
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
     
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId")
@@ -315,7 +315,7 @@ describe("Update ip.", function () {
       }
     });
 
-    access.byToken({headers: { authorization: 'Token 12345'}, connection: {remoteAddress : '127.0.0.1' }, get : function(){}}, {}, function () {
+    access.byToken({headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}}, {}, function () {
       db.user.update.restore();
       done();
     });
@@ -334,7 +334,7 @@ describe("Update ip.", function () {
       done();
     });
 
-    access.byToken({headers: { authorization: 'Token 123'}, connection: {remoteAddress : '127.0.0.1' }, get : function(){}}, {}, function () {
+    access.byToken({headers: { authorization: "Token 123"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}}, {}, function () {
                 //do nothing
               });
   });
@@ -352,7 +352,7 @@ describe("Update ip.", function () {
       done();
     });
 
-    access.byToken({headers: { authorization: 'Token 123'}, connection: {remoteAddress : '127.0.0.1' }, get : function(){}}, {}, function () {
+    access.byToken({headers: { authorization: "Token 123"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}}, {}, function () {
                 //do nothing
               });
   });

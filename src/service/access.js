@@ -4,7 +4,7 @@ var logger = require("../log/logger");
 var config = require("config");
 
 function checkAccess (req, res, next) {
-  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
   
   var authHeader = req.headers.authorization || 
   logger.debug("[access.checkAccess] start. Authorization header: ", authHeader, " ip: ", ip);
@@ -15,7 +15,6 @@ function checkAccess (req, res, next) {
   }
 
   var authHeaderSplit = authHeader.split(' ');
-
   if (authHeaderSplit.length !==2 ||  authHeaderSplit[0]!=="Token"){
     logger.debug("[access.checkAccess] Bad to token format. Send Unauthorized");
     sendUnauthorized(res);
