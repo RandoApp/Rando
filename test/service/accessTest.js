@@ -157,7 +157,7 @@ describe("For user with token.", function () {
       callback();
     });
 
-    access.byToken ( {headers: { authorization: 'Token 12345'}, connection: {remoteAddress : "127.0.0.1" }}, {
+    access.byToken ( {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }}, {
       status: function(status) {
         status.should.be.eql(401);
         return this;
@@ -172,7 +172,7 @@ describe("For user with token.", function () {
   });
 
  it("Should return Unauthorized error when empty token passed", function (done) {
-  access.byToken ( {headers: { authorization: 'Token'}, connection: {remoteAddress : "127.0.0.1" }}, {
+  access.byToken ( {headers: { authorization: "Token"}, connection: {remoteAddress : "127.0.0.1" }}, {
       status: function(status) {
         status.should.be.eql(401);
         return this;
