@@ -224,7 +224,7 @@ describe("For user with token.", function () {
     
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId") {
-        return 'FirebaseInstanceId12345';
+        return "FirebaseInstanceId12345";
       } else {
         return null;
       }
