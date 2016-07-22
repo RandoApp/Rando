@@ -23,8 +23,8 @@ function updateIp (user, ip) {
 
 function checkAccess (req, res, next) {
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-  
-  var authHeader = req.headers.authorization || 
+
+  var authHeader = req.headers.authorization;
   logger.debug("[access.checkAccess] start. Authorization header: ", authHeader, " ip: ", ip);
   if (!authHeader) {
     logger.debug("[access.checkAccess] Authorization header. Send Unauthorized");

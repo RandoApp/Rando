@@ -180,10 +180,6 @@ if (cluster.isMaster) {
     });
   });
 
-  app.post("/logout", access.byToken, function (req, res) {
-    logout(req.user, res);
-  });
-
   function logout(user, req, res) {
     userService.destroyAuthToken(user, req.firebaseInstanceId, function (err, response) {
       if (err) {
@@ -197,6 +193,10 @@ if (cluster.isMaster) {
       res.status(200).send(response);
     });
   };
+
+  app.post("/logout", access.byToken, function (req, res) {
+    logout(req.user, res);
+  });
 
   app.post("/log", function (req, res) {
     logger.data("Start process user request. POST /log. Token: ", req.params.token);
