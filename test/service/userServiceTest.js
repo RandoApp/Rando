@@ -276,12 +276,21 @@ describe("Destroy auth token.", function () {
       authToken: "someToken",
       save: function () {
         isSaveCalled = true;
-      }
+      },
+      firebaseInstanceIds: [
+    {
+        instanceId: "firebaseInstanceId",
+        active: true,
+        createdDate: 300,
+        lastUsedDate: 400
+    }]
     }
-    userService.destroyAuthToken(user, function (err, result) {
+    userService.destroyAuthToken(user, "firebaseInstanceId", function (err, result) {
       should.not.exist(err);
       isSaveCalled.should.be.true;
       user.authToken.should.be.empty;
+      user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId");
+      user.firebaseInstanceIds[0].active.should.be.false;
 
       result.should.be.eql({
         command: "logout",
@@ -325,6 +334,55 @@ describe("FirebaseInstanceId operations. ", function () {
 
     done();
   });
+
+  it("Should add deactivated FirebaseInstanceId and don't change others when id is not in list" , function (done) {
+    var firebaseInstanceId = "FirebaseInstanceId1";
+    var user = {
+      authToken: "someToken",
+      firebaseInstanceIds: [
+    {
+        instanceId: "firebaseInstanceId2",
+        active: false,
+        createdDate: 300,
+        lastUsedDate: 400
+    }]};
+
+    userService.deactivateFirebaseInstanceId(user,firebaseInstanceId);
+
+    user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId2");
+    user.firebaseInstanceIds[0].active.should.be.false;
+    user.firebaseInstanceIds[0].createdDate.should.be.eql(300);
+    user.firebaseInstanceIds[0].lastUsedDate.should.be.eql(400);
+
+    user.firebaseInstanceIds[1].instanceId.should.be.eql(firebaseInstanceId);
+    user.firebaseInstanceIds[1].active.should.be.false;
+
+    done();
+  });
+
+  it("Should not fail when FirebaseInstanceId or user is undefined" , function (done) {
+    var firebaseInstanceId = "FirebaseInstanceId1";
+    var user = {
+      authToken: "someToken",
+      firebaseInstanceIds: [
+    {
+        instanceId: "firebaseInstanceId2",
+        active: false,
+        createdDate: 300,
+        lastUsedDate: 400
+    }]};
+
+    userService.deactivateFirebaseInstanceId(user, undefined);
+    userService.deactivateFirebaseInstanceId(undefined, firebaseInstanceId);
+    userService.deactivateFirebaseInstanceId(undefined, undefined);
+
+    userService.addOrUpdateFirebaseInstanceId(user, undefined);
+    userService.addOrUpdateFirebaseInstanceId(undefined, firebaseInstanceId);
+    userService.addOrUpdateFirebaseInstanceId(undefined, undefined);
+
+    done();
+  });
+
 });
 
 });

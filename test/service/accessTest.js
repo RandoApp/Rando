@@ -217,7 +217,7 @@ describe("For user with token.", function () {
       db.user.update.restore();
       user.firebaseInstanceIds.length.should.be.eql(1);
       user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId12345");
-      user.firebaseInstanceIds[0].active.should.be.eql(true);
+      user.firebaseInstanceIds[0].active.should.be.true;
     });
 
     var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
@@ -252,7 +252,7 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
       db.user.update.restore();
       user.firebaseInstanceIds.length.should.be.eql(2);
       user.firebaseInstanceIds[1].instanceId.should.be.eql("FirebaseInstanceId12345");
-      user.firebaseInstanceIds[1].active.should.be.eql(true);
+      user.firebaseInstanceIds[1].active.should.be.true;
     });
 
     var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
@@ -284,7 +284,7 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
       db.user.update.restore();
       user.firebaseInstanceIds.length.should.be.eql(1);
       user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId12345");
-      user.firebaseInstanceIds[0].active.should.be.eql(true);
+      user.firebaseInstanceIds[0].active.should.be.true;
       user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(2);
     });
 

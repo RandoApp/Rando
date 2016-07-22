@@ -8,8 +8,45 @@ var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
 
 module.exports = {
-  destroyAuthToken: function (user, callback) {
+  addOrUpdateFirebaseInstanceId: function(user, firebaseInstanceId) {
+  var firebaseInstanceIdSet = false;
+  if (user && firebaseInstanceId) {
+    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
+        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
+            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
+            user.firebaseInstanceIds[i].active = true;
+            firebaseInstanceIdSet = true;
+        }
+    }
+    if (!firebaseInstanceIdSet){
+      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
+      logger.debug("Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+      firebaseInstanceIdSet = true;
+    }
+  }
+  return;
+},
+
+deactivateFirebaseInstanceId: function(user, firebaseInstanceId) {
+  var firebaseInstanceIdSet = false;
+  if (user && firebaseInstanceId) {
+    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
+        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
+            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
+            user.firebaseInstanceIds[i].active = false;
+            firebaseInstanceIdSet = true;
+        }
+    }
+    if (!firebaseInstanceIdSet){
+      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
+      firebaseInstanceIdSet = true;
+    }
+  }
+  return;
+},
+  destroyAuthToken: function (user, firebaseInstanceId, callback) {
     user.authToken = "";
+    this.deactivateFirebaseInstanceId(user, firebaseInstanceId);
     db.user.update(user);
     callback(null, {command: "logout", result: "done"});
   },
@@ -325,41 +362,5 @@ findOrCreateByGoogleData: function (id, email, ip, callback) {
       });
     }
   });
-},
-addOrUpdateFirebaseInstanceId: function(user, firebaseInstanceId) {
-  var firebaseInstanceIdSet = false;
-  if (firebaseInstanceId) {
-    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
-        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
-            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
-            user.firebaseInstanceIds[i].active = true;
-            firebaseInstanceIdSet = true;
-        }
-    }
-    if (!firebaseInstanceIdSet){
-      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
-      logger.debug("Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
-      firebaseInstanceIdSet = true;
-    }
-  }
-  return;
-},
-
-deactivateFirebaseInstanceId: function(user, firebaseInstanceId) {
-  var firebaseInstanceIdSet = false;
-  if (firebaseInstanceId) {
-    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
-        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
-            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
-            user.firebaseInstanceIds[i].active = false;
-            firebaseInstanceIdSet = true;
-        }
-    }
-    if (!firebaseInstanceIdSet){
-      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
-      firebaseInstanceIdSet = true;
-    }
-  }
-  return;
 }
 };
