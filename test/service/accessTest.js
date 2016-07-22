@@ -220,7 +220,7 @@ describe("For user with token.", function () {
       user.firebaseInstanceIds[0].active.should.be.true;
     });
 
-    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
     
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId") {
@@ -255,7 +255,7 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
       user.firebaseInstanceIds[1].active.should.be.true;
     });
 
-    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
     
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId") {
@@ -288,7 +288,7 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
       user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(2);
     });
 
-    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}};
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
     
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId"){
@@ -320,7 +320,7 @@ describe("Update ip.", function () {
       }
     });
 
-    access.byToken({headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}}, {}, function () {
+    access.byToken({headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}}, {}, function () {
       db.user.update.restore();
       done();
     });
@@ -339,7 +339,7 @@ describe("Update ip.", function () {
       done();
     });
 
-    access.byToken({headers: { authorization: "Token 123"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}}, {}, function () {
+    access.byToken({headers: { authorization: "Token 123"}, connection: {remoteAddress : "127.0.0.1" }, get(){}}, {}, function () {
                 //do nothing
               });
   });
@@ -357,7 +357,7 @@ describe("Update ip.", function () {
       done();
     });
 
-    access.byToken({headers: { authorization: "Token 123"}, connection: {remoteAddress : "127.0.0.1" }, get : function(){}}, {}, function () {
+    access.byToken({headers: { authorization: "Token 123"}, connection: {remoteAddress : "127.0.0.1" }, get(){}}, {}, function () {
                 //do nothing
               });
   });
