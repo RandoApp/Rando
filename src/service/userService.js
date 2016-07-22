@@ -8,7 +8,7 @@ var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
 
 module.exports = {
-  addOrUpdateFirebaseInstanceId: function(user, firebaseInstanceId) {
+  addOrUpdateFirebaseInstanceId: function (user, firebaseInstanceId) {
   var firebaseInstanceIdSet = false;
   if (user && firebaseInstanceId) {
     for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
@@ -27,7 +27,7 @@ module.exports = {
   return;
 },
 
-deactivateFirebaseInstanceId: function(user, firebaseInstanceId) {
+deactivateFirebaseInstanceId: function (user, firebaseInstanceId) {
   var firebaseInstanceIdSet = false;
   if (user && firebaseInstanceId) {
     for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
@@ -44,6 +44,7 @@ deactivateFirebaseInstanceId: function(user, firebaseInstanceId) {
   }
   return;
 },
+
   destroyAuthToken: function (user, firebaseInstanceId, callback) {
     user.authToken = "";
     this.deactivateFirebaseInstanceId(user, firebaseInstanceId);
@@ -60,6 +61,7 @@ deactivateFirebaseInstanceId: function(user, firebaseInstanceId) {
       mapSizeURL: rando.mapSizeURL
     };
   },
+
   getUser: function (user, callback) {
     logger.debug("[userService.getUser, ", user.email, "] Try get user");
     var self = this;
@@ -99,6 +101,7 @@ deactivateFirebaseInstanceId: function(user, firebaseInstanceId) {
       });
     });
   },
+
   findOrCreateByLoginAndPassword: function (email, password, ip, callback) {
     logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
@@ -153,6 +156,7 @@ deactivateFirebaseInstanceId: function(user, firebaseInstanceId) {
       }
     });
 },
+
 findOrCreateAnonymous: function (id, ip, callback) {
   if (!id) {
     callback(Errors.IncorrectAnonymousId());
@@ -199,6 +203,7 @@ findOrCreateAnonymous: function (id, ip, callback) {
     }
   });
 },
+
 verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, callback) {
   logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Start");
 
@@ -224,6 +229,7 @@ verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, callback) {
     });
   });
 },
+
 verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, callback) {
   logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
 
@@ -259,6 +265,7 @@ verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, callbac
     });
   });
 },
+
 findOrCreateByFBData: function (data, callback) {
   logger.data("[userService.findOrCreateByFBData, ", data, "] Try find or create.");
 
@@ -310,6 +317,7 @@ findOrCreateByFBData: function (data, callback) {
     }
   });
 },
+
 findOrCreateByGoogleData: function (id, email, ip, callback) {
   logger.data("[userService.findOrCreateByGoogleData, ", email, "] Try find or create.");
 
