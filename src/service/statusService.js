@@ -83,7 +83,7 @@ function fsStatus (callback) {
 
 function s3Status (callback ) {
   http.get("http://s3.amazonaws.com/img.s.rando4me/reported.jpg", function (res) {
-    if (res.statusCode == 200) {
+    if (res.statusCode === 200) {
       callback(null, {s3: "ok"});
     } else {
       callback(null, {s3: "fail"});
