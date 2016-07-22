@@ -8,7 +8,7 @@ var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
 
 module.exports = {
-  addOrUpdateFirebaseInstanceId: function (user, firebaseInstanceId) {
+  addOrUpdateFirebaseInstanceId (user, firebaseInstanceId) {
   var firebaseInstanceIdSet = false;
   if (user && firebaseInstanceId) {
     for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
@@ -27,7 +27,7 @@ module.exports = {
   return;
 },
 
-deactivateFirebaseInstanceId: function (user, firebaseInstanceId) {
+deactivateFirebaseInstanceId (user, firebaseInstanceId) {
   var firebaseInstanceIdSet = false;
   if (user && firebaseInstanceId) {
     for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
