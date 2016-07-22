@@ -1,6 +1,5 @@
 var fs = require("fs");
 var logger = require("../log/logger");
-var async = require("async");
 var Errors = require("../error/errors");
 var crypto = require("crypto");
 var config = require("config");
