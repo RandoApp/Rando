@@ -184,7 +184,7 @@ if (cluster.isMaster) {
     logout(req.user, res);
   });
 
-  function logout(user, res) {
+  function logout(user, req, res) {
     userService.destroyAuthToken(user, req.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
