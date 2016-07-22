@@ -108,7 +108,6 @@ deactivateFirebaseInstanceId: function(user, firebaseInstanceId) {
       return;
     }
 
-    var self = this;
     db.user.getByEmail(email, function(err, user) {
       if (err) {
         logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't db.user.getByEmail, because: ", err);
