@@ -260,8 +260,9 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId") {
         return "FirebaseInstanceId12345";
+      } else {
+        return null;
       }
-      return;
     });
 
     access.byToken(req, {
@@ -294,6 +295,8 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId"){
         return "FirebaseInstanceId12345";
+      } else {
+        return null;
       }
     });
 
