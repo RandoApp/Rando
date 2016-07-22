@@ -9,20 +9,18 @@ var passwordUtil = require("../util/password");
 
 module.exports = {
   addOrUpdateFirebaseInstanceId (user, firebaseInstanceId) {
-  var firebaseInstanceIdSet = false;
   if (user && firebaseInstanceId) {
-    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
-        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
-            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
-            user.firebaseInstanceIds[i].active = true;
-            firebaseInstanceIdSet = true;
-        }
-    }
-    if (!firebaseInstanceIdSet){
-      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
-      logger.debug("Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
-      firebaseInstanceIdSet = true;
-    }
+      async.detect(user.firebaseInstanceIds, (instanceIdTest, callback) => {
+      callback(instanceIdTest.instanceId === firebaseInstanceId);
+    }, (instanceIdFound) => {
+      if(instanceIdFound){
+        instanceIdFound.lastUsedDate = Date.now();
+        instanceIdFound.active = true;
+      } else {
+        user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
+        logger.debug("Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+      }
+  });
   }
   return;
 },
@@ -30,17 +28,19 @@ module.exports = {
 deactivateFirebaseInstanceId (user, firebaseInstanceId) {
   var firebaseInstanceIdSet = false;
   if (user && firebaseInstanceId) {
-    for (var i = 0; i < user.firebaseInstanceIds.length; i++) {
-        if (user.firebaseInstanceIds[i].instanceId === firebaseInstanceId) {
-            user.firebaseInstanceIds[i].lastUsedDate = Date.now();
-            user.firebaseInstanceIds[i].active = false;
-            firebaseInstanceIdSet = true;
-        }
-    }
-    if (!firebaseInstanceIdSet){
-      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
-      firebaseInstanceIdSet = true;
-    }
+     logger.debug("User: ", user);
+    async.detect(user.firebaseInstanceIds, (instanceIdTest, callback) => {
+      logger.debug("Asserting: ", instanceIdTest.instanceId, " to be equals to ", firebaseInstanceId);
+      callback(instanceIdTest.instanceId === firebaseInstanceId);
+    }, (instanceIdFound) => {
+      if(instanceIdFound){
+        instanceIdFound.lastUsedDate = Date.now();
+        instanceIdFound.active = false;
+      } else {
+        user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
+        logger.debug("Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+      }
+  });
   }
   return;
 },

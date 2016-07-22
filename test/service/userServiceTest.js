@@ -303,10 +303,12 @@ describe("Destroy auth token.", function () {
 });
 
 describe("FirebaseInstanceId operations. ", function () {
+  
   it("Should deactivate FirebaseInstanceId and don't change others when id exists" , function (done) {
     var firebaseInstanceId = "FirebaseInstanceId1";
     var user = {
-      authToken: "someToken",
+      authToken: "someToken2",
+      email: "FirebaseInstanceId1@email.com",
       firebaseInstanceIds: [{
         instanceId: firebaseInstanceId,
         active: true,
@@ -320,8 +322,9 @@ describe("FirebaseInstanceId operations. ", function () {
         lastUsedDate: 400
     }]};
 
-    userService.deactivateFirebaseInstanceId(user,firebaseInstanceId);
+    userService.deactivateFirebaseInstanceId(user, firebaseInstanceId);
 
+    user.firebaseInstanceIds.length.should.be.eql(2);
     user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);
     user.firebaseInstanceIds[0].active.should.be.false;
     user.firebaseInstanceIds[0].createdDate.should.be.eql(100);
