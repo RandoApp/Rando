@@ -372,13 +372,13 @@ describe("FirebaseInstanceId operations. ", function () {
         lastUsedDate: 400
     }]};
 
-    userService.deactivateFirebaseInstanceId(user, undefined);
-    userService.deactivateFirebaseInstanceId(undefined, firebaseInstanceId);
-    userService.deactivateFirebaseInstanceId(undefined, undefined);
+    userService.deactivateFirebaseInstanceId(user, null);
+    userService.deactivateFirebaseInstanceId(null, firebaseInstanceId);
+    userService.deactivateFirebaseInstanceId(null, null);
 
-    userService.addOrUpdateFirebaseInstanceId(user, undefined);
-    userService.addOrUpdateFirebaseInstanceId(undefined, firebaseInstanceId);
-    userService.addOrUpdateFirebaseInstanceId(undefined, undefined);
+    userService.addOrUpdateFirebaseInstanceId(user, null);
+    userService.addOrUpdateFirebaseInstanceId(null, firebaseInstanceId);
+    userService.addOrUpdateFirebaseInstanceId(null, null);
 
     done();
   });
