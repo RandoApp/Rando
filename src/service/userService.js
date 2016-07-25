@@ -115,7 +115,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
     });
   },
 
-  findOrCreateByLoginAndPassword: function (email, password, ip, firebaseInstanceId, callback) {
+  findOrCreateByLoginAndPassword (email, password, ip, firebaseInstanceId, callback) {
     var self = this;
     logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
@@ -174,7 +174,8 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
     });
 },
 
-findOrCreateAnonymous: function (id, ip, callback) {
+findOrCreateAnonymous(id, ip, firebaseInstanceId, callback) {
+  var self = this;
   if (!id) {
     callback(Errors.IncorrectAnonymousId());
     return;
@@ -191,6 +192,7 @@ findOrCreateAnonymous: function (id, ip, callback) {
       logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = ip;
+      self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId);
       db.user.update(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
@@ -202,26 +204,28 @@ findOrCreateAnonymous: function (id, ip, callback) {
       });
     } else {
       logger.debug("[userService.findOrCreateAnonymous, ", email, " User not exist. Try create him");
-      var user = {
+      var newUser = {
         authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
         anonymousId: id,
         email: email,
-        ip: ip
-      }
-      db.user.create(user, function (err) {
+        ip: ip,
+        firebaseInstanceIds: []
+      };
+      self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId);
+      db.user.create(newUser, function (err) {
         if (err) {
-          logger.warn("[userService.findOrCreateAnonymous, ", user.email, "] Can't create user because: ", err);
+          logger.warn("[userService.findOrCreateAnonymous, ", newUser.email, "] Can't create user because: ", err);
           callback(Errors.System(err));
           return;
         }
-        logger.data("[userService.findOrCreateAnonymous, ", user.email, "] Anonymous user created.");
-        callback(null, {token: user.authToken});
+        logger.data("[userService.findOrCreateAnonymous, ", newUser.email, "] Anonymous user created.");
+        callback(null, {token: newUser.authToken});
       });
     }
   });
 },
 
-verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, callback) {
+verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, firebaseInstanceId, callback) {
   logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Start");
 
   var self = this;
@@ -235,7 +239,7 @@ verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, callback) {
       logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Recive json: ", json);
       if (json.email === email) {
         logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is equals");
-        self.findOrCreateByFBData({email: email, id: id, ip: ip}, callback);
+        self.findOrCreateByFBData({email: email, id: id, ip: ip, firebaseInstanceId: firebaseInstanceId}, callback);
       } else {
         logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is not equals. Return incorrect args");
         callback(Errors.FBIncorrectArgs());
@@ -247,7 +251,7 @@ verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, callback) {
   });
 },
 
-verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, callback) {
+verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, firebaseInstanceId, callback) {
   logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
 
   var self = this;
@@ -271,7 +275,7 @@ verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, callbac
       logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
       if (json.family_name = familyName) {
         logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
-        self.findOrCreateByGoogleData(json.id, email, ip, callback);
+        self.findOrCreateByGoogleData(json.id, email, ip, firebaseInstanceId, callback);
       } else {
         logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
         callback(Errors.GoogleIncorrectArgs());
@@ -284,6 +288,7 @@ verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, callbac
 },
 
 findOrCreateByFBData: function (data, callback) {
+  var self = this;
   logger.data("[userService.findOrCreateByFBData, ", data, "] Try find or create.");
 
   if (!data || !data.email) {
@@ -303,6 +308,8 @@ findOrCreateByFBData: function (data, callback) {
       logger.warn("[userService.findOrCreateByFBData, ", user.email, "] User ", data.email, " exist");
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = data.ip;
+      self.addOrUpdateFirebaseInstanceId(user, data.firebaseInstanceId);
+
       db.user.update(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateByFBData, ", email, "] Can't update user with new authToken, because: ", err);
@@ -314,31 +321,33 @@ findOrCreateByFBData: function (data, callback) {
     } else {
       logger.debug("[userService.findOrCreateByFBData, ", data.email, " User not exist. Try create him");
 
-      var user = {
+      var newUser = {
         authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"), 
         facebookId: data.id,
         email: data.email,
-        ip: data.ip
+        ip: data.ip,
+        firebaseInstanceIds : []
       };
-
-      db.user.create(user, function (err) {
+      self.addOrUpdateFirebaseInstanceId(newUser, data.firebaseInstanceId);
+      db.user.create(newUser, function (err) {
         if (err) {
-          logger.warn("[userService.findOrCreateByFBData, ", user.email, "] Can't create user because: ", err);
+          logger.warn("[userService.findOrCreateByFBData, ", newUser.email, "] Can't create user because: ", err);
           callback(Errors.System(err));
           return;
         }
 
-        logger.data("[userService.findOrCreateByFBData, ", user.email, "] User created: ", user);
-        callback(null, {token: user.authToken});
+        logger.data("[userService.findOrCreateByFBData, ", newUser.email, "] User created: ", newUser);
+        callback(null, {token: newUser.authToken});
       });
     }
   });
 },
 
-findOrCreateByGoogleData: function (id, email, ip, callback) {
+findOrCreateByGoogleData: function (id, email, ip, firebaseInstanceId, callback) {
+  var self = this;
   logger.data("[userService.findOrCreateByGoogleData, ", email, "] Try find or create.");
 
-  if (!email) {
+  if (!email || !id) {
     logger.data("[userService.findOrCreateByGoogleData, ", email, "] Data or data.email is incorrect. Return error.");
     callback(Errors.GoogleIncorrectArgs());
     return;
@@ -356,6 +365,7 @@ findOrCreateByGoogleData: function (id, email, ip, callback) {
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.googleId = id;
       user.ip = ip;
+      self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
       db.user.update(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't update user with new authToken, because: ", err);
@@ -367,22 +377,22 @@ findOrCreateByGoogleData: function (id, email, ip, callback) {
     } else {
       logger.debug("[userService.findOrCreateByGoogleData, ", email, " User not exist. Try create him");
 
-      var user = {
+      var newUser = {
         authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"), 
         googleId: id, 
         email: email,
         ip: ip
       }
 
-      db.user.create(user, function (err, user) {
+      db.user.create(newUser, function (err, user) {
         if (err) {
           logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't create user because: ", err);
           callback(Errors.System(err));
           return;
         }
 
-        logger.data("[userService.findOrCreateByGoogleData, ", email, "] User created: ", user);
-        callback(null, {token: user.authToken});
+        logger.data("[userService.findOrCreateByGoogleData, ", email, "] User created: ", newUser);
+        callback(null, {token: newUser.authToken});
       });
     }
   });

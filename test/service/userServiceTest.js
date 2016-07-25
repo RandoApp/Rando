@@ -130,7 +130,7 @@ it("New user should be created in data base and return token", function (done) {
 
 describe("Find or create by FB data.", function () {
   it("Wrong data without email from facebook", function (done) {
-    userService.findOrCreateByFBData({email: null, ip: "127.0.0.1"}, function (err) {
+    userService.findOrCreateByFBData({email: null, ip: "127.0.0.1", firebaseInstanceId: "FireBaseInstanceId"}, function (err) {
       err.rando.should.be.eql(Errors.FBIncorrectArgs().rando);
       done();
     });
@@ -189,7 +189,87 @@ describe("Find or create by FB data.", function () {
     });
   });
 });
-    //TODO: !!!!!!!make assertion more strongly!!!!!!!!
+
+describe("Find or create by Google data.", function () {
+  it("Should return GoogleIncorrectArgs when no email from google", function (done) {
+    var isCallbackCalled = false;
+    userService.findOrCreateByGoogleData("googleId",null, "127.0.0.1", "FireBaseInstanceId", function (err) {
+      isCallbackCalled = true;
+      err.rando.should.be.eql(Errors.GoogleIncorrectArgs().rando);
+      done();
+    });
+    isCallbackCalled.should.be.true();
+  });
+
+  it("Should return GoogleIncorrectArgs when no googleId sent", function (done) {
+    var isCallbackCalled = false;
+    userService.findOrCreateByGoogleData(null, "email@email.com", "127.0.0.1", "FireBaseInstanceId", function (err) {
+      isCallbackCalled = true;
+      err.rando.should.be.eql(Errors.GoogleIncorrectArgs().rando);
+      done();
+    });
+    isCallbackCalled.should.be.true();
+  });
+
+  it("Should return System Errpr when Database error appears", function (done) {
+    var isCallbackCalled = false;
+    sinon.stub(db.user, "getByEmail", function (email, callback) {
+      db.user.getByEmail.restore();
+      callback(new Error("Data base error"));
+    });
+
+    userService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function (err) {
+      isCallbackCalled = true;
+      err.rando.should.be.eql(Errors.System(new Error()).rando);
+      done();
+    });
+    isCallbackCalled.should.be.true();
+  });
+
+  it("User exist", function (done) {
+    var isCallbackCalled = false;
+    sinon.stub(db.user, "getByEmail", function (email, callback) {
+      db.user.getByEmail.restore();
+      callback(null, {user: "user@mail.com"});
+    });
+
+    sinon.stub(db.user, "update", function (user, callback) {
+      db.user.update.restore();
+      callback(null, {token: "auttoken123"});
+    });
+
+    userService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function (err, userId) {
+      isCallbackCalled = true;
+      should.not.exist(err);
+      should.exist(userId);
+      done();
+    });
+    isCallbackCalled.should.be.true();
+  });
+
+  it("Should create user when valid google data is passed and ther is no such user before", function (done) {
+    var isCallbackCalled = false;
+    sinon.stub(db.user, "getByEmail", function (email, callback) {
+      db.user.getByEmail.restore();
+      callback();
+    });
+
+    sinon.stub(db.user, "create", function (user, callback) {
+      db.user.create.restore();
+      callback();
+    });
+
+    userService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function (err, userId) {
+      isCallbackCalled = true;
+      should.not.exist(err);
+      should.exist(userId);
+      done();
+    });
+    isCallbackCalled.should.be.true();
+  });
+});
+
+    //TODO: !!!!!!!make assertion more strict!!!!!!!!
     describe("Get user.", function () {
       it("Get user successfully", function (done) {
         userService.getUser({email: "user@mail.com", out: [{randoId: 123}], in: [{randoId: 456}]}, function (err, user) {
@@ -205,7 +285,7 @@ describe("Find or create by FB data.", function () {
     });
     describe("Find Or Create Anonymouse.", function () {
       it("Not defined id should return error", function (done) {
-        userService.findOrCreateAnonymous(null, "127.0.0.1", function (err, response) {
+        userService.findOrCreateAnonymous(null, "127.0.0.1", "FireBaseInstanceId", function (err, response) {
           should.exist(err);
           err.should.have.property("message", "Id is not correct");
           done();
@@ -218,7 +298,7 @@ describe("Find or create by FB data.", function () {
           callback(new Error("Data base error"));
         });
 
-        userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", function(err, response) {
+        userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", "FireBaseInstanceId", function(err, response) {
           err.rando.should.be.eql(Errors.System(new Error()).rando);
           done();
         });
@@ -229,7 +309,8 @@ describe("Find or create by FB data.", function () {
           db.user.getByEmail.restore();
           callback(null, {
             email: "efab3c3@rando4.me",
-            authToken: "12312j1k2j3o12j31"
+            authToken: "12312j1k2j3o12j31",
+            firebaseInstanceIds:[]
           });
         });
 
@@ -238,7 +319,7 @@ describe("Find or create by FB data.", function () {
           callback();
         });
 
-        userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", function(err, response) {
+        userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", "FireBaseInstanceId", function(err, response) {
           should.not.exist(err);
           response.should.have.property("token");
           response.token.should.not.be.empty;
@@ -259,7 +340,7 @@ describe("Find or create by FB data.", function () {
           callback();
         });
 
-        userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", function(err, response) {
+        userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", "FireBaseInstanceId", function(err, response) {
           should.not.exist(err);
           response.should.have.property("token");
           response.token.should.not.be.empty;
@@ -288,10 +369,10 @@ describe("Destroy auth token.", function () {
     }
     userService.destroyAuthToken(user, "firebaseInstanceId", function (err, result) {
       should.not.exist(err);
-      isSaveCalled.should.be.true;
+      isSaveCalled.should.be.true();
       user.authToken.should.be.empty;
       user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId");
-      user.firebaseInstanceIds[0].active.should.be.false;
+      user.firebaseInstanceIds[0].active.should.be.false();
 
       result.should.be.eql({
         command: "logout",
@@ -327,12 +408,12 @@ describe("FirebaseInstanceId operations. ", function () {
 
     user.firebaseInstanceIds.length.should.be.eql(2);
     user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);
-    user.firebaseInstanceIds[0].active.should.be.false;
+    user.firebaseInstanceIds[0].active.should.be.false();
     user.firebaseInstanceIds[0].createdDate.should.be.eql(100);
     user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(200);
 
     user.firebaseInstanceIds[1].instanceId.should.be.eql("firebaseInstanceId2");
-    user.firebaseInstanceIds[1].active.should.be.false;
+    user.firebaseInstanceIds[1].active.should.be.false();
     user.firebaseInstanceIds[1].createdDate.should.be.eql(300);
     user.firebaseInstanceIds[1].lastUsedDate.should.be.eql(400);
 
@@ -356,12 +437,12 @@ describe("FirebaseInstanceId operations. ", function () {
 
     user.firebaseInstanceIds.length.should.be.eql(2);
     user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId2");
-    user.firebaseInstanceIds[0].active.should.be.false;
+    user.firebaseInstanceIds[0].active.should.be.false();
     user.firebaseInstanceIds[0].createdDate.should.be.eql(300);
     user.firebaseInstanceIds[0].lastUsedDate.should.be.eql(400);
 
     user.firebaseInstanceIds[1].instanceId.should.be.eql(firebaseInstanceId);
-    user.firebaseInstanceIds[1].active.should.be.false;
+    user.firebaseInstanceIds[1].active.should.be.false();
 
     done();
   });
@@ -385,6 +466,36 @@ describe("FirebaseInstanceId operations. ", function () {
     userService.addOrUpdateFirebaseInstanceId(user, null);
     userService.addOrUpdateFirebaseInstanceId(null, firebaseInstanceId);
     userService.addOrUpdateFirebaseInstanceId(null, null);
+
+    done();
+  });
+
+    it("Should add or update new FirebaseInstanceId or user doesn't have user.firebaseInstanceIds defined" , function (done) {
+    var firebaseInstanceId = "FirebaseInstanceId1";
+    var user = {
+      authToken: "someToken",
+      };
+
+    userService.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
+
+    user.firebaseInstanceIds.length.should.be.eql(1);
+    user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);
+    user.firebaseInstanceIds[0].active.should.be.true();
+
+    done();
+  });
+
+  it("Should deactivate FirebaseInstanceId or user doesn't have user.firebaseInstanceIds defined" , function (done) {
+    var firebaseInstanceId = "FirebaseInstanceId1";
+    var user = {
+      authToken: "someToken",
+      };
+
+    userService.deactivateFirebaseInstanceId(user, firebaseInstanceId);
+
+    user.firebaseInstanceIds.length.should.be.eql(1);
+    user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);
+    user.firebaseInstanceIds[0].active.should.be.false();
 
     done();
   });
