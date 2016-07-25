@@ -13,6 +13,9 @@ module.exports = {
       async.detect(user.firebaseInstanceIds, (instanceIdTest, callback) => {
       callback(null, instanceIdTest.instanceId === firebaseInstanceId);
     }, (err, instanceIdFound) => {
+      if (err){
+        logger.log(err);
+      }
       if(instanceIdFound){
         logger.debug("Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
         instanceIdFound.lastUsedDate = Date.now();
@@ -32,6 +35,9 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
       logger.debug("Asserting: ", instanceIdTest.instanceId, " to be equals to ", firebaseInstanceId);
       callback(null, instanceIdTest.instanceId === firebaseInstanceId);
     }, (err, instanceIdFound) => {
+      if (err){
+        logger.log(err);
+      }
       if(instanceIdFound){
         logger.debug("Deactivating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
         instanceIdFound.lastUsedDate = Date.now();
@@ -52,7 +58,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
     callback(null, {command: "logout", result: "done"});
   },
 
-  buildRandoSync: function (rando) {
+  buildRandoSync (rando) {
     return {
       creation: rando.creation,
       randoId: rando.randoId,
@@ -87,14 +93,14 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
       }
     }, function (err) {
       if (err) {
-        logger.warn("[userService.getUser, ", userId, "] Error when each randos in parallel for : ", user);
+        logger.warn("[userService.getUser ] Error when each randos in parallel for : ", user);
         callback(Errors.System(err));
         return;
       }
 
       backwardCompatibility.makeUserBackwardCompaitble(userJSON, function (err, compatibleUserJSON) {
         if (err) {
-          logger.warn("[userService.getUser, ", userId, "] Error when make user backward compaitble");
+          logger.warn("[userService.getUser] Error when make user backward compaitble");
           callback(Errors.System(err));
           return;
         }
@@ -217,7 +223,7 @@ verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, callback) {
     resp.on("data", function(chunk) {
       var json = JSON.parse(chunk.toString("utf8"));
       logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Recive json: ", json);
-      if (json.email == email) {
+      if (json.email === email) {
         logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is equals");
         self.findOrCreateByFBData({email: email, id: id, ip: ip}, callback);
       } else {
