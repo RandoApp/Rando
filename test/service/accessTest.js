@@ -275,8 +275,8 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
     });
   });
 
-it("Should return existing user without error and add FirebaseInstanceId", function (done) {
-    var user = {email: "user@mail.com", firebaseInstanceIds: [{instanceId: "FirebaseInstanceId12345", active: true, lastUsedDate: 2, createdDate: 1}]};
+it("Should return existing user without error and bump lastUsedDate for FirebaseInstanceId", function (done) {
+    var user = {email: "user@mail.com", firebaseInstanceIds: [{instanceId: "FirebaseInstanceId12345", active: true, lastUsedDate: 200, createdDate: 1}]};
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
       callback(null, user);
@@ -287,7 +287,7 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
       user.firebaseInstanceIds.length.should.be.eql(1);
       user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId12345");
       user.firebaseInstanceIds[0].active.should.be.true;
-      user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(2);
+      user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(200);
     });
 
     var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
