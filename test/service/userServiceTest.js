@@ -288,6 +288,7 @@ describe("Find or create by Google data.", function () {
         userService.findOrCreateAnonymous(null, "127.0.0.1", "FireBaseInstanceId", function (err, response) {
           should.exist(err);
           err.should.have.property("message", "Id is not correct");
+          should.not.exist(response);
           done();
         });
       });
@@ -300,6 +301,7 @@ describe("Find or create by Google data.", function () {
 
         userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", "FireBaseInstanceId", function(err, response) {
           err.rando.should.be.eql(Errors.System(new Error()).rando);
+          should.not.exist(response);
           done();
         });
       });
@@ -488,7 +490,7 @@ describe("FirebaseInstanceId operations. ", function () {
   it("Should deactivate FirebaseInstanceId or user doesn't have user.firebaseInstanceIds defined" , function (done) {
     var firebaseInstanceId = "FirebaseInstanceId1";
     var user = {
-      authToken: "someToken",
+      authToken: "someToken"
       };
 
     userService.deactivateFirebaseInstanceId(user, firebaseInstanceId);
