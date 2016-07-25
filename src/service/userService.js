@@ -10,6 +10,9 @@ var passwordUtil = require("../util/password");
 module.exports = {
   addOrUpdateFirebaseInstanceId (user, firebaseInstanceId) {
   if (user && firebaseInstanceId) {
+    if (!user.firebaseInstanceIds){
+      user.firebaseInstanceIds = [];
+    }
       async.detect(user.firebaseInstanceIds, (instanceIdTest, callback) => {
       callback(null, instanceIdTest.instanceId === firebaseInstanceId);
     }, (err, instanceIdFound) => {
@@ -31,6 +34,9 @@ module.exports = {
 
 deactivateFirebaseInstanceId (user, firebaseInstanceId) {
   if (user && firebaseInstanceId) {
+    if (!user.firebaseInstanceIds){
+      user.firebaseInstanceIds = [];
+    }
     async.detect(user.firebaseInstanceIds, (instanceIdTest,callback) => {
       logger.debug("Asserting: ", instanceIdTest.instanceId, " to be equals to ", firebaseInstanceId);
       callback(null, instanceIdTest.instanceId === firebaseInstanceId);
@@ -109,7 +115,8 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
     });
   },
 
-  findOrCreateByLoginAndPassword: function (email, password, ip, callback) {
+  findOrCreateByLoginAndPassword: function (email, password, ip, firebaseInstanceId, callback) {
+    var self = this;
     logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
     if (!email || !/.+@.+\..+/.test(email) || !password) {
@@ -129,6 +136,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
         if (passwordUtil.isPasswordCorrect(password, user)) {
           user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
           user.ip = ip;
+          self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
           db.user.update(user, function (err) {
             if (err) {
               logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
@@ -147,8 +155,10 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
           authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
           email: email,
           password: passwordUtil.generateHashForPassword(email, password, config.app.secret),
-          ip: ip
+          ip: ip,
+          firebaseInstanceIds: []
         }
+        self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
 
         logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
         db.user.create(user, function (err) {

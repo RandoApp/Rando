@@ -8,31 +8,31 @@ var passwordUtil = require("../../src/util/password");
 describe("User service.", function () {
   describe("Find or create user by login and password.", function () {
     it("Should return error when email is invalid", function () {
-      userService.findOrCreateByLoginAndPassword("this is not email", "", "127.0.0.1", function (err) {
+      userService.findOrCreateByLoginAndPassword("this is not email", "", "127.0.0.1", "FireBaseInstanceId", function (err) {
         err.should.be.eql(Errors.LoginAndPasswordIncorrectArgs());
       });
     });
 
     it("Empty email should return Error", function () {
-      userService.findOrCreateByLoginAndPassword("", "password", "127.0.0.1", function (err) {
+      userService.findOrCreateByLoginAndPassword("", "password", "127.0.0.1","FireBaseInstanceId", function (err) {
         err.should.be.eql(Errors.LoginAndPasswordIncorrectArgs());
       });
     });
 
     it("Empty password should return Error", function () {
-      userService.findOrCreateByLoginAndPassword("this@is.email", "", "127.0.0.1", function (err) {should.exist(err);
+      userService.findOrCreateByLoginAndPassword("this@is.email", "", "127.0.0.1", "FireBaseInstanceId", function (err) {should.exist(err);
         err.should.be.eql(Errors.LoginAndPasswordIncorrectArgs());
       });
     });
 
     it("Undefined email should return Error", function () {
-      userService.findOrCreateByLoginAndPassword(null, "", "127.0.0.1", function (err) {
+      userService.findOrCreateByLoginAndPassword(null, "", "127.0.0.1", "FireBaseInstanceId", function (err) {
         err.should.be.eql(Errors.LoginAndPasswordIncorrectArgs());
       });
     });
 
     it("Undefined password should return Error", function () {
-      userService.findOrCreateByLoginAndPassword("this@is.email", null, "127.0.0.1", function (err) {
+      userService.findOrCreateByLoginAndPassword("this@is.email", null, "127.0.0.1", "FireBaseInstanceId", function (err) {
         err.should.be.eql(Errors.LoginAndPasswordIncorrectArgs());
       });
     });
@@ -48,7 +48,7 @@ describe("User service.", function () {
         callback();
       });
 
-      userService.findOrCreateByLoginAndPassword("user@mail.com", "password", "127.0.0.1", function (err) {
+      userService.findOrCreateByLoginAndPassword("user@mail.com", "password", "127.0.0.1", "FireBaseInstanceId", function (err) {
         should.not.exist(err);
         done();
       });
@@ -60,7 +60,7 @@ describe("User service.", function () {
         callback(new Error("Db error"));
       });
 
-      userService.findOrCreateByLoginAndPassword("email@mail.com", "password", "127.0.0.1", function (err) {
+      userService.findOrCreateByLoginAndPassword("email@mail.com", "password", "127.0.0.1", "FireBaseInstanceId", function (err) {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
@@ -72,7 +72,7 @@ describe("User service.", function () {
         callback(null, {email: "user@mail.com", password: "different"});
       });
 
-      userService.findOrCreateByLoginAndPassword("user@mail.com", "password2", "127.0.0.1", function (err) {
+      userService.findOrCreateByLoginAndPassword("user@mail.com", "password2", "127.0.0.1", "FireBaseInstanceId", function (err) {
         err.should.be.eql(Errors.LoginAndPasswordIncorrectArgs());
         done();
       });
@@ -90,7 +90,8 @@ describe("User service.", function () {
           email: "user@mail.com",
                     password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5", //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
                     authToken: "",
-                    ip: ""
+                    ip: "",
+                    firebaseInstanceIds: []
                   });
       });
 
@@ -99,7 +100,7 @@ describe("User service.", function () {
         callback();
       });
 
-      userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", "127.0.0.1", function (err, response) {
+      userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", "127.0.0.1", "FireBaseInstanceId", function (err, response) {
         should.not.exist(err);
         response.should.have.property("token");
         response.token.should.not.be.empty;
@@ -118,7 +119,7 @@ it("New user should be created in data base and return token", function (done) {
     callback();
   });
 
-  userService.findOrCreateByLoginAndPassword("email@mail.com", "password", "127.0.0.1", function (err, response) {
+  userService.findOrCreateByLoginAndPassword("email@mail.com", "password", "127.0.0.1", "FireBaseInstanceId", function (err, response) {
     should.not.exist(err);
     response.should.have.property("token");
     response.token.should.not.be.empty;

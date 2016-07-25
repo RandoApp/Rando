@@ -87,7 +87,7 @@ if (cluster.isMaster) {
 
     var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, ip, function (err, response) {
+    userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, ip, req.body.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
@@ -125,7 +125,7 @@ if (cluster.isMaster) {
 
     var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    userService.findOrCreateAnonymous(req.body.id, ip, function (err, response) {
+    userService.findOrCreateAnonymous(req.body.id, ip, req.body.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
@@ -145,7 +145,7 @@ if (cluster.isMaster) {
 
     var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, ip, function (err, response) {
+    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
@@ -165,7 +165,7 @@ if (cluster.isMaster) {
 
     var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, ip, function (err, response) {
+    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
