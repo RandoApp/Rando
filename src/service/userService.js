@@ -151,24 +151,24 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
         }
       } else {
         logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] user not exist. Try create him");
-        var user = {
+        var newUser = {
           authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
           email: email,
           password: passwordUtil.generateHashForPassword(email, password, config.app.secret),
           ip: ip,
           firebaseInstanceIds: []
         }
-        self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
+        self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId);
 
         logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
-        db.user.create(user, function (err) {
+        db.user.create(newUser, function (err) {
           if (err) {
             logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't create user, because: ", err);
             return;
           }
 
           logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] User created.");
-          callback(null, {token: user.authToken});
+          callback(null, {token: newUser.authToken});
         });
       }
     });
