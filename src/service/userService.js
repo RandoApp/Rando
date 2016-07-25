@@ -11,14 +11,15 @@ module.exports = {
   addOrUpdateFirebaseInstanceId (user, firebaseInstanceId) {
   if (user && firebaseInstanceId) {
       async.detect(user.firebaseInstanceIds, (instanceIdTest, callback) => {
-      callback(instanceIdTest.instanceId === firebaseInstanceId);
-    }, (instanceIdFound) => {
+      callback(null, instanceIdTest.instanceId === firebaseInstanceId);
+    }, (err, instanceIdFound) => {
       if(instanceIdFound){
+        logger.debug("Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
         instanceIdFound.lastUsedDate = Date.now();
         instanceIdFound.active = true;
       } else {
         user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
-        logger.debug("Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+        logger.debug("Adding new firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
       }
   });
   }
@@ -28,12 +29,12 @@ module.exports = {
 deactivateFirebaseInstanceId (user, firebaseInstanceId) {
   var firebaseInstanceIdSet = false;
   if (user && firebaseInstanceId) {
-     logger.debug("User: ", user);
-    async.detect(user.firebaseInstanceIds, (instanceIdTest, callback) => {
+    async.detect(user.firebaseInstanceIds, (instanceIdTest,callback) => {
       logger.debug("Asserting: ", instanceIdTest.instanceId, " to be equals to ", firebaseInstanceId);
-      callback(instanceIdTest.instanceId === firebaseInstanceId);
-    }, (instanceIdFound) => {
+      callback(null, instanceIdTest.instanceId === firebaseInstanceId);
+    }, (err, instanceIdFound) => {
       if(instanceIdFound){
+        logger.debug("Deactivating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
         instanceIdFound.lastUsedDate = Date.now();
         instanceIdFound.active = false;
       } else {
@@ -52,7 +53,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
     callback(null, {command: "logout", result: "done"});
   },
   buildRandoSync: function (rando) {
-    return { 
+    return {
       creation: rando.creation,
       randoId: rando.randoId,
       imageURL: rando.imageURL,
