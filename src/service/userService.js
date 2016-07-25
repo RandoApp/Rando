@@ -27,7 +27,6 @@ module.exports = {
 },
 
 deactivateFirebaseInstanceId (user, firebaseInstanceId) {
-  var firebaseInstanceIdSet = false;
   if (user && firebaseInstanceId) {
     async.detect(user.firebaseInstanceIds, (instanceIdTest,callback) => {
       logger.debug("Asserting: ", instanceIdTest.instanceId, " to be equals to ", firebaseInstanceId);
@@ -46,12 +45,13 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
   return;
 },
 
-  destroyAuthToken: function (user, firebaseInstanceId, callback) {
+  destroyAuthToken (user, firebaseInstanceId, callback) {
     user.authToken = "";
     this.deactivateFirebaseInstanceId(user, firebaseInstanceId);
     db.user.update(user);
     callback(null, {command: "logout", result: "done"});
   },
+
   buildRandoSync: function (rando) {
     return {
       creation: rando.creation,
