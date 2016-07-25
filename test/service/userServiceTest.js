@@ -473,7 +473,7 @@ describe("FirebaseInstanceId operations. ", function () {
     it("Should add or update new FirebaseInstanceId or user doesn't have user.firebaseInstanceIds defined" , function (done) {
     var firebaseInstanceId = "FirebaseInstanceId1";
     var user = {
-      authToken: "someToken",
+      authToken: "someToken"
       };
 
     userService.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
