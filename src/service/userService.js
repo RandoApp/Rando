@@ -75,7 +75,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
     };
   },
 
-  getUser: function (user, callback) {
+  getUser (user, callback) {
     logger.debug("[userService.getUser, ", user.email, "] Try get user");
     var self = this;
     var userJSON = {
@@ -85,13 +85,13 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
     };
 
     async.parallel({
-      buildOut: function (parallelDone) {
+      buildOut (parallelDone) {
         async.each(user.out, function (rando, done) {
           userJSON.out.push( self.buildRandoSync(rando) );
           done();
         }, parallelDone);
       },
-      buildIn: function (parallelDone) {
+      buildIn (parallelDone) {
         async.each(user.in, function (rando, done) {
           userJSON.in.push( self.buildRandoSync(rando) );
           done();
@@ -174,7 +174,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
     });
 },
 
-findOrCreateAnonymous(id, ip, firebaseInstanceId, callback) {
+findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
   var self = this;
   if (!id) {
     callback(Errors.IncorrectAnonymousId());
@@ -225,7 +225,7 @@ findOrCreateAnonymous(id, ip, firebaseInstanceId, callback) {
   });
 },
 
-verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, firebaseInstanceId, callback) {
+verifyFacebookAndFindOrCreateUser (id, email, token, ip, firebaseInstanceId, callback) {
   logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Start");
 
   var self = this;
@@ -251,7 +251,7 @@ verifyFacebookAndFindOrCreateUser: function (id, email, token, ip, firebaseInsta
   });
 },
 
-verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, firebaseInstanceId, callback) {
+verifyGoogleAndFindOrCreateUser (email, familyName, token, ip, firebaseInstanceId, callback) {
   logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
 
   var self = this;
@@ -287,7 +287,7 @@ verifyGoogleAndFindOrCreateUser: function (email, familyName, token, ip, firebas
   });
 },
 
-findOrCreateByFBData: function (data, callback) {
+findOrCreateByFBData (data, callback) {
   var self = this;
   logger.data("[userService.findOrCreateByFBData, ", data, "] Try find or create.");
 
@@ -343,7 +343,7 @@ findOrCreateByFBData: function (data, callback) {
   });
 },
 
-findOrCreateByGoogleData: function (id, email, ip, firebaseInstanceId, callback) {
+findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
   var self = this;
   logger.data("[userService.findOrCreateByGoogleData, ", email, "] Try find or create.");
 
