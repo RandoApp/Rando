@@ -157,7 +157,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
           password: passwordUtil.generateHashForPassword(email, password, config.app.secret),
           ip: ip,
           firebaseInstanceIds: []
-        }
+        };
         self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId);
 
         logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
