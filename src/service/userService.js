@@ -239,7 +239,7 @@ verifyFacebookAndFindOrCreateUser (id, email, token, ip, firebaseInstanceId, cal
       logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Recive json: ", json);
       if (json.email === email) {
         logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is equals");
-        self.findOrCreateByFBData({email: email, id: id, ip: ip, firebaseInstanceId: firebaseInstanceId}, callback);
+        self.findOrCreateByFBData({email, id, ip, firebaseInstanceId}, callback);
       } else {
         logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is not equals. Return incorrect args");
         callback(Errors.FBIncorrectArgs());
