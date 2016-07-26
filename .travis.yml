@@ -4,6 +4,8 @@ node_js:
   - 5
   - 6
   - node
+git:
+  depth: 3
 
 after_script:
   - npm run-script coveralls
