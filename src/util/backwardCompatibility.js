@@ -64,6 +64,9 @@ module.exports = {
       return randos;
     },
     tokenConverter: function (req, res, next) {
+      if (req.params.token && !req.headers.authorization){
+        req.headers.authorization = "Token "+ req.params.token;
+      }
       req.query.token = req.params.token;
       next();
     }
