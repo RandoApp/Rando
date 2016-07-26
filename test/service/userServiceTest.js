@@ -434,7 +434,7 @@ describe("Destroy auth token.", function () {
     var isSaveCalled = false;
     var user = {
       authToken: "someToken",
-      save: function () {
+      save () {
         isSaveCalled = true;
       },
       firebaseInstanceIds: [
@@ -444,7 +444,7 @@ describe("Destroy auth token.", function () {
         createdDate: 300,
         lastUsedDate: 400
     }]
-    }
+    };
     userService.destroyAuthToken(user, "firebaseInstanceId", function (err, result) {
       should.not.exist(err);
       isSaveCalled.should.be.true();
