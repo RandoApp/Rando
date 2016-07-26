@@ -265,8 +265,9 @@ verifyGoogleAndFindOrCreateUser (email, familyName, token, ip, firebaseInstanceI
     resp.on("data", function (chunk) {
       googleJson += chunk.toString("utf8");
     }).on("end", function (chunk) {
+      var json;
       try {
-        var json = JSON.parse(googleJson);
+        json = JSON.parse(googleJson);
       } catch (e) {
         logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Bad JSON: ", e.message);
         callback(Errors.GoogleError());
