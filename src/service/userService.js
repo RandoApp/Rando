@@ -384,9 +384,9 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
         ip: ip
       }
 
-      db.user.create(newUser, function (err, user) {
+      db.user.create(newUser, function (err) {
         if (err) {
-          logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't create user because: ", err);
+          logger.warn("[userService.findOrCreateByGoogleData, ", newUser.email, "] Can't create user because: ", err);
           callback(Errors.System(err));
           return;
         }
