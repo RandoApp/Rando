@@ -153,9 +153,9 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
         logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] user not exist. Try create him");
         var newUser = {
           authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
-          email: email,
+          email,
           password: passwordUtil.generateHashForPassword(email, password, config.app.secret),
-          ip: ip,
+          ip,
           firebaseInstanceIds: []
         };
         self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId);
