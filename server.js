@@ -33,11 +33,10 @@ if (cluster.isMaster) {
 
   app.use(express.static(__dirname + "/static", {maxAge: config.app.cacheControl}));
   app.use(morgan("combined"));
-  app.use(bodyParser());
-/*  app.use(bodyParser.urlencoded({
+  app.use(bodyParser.urlencoded({
     extended: true
   }));
-  app.use(bodyParser.json());*/
+  app.use(bodyParser.json());
 
   (function checkSources() {
     if (!fs.existsSync(config.app.citiesJson)) {
