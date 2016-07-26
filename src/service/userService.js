@@ -207,8 +207,8 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       var newUser = {
         authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
         anonymousId: id,
-        email: email,
-        ip: ip,
+        email,
+        ip,
         firebaseInstanceIds: []
       };
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId);
