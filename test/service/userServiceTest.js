@@ -295,6 +295,10 @@ describe("Find or create by Google data.", function () {
 
     sinon.stub(db.user, "update", function (user, callback) {
       db.user.update.restore();
+      should.exist(user);
+      user.firebaseInstanceIds.length.should.be.eql(1);
+      user.firebaseInstanceIds[0].instanceId.should.be.eql("FireBaseInstanceId");
+      user.firebaseInstanceIds[0].active.should.be.true();
       callback(null, {token: "auttoken123"});
     });
 
@@ -378,15 +382,22 @@ describe("Find or create by Google data.", function () {
 
         sinon.stub(db.user, "update", function (user, callback) {
           db.user.update.restore();
+          should.exist(user);
+          user.firebaseInstanceIds.length.should.be.eql(1);
+          user.firebaseInstanceIds[0].instanceId.should.be.eql("FireBaseInstanceId");
+          user.firebaseInstanceIds[0].active.should.be.true();
           callback();
         });
 
+        var isCallbackCalled = false;
         userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", "FireBaseInstanceId", function(err, response) {
+          isCallbackCalled = true;
           should.not.exist(err);
           response.should.have.property("token");
           response.token.should.not.be.empty();
-          done();
         });
+        isCallbackCalled.should.be.true();
+        done();
       });
       
       it("Anonymous should be created in database if not found", function (done) {
@@ -399,6 +410,9 @@ describe("Find or create by Google data.", function () {
           db.user.create.restore();
           user.should.have.property("email", "efab3c3@rando4.me");
           user.should.have.property("anonymousId", "efab3c3");
+          user.firebaseInstanceIds.length.should.be.eql(1);
+          user.firebaseInstanceIds[0].instanceId.should.be.eql("FireBaseInstanceId");
+          user.firebaseInstanceIds[0].active.should.be.true();
           callback();
         });
 
