@@ -103,7 +103,7 @@ describe("User service.", function () {
       userService.findOrCreateByLoginAndPassword("user@mail.com", "passwordForSha1", "127.0.0.1", "FireBaseInstanceId", function (err, response) {
         should.not.exist(err);
         response.should.have.property("token");
-        response.token.should.not.be.empty;
+        response.token.should.not.be.empty();
         done();
       });
     });
@@ -122,7 +122,7 @@ it("New user should be created in data base and return token", function (done) {
   userService.findOrCreateByLoginAndPassword("email@mail.com", "password", "127.0.0.1", "FireBaseInstanceId", function (err, response) {
     should.not.exist(err);
     response.should.have.property("token");
-    response.token.should.not.be.empty;
+    response.token.should.not.be.empty();
     done();
   });
 });
@@ -337,8 +337,8 @@ describe("Find or create by Google data.", function () {
           should.exist(user);
     //TODO: make assertion more strongly;
     user.should.have.property("email", "user@mail.com");
-    user.out.should.not.be.empty;
-    user.in.should.not.be.empty;
+    user.out.should.not.be.empty();
+    user.in.should.not.be.empty();
     done();
   });
       });
@@ -384,7 +384,7 @@ describe("Find or create by Google data.", function () {
         userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", "FireBaseInstanceId", function(err, response) {
           should.not.exist(err);
           response.should.have.property("token");
-          response.token.should.not.be.empty;
+          response.token.should.not.be.empty();
           done();
         });
       });
@@ -405,7 +405,7 @@ describe("Find or create by Google data.", function () {
         userService.findOrCreateAnonymous("efab3c3", "127.0.0.1", "FireBaseInstanceId", function(err, response) {
           should.not.exist(err);
           response.should.have.property("token");
-          response.token.should.not.be.empty;
+          response.token.should.not.be.empty();
           done();
         });
 
@@ -432,7 +432,7 @@ describe("Destroy auth token.", function () {
     userService.destroyAuthToken(user, "firebaseInstanceId", function (err, result) {
       should.not.exist(err);
       isSaveCalled.should.be.true();
-      user.authToken.should.be.empty;
+      user.authToken.should.be.empty();
       user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId");
       user.firebaseInstanceIds[0].active.should.be.false();
 

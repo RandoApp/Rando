@@ -192,7 +192,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       logger.warn("[userService.findOrCreateAnonymous, ", email, "] User already exist");
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = ip;
-      self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId);
+      self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
       db.user.update(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
