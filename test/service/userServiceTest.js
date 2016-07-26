@@ -211,7 +211,7 @@ describe("Find or create by Google data.", function () {
     isCallbackCalled.should.be.true();
   });
 
-  it("Should return System Errpr when Database error appears", function (done) {
+  it("Should return System Error when getByEmail Database call errors", function (done) {
     var isCallbackCalled = false;
     sinon.stub(db.user, "getByEmail", function (email, callback) {
       db.user.getByEmail.restore();
@@ -226,7 +226,67 @@ describe("Find or create by Google data.", function () {
     isCallbackCalled.should.be.true();
   });
 
-  it("User exist", function (done) {
+    it("Should return System Error when user.update Database call errors", function (done) {
+    var isCallbackCalled = false;
+    sinon.stub(db.user, "getByEmail", function (email, callback) {
+      db.user.getByEmail.restore();
+      callback(null, {user: "user@mail.com"});
+    });
+
+    sinon.stub(db.user, "update", function (email, callback) {
+      db.user.update.restore();
+      callback(new Error("Data base error"));
+    });
+
+    userService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function (err) {
+      isCallbackCalled = true;
+      err.rando.should.be.eql(Errors.System(new Error()).rando);
+      done();
+    });
+    isCallbackCalled.should.be.true();
+  });
+
+  it("Should return System Error when new user need to be created and.create Database call errors", function (done) {
+    var isCallbackCalled = false;
+    sinon.stub(db.user, "getByEmail", function (email, callback) {
+      db.user.getByEmail.restore();
+      callback(null, {user: "user@mail.com"});
+    });
+
+    sinon.stub(db.user, "update", function (email, callback) {
+      db.user.update.restore();
+      callback(new Error("Data base error"));
+    });
+
+    userService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function (err) {
+      isCallbackCalled = true;
+      err.rando.should.be.eql(Errors.System(new Error()).rando);
+      done();
+    });
+    isCallbackCalled.should.be.true();
+  });
+
+  it("Should return System Error when new user need to be created and.create Database call errors", function (done) {
+    var isCallbackCalled = false;
+    sinon.stub(db.user, "getByEmail", function (email, callback) {
+      db.user.getByEmail.restore();
+      callback();
+    });
+
+    sinon.stub(db.user, "create", function (email, callback) {
+      db.user.create.restore();
+      callback(new Error("Data base error"));
+    });
+
+    userService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function (err) {
+      isCallbackCalled = true;
+      err.rando.should.be.eql(Errors.System(new Error()).rando);
+      done();
+    });
+    isCallbackCalled.should.be.true();
+  });
+
+  it("Should find and return authToken for existing user", function (done) {
     var isCallbackCalled = false;
     sinon.stub(db.user, "getByEmail", function (email, callback) {
       db.user.getByEmail.restore();
