@@ -273,9 +273,9 @@ if (cluster.isMaster) {
     });
 
     //@deprecated
-    app.post("/image/:token", tokenConverter, access.byToken, access.noSpam, function (req, res) {
+    app.post("/image/:token", tokenConverter, access.byToken, access.noSpam, upload.single("image"), function (req, res) {
       logger.warn("DEPRECATED API CALL: POST /image/:token");
-      postImage(req.user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
+      postImage(req.user, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
     });
     //=========================================================================================================
 
