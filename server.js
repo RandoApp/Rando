@@ -183,8 +183,8 @@ if (cluster.isMaster) {
     });
   });
 
-  function logout(user, req, res) {
-    userService.destroyAuthToken(user, req.firebaseInstanceId, function (err, response) {
+  function logout(req, res) {
+    userService.destroyAuthToken(req.user, req.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         logger.data("POST /logout DONE with error: ", response.code);
@@ -198,7 +198,7 @@ if (cluster.isMaster) {
   };
 
   app.post("/logout", access.byToken, function (req, res) {
-    logout(req.user, res);
+    logout(req, res);
   });
 
   app.post("/log", function (req, res) {
@@ -256,7 +256,7 @@ if (cluster.isMaster) {
     //@deprecated
     app.post("/logout/:token", tokenConverter, access.byToken, function (req, res) {
       logger.warn("DEPRECATED API CALL: POST /logout/:token");
-      logout(req.user, res);
+      logout(req, res);
     });
 
     //@deprecated
@@ -278,7 +278,6 @@ if (cluster.isMaster) {
       postImage(req.user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
     });
     //=========================================================================================================
-
 
     app.listen(config.app.port, /*config.app.host,*/ function () {
       logger.info("Express server listening on port " + config.app.port + " and host: " + config.app.host);
