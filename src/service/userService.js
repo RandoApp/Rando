@@ -154,7 +154,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
         var newUser = {
           authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
           email,
-          password: passwordUtil.generateHashForPassword(email, password, config.app.secret),
+          password: passwordUtil.generateHashForPassword(email, password),
           ip,
           firebaseInstanceIds: []
         };
