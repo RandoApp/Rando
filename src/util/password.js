@@ -10,7 +10,7 @@ module.exports = {
     return sha1sum.digest("hex");
   },
   isPasswordCorrect (password, user) {
-    logger.data("[userService.isPasswordCorrect, ", user.email, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
+    logger.data("[userService.isPasswordCorrect, ", user.email, "] Try compare passwords: ", user.password, " === ", this.generateHashForPassword(user.email, password));
     return user.password === this.generateHashForPassword(user.email, password);
   }
 };
