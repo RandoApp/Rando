@@ -8,7 +8,7 @@ var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
 
 module.exports = {
-  addOrUpdateFirebaseInstanceId (user, firebaseInstanceId) {
+  addOrUpdateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
   if (user && firebaseInstanceId) {
     if (!user.firebaseInstanceIds){
       user.firebaseInstanceIds = [];
@@ -27,12 +27,15 @@ module.exports = {
         user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
         logger.debug("Adding new firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
       }
+      if (resultCallback) {
+        resultCallback(null, user);
+      }
   });
   }
   return;
 },
 
-deactivateFirebaseInstanceId (user, firebaseInstanceId) {
+deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
   if (user && firebaseInstanceId) {
     if (!user.firebaseInstanceIds){
       user.firebaseInstanceIds = [];
@@ -52,9 +55,15 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId) {
         user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
         logger.debug("Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
       }
+      if (resultCallback){
+        resultCallback(null, user);
+      }
   });
+  } else {
+    if (resultCallback){
+        resultCallback("user and firebaseInstanceId should be present", user);
+      }
   }
-  return;
 },
 
   destroyAuthToken (user, firebaseInstanceId, callback) {
