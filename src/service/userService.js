@@ -173,6 +173,10 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
           firebaseInstanceIds: []
         };
         self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
+         if (err) {
+          logger.err("error setting firebaseInstanceId");
+          return;
+         }
 
         logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
         db.user.create(user, function (err) {
