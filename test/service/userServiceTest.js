@@ -151,7 +151,7 @@ describe("Find or create by FB data.", function () {
       callback(new Error("Data base error"));
     });
 
-    userService.findOrCreateByFBData({email: "user@mail.com", ip: "127.0.0.1"}, function (err) {
+    userService.findOrCreateByFBData({email: "user@mail.com", ip: "127.0.0.1", firebaseInstanceId: "FireBaseInstanceId"}, function (err) {
       err.rando.should.be.eql(Errors.System(new Error()).rando);
       done();
     });
@@ -167,7 +167,7 @@ describe("Find or create by FB data.", function () {
       callback(null, {token: "auttoken123"});
     });
 
-    userService.findOrCreateByFBData({email: "user@mail.com", ip: "127.0.0.1"}, function (err, userId) {
+    userService.findOrCreateByFBData({email: "user@mail.com", ip: "127.0.0.1", firebaseInstanceId: "FireBaseInstanceId"}, function (err, userId) {
       should.not.exist(err);
       should.exist(userId);
       done();
@@ -184,7 +184,7 @@ describe("Find or create by FB data.", function () {
       callback();
     });
 
-    userService.findOrCreateByFBData({email: "user@mail.com", id: "23131231", ip: "127.0.0.1"}, function (err, userId) {
+    userService.findOrCreateByFBData({email: "user@mail.com", id: "23131231", ip: "127.0.0.1", firebaseInstanceId: "FireBaseInstanceId"}, function (err, userId) {
       should.not.exist(err);
       should.exist(userId);
       done();
@@ -471,6 +471,8 @@ describe("FirebaseInstanceId operations. ", function () {
       };
     var isCallbackCalled = false;
     userService.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+
+      should.not.exist(err);
 
       user.firebaseInstanceIds.length.should.be.eql(1);
       user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);

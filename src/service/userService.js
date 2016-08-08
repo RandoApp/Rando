@@ -150,6 +150,11 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
           user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
           user.ip = ip;
           self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+          if (err) {
+            logger.info("error setting firebaseInstanceId");
+            callback(Errors.System(err));
+            return;
+         }
           db.user.update(user, function (err) {
             if (err) {
               logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
@@ -174,7 +179,8 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
         };
         self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
          if (err) {
-          logger.err("error setting firebaseInstanceId");
+          logger.info("error setting firebaseInstanceId");
+          callback(Errors.System(err));
           return;
          }
 
@@ -212,6 +218,11 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = ip;
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+         if (err) {
+          logger.info("error setting firebaseInstanceId");
+          callback(Errors.System(err));
+          return;
+         }
       db.user.update(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
@@ -232,6 +243,11 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
         firebaseInstanceIds: []
       };
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
+         if (err) {
+          logger.info("error setting firebaseInstanceId");
+          callback(Errors.System(err));
+          return;
+         }
       db.user.create(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateAnonymous, ", newUser.email, "] Can't create user because: ", err);
@@ -325,12 +341,16 @@ findOrCreateByFBData (data, callback) {
       callback(Errors.System(err));
       return;
     }
-
     if (user) {
       logger.warn("[userService.findOrCreateByFBData, ", user.email, "] User ", data.email, " exist");
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = data.ip;
       self.addOrUpdateFirebaseInstanceId(user, data.firebaseInstanceId, function (err, user) {
+         if (err) {
+          logger.info("error setting firebaseInstanceId");
+          callback(Errors.System(err));
+          return;
+         }
         db.user.update(user, function (err) {
           if (err) {
             logger.warn("[userService.findOrCreateByFBData, ", email, "] Can't update user with new authToken, because: ", err);
@@ -351,13 +371,17 @@ findOrCreateByFBData (data, callback) {
         firebaseInstanceIds : []
       };
       self.addOrUpdateFirebaseInstanceId(newUser, data.firebaseInstanceId, function (err, user) {
+         if (err) {
+          logger.info("error setting firebaseInstanceId");
+          callback(Errors.System(err));
+          return;
+         }
       db.user.create(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateByFBData, ", newUser.email, "] Can't create user because: ", err);
           callback(Errors.System(err));
           return;
         }
-
         logger.data("[userService.findOrCreateByFBData, ", newUser.email, "] User created: ", newUser);
         callback(null, {token: newUser.authToken});
       });
@@ -389,6 +413,11 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
       user.googleId = id;
       user.ip = ip;
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+         if (err) {
+          logger.info("error setting firebaseInstanceId");
+          callback(Errors.System(err));
+          return;
+         }
       db.user.update(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't update user with new authToken, because: ", err);
@@ -408,6 +437,11 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
         ip: ip
       }
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
+         if (err) {
+          logger.info("error setting firebaseInstanceId");
+          callback(Errors.System(err));
+          return;
+         }
       db.user.create(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateByGoogleData, ", newUser.email, "] Can't create user because: ", err);
