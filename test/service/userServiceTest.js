@@ -611,8 +611,11 @@ describe("FirebaseInstanceId operations. ", function () {
     var user = {
       authToken: "someToken"
       };
+    var isCallbackCalled = false;
 
     userService.deactivateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+      
+      should.not.exist(err);
 
       user.firebaseInstanceIds.length.should.be.eql(1);
       user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);
