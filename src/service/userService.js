@@ -150,7 +150,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
           user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
           user.ip = ip;
           self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-          if (err) {
+          if (err && firebaseInstanceId) {
             logger.info("error setting firebaseInstanceId");
             callback(Errors.System(err));
             return;
@@ -178,7 +178,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
           firebaseInstanceIds: []
         };
         self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
-         if (err) {
+         if (err && firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -218,7 +218,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = ip;
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-         if (err) {
+         if (err && firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -243,7 +243,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
         firebaseInstanceIds: []
       };
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
-         if (err) {
+         if (err && firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -346,7 +346,7 @@ findOrCreateByFBData (data, callback) {
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = data.ip;
       self.addOrUpdateFirebaseInstanceId(user, data.firebaseInstanceId, function (err, user) {
-         if (err) {
+         if (err && firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -371,7 +371,7 @@ findOrCreateByFBData (data, callback) {
         firebaseInstanceIds : []
       };
       self.addOrUpdateFirebaseInstanceId(newUser, data.firebaseInstanceId, function (err, user) {
-         if (err) {
+         if (err && firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -413,7 +413,7 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
       user.googleId = id;
       user.ip = ip;
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-         if (err) {
+         if (err && firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -437,13 +437,13 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
         ip: ip
       }
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
-         if (err) {
+         if (err && firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
          }
       db.user.create(user, function (err) {
-        if (err) {
+        if (err && firebaseInstanceId) {
           logger.warn("[userService.findOrCreateByGoogleData, ", newUser.email, "] Can't create user because: ", err);
           callback(Errors.System(err));
           return;
