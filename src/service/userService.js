@@ -346,7 +346,7 @@ findOrCreateByFBData (data, callback) {
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = data.ip;
       self.addOrUpdateFirebaseInstanceId(user, data.firebaseInstanceId, function (err, user) {
-         if (err && firebaseInstanceId) {
+         if (err && data.firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -371,7 +371,7 @@ findOrCreateByFBData (data, callback) {
         firebaseInstanceIds : []
       };
       self.addOrUpdateFirebaseInstanceId(newUser, data.firebaseInstanceId, function (err, user) {
-         if (err && firebaseInstanceId) {
+         if (err && data.firebaseInstanceId) {
           logger.info("error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -443,7 +443,7 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
           return;
          }
       db.user.create(user, function (err) {
-        if (err && firebaseInstanceId) {
+        if (err) {
           logger.warn("[userService.findOrCreateByGoogleData, ", newUser.email, "] Can't create user because: ", err);
           callback(Errors.System(err));
           return;
