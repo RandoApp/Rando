@@ -162,7 +162,7 @@ function (imagePaths, user, randoId, imageURL, imageSizeURL, location, done) {
   });
 },
 this.updateRando
-], function (err, imageURL) {
+], function (err, rando) {
   if (err) {
     logger.warn("[randoService.saveImage, ", user.email, "] Can't save image, because: ", err);
     callback(err);
@@ -170,7 +170,7 @@ this.updateRando
   }
 
   logger.debug("[randoService.saveImage, ", user.email, "] save done");
-  callback(null, {imageURL: imageURL, randoId: randoId, creation: Date.now()});
+  callback(null, {rando: rando});
 });
 },
 updateRando: function (user, randoId, imageURL, imageSizeURL, location, callback) {
@@ -201,7 +201,7 @@ updateRando: function (user, randoId, imageURL, imageSizeURL, location, callback
       });
     },
     updateUser: function (done) {
-      user.out.push({
+      var newRando = {
         email: user.email,
         location: location,
         randoId: randoId,
@@ -219,11 +219,12 @@ updateRando: function (user, randoId, imageURL, imageSizeURL, location, callback
         },
         creation: creation,
         delete: 0
-      });
+      };
+      user.out.push(newRando);
 
       logger.data("[randoService.updateRando.updateUser, ", user.email, "] Try update user");
       db.user.update(user);
-      done(null, imageURL);
+      done(null, newRando);
     }
   },
   function (err, res) {
