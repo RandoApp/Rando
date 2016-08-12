@@ -170,7 +170,7 @@ this.updateRando
   }
 
   logger.debug("[randoService.saveImage, ", user.email, "] save done");
-  callback(null, {imageURL: imageURL, creation: Date.now()});
+  callback(null, {imageURL: imageURL, randoId: randoId, creation: Date.now()});
 });
 },
 updateRando: function (user, randoId, imageURL, imageSizeURL, location, callback) {
