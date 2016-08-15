@@ -20,12 +20,12 @@ module.exports = {
         logger.log(err);
       }
       if(instanceIdFound){
-        logger.debug("Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+        logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
         instanceIdFound.lastUsedDate = Date.now();
         instanceIdFound.active = true;
       } else {
         user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
-        logger.debug("Adding new firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+        logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Adding new firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
       }
       if (resultCallback) {
         resultCallback(null, user);
@@ -45,19 +45,18 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
       user.firebaseInstanceIds = [];
     }
     async.detect(user.firebaseInstanceIds, (instanceIdTest,callback) => {
-      logger.debug("Asserting: ", instanceIdTest.instanceId, " to be equals to ", firebaseInstanceId);
       callback(null, instanceIdTest.instanceId === firebaseInstanceId);
     }, (err, instanceIdFound) => {
       if (err){
         logger.log(err);
       }
       if(instanceIdFound){
-        logger.debug("Deactivating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+        logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
         instanceIdFound.lastUsedDate = Date.now();
         instanceIdFound.active = false;
       } else {
         user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
-        logger.debug("Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+        logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
       }
       if (resultCallback){
         resultCallback(null, user);
@@ -151,7 +150,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
           user.ip = ip;
           self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
           if (err && firebaseInstanceId) {
-            logger.info("error setting firebaseInstanceId");
+            logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "] error setting firebaseInstanceId");
             callback(Errors.System(err));
             return;
          }
@@ -179,7 +178,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
         };
         self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
          if (err && firebaseInstanceId) {
-          logger.info("error setting firebaseInstanceId");
+          logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "]error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
          }
@@ -219,7 +218,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       user.ip = ip;
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
          if (err && firebaseInstanceId) {
-          logger.info("error setting firebaseInstanceId");
+          logger.info("[userService.findOrCreateAnonymous, ", email, "] error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
          }
@@ -244,7 +243,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       };
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
          if (err && firebaseInstanceId) {
-          logger.info("error setting firebaseInstanceId");
+          logger.info("[userService.findOrCreateAnonymous, ", email, "]error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
          }
@@ -347,7 +346,7 @@ findOrCreateByFBData (data, callback) {
       user.ip = data.ip;
       self.addOrUpdateFirebaseInstanceId(user, data.firebaseInstanceId, function (err, user) {
          if (err && data.firebaseInstanceId) {
-          logger.info("error setting firebaseInstanceId");
+          logger.info("[userService.findOrCreateByFBData, ", user.email, "]error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
          }
@@ -372,7 +371,7 @@ findOrCreateByFBData (data, callback) {
       };
       self.addOrUpdateFirebaseInstanceId(newUser, data.firebaseInstanceId, function (err, user) {
          if (err && data.firebaseInstanceId) {
-          logger.info("error setting firebaseInstanceId");
+          logger.info("[userService.findOrCreateByFBData, ", user.email, "]error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
          }
@@ -414,7 +413,7 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
       user.ip = ip;
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
          if (err && firebaseInstanceId) {
-          logger.info("error setting firebaseInstanceId");
+          logger.info("[userService.findOrCreateByGoogleData, ", user.email, "] error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
          }
@@ -438,7 +437,7 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
       }
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
          if (err && firebaseInstanceId) {
-          logger.info("error setting firebaseInstanceId");
+          logger.info("[userService.findOrCreateByGoogleData, ", user.email, "] error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
          }
