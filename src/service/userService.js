@@ -32,6 +32,7 @@ module.exports = {
     }
       callback(null, user);
   });
+  return;
 },
 
 deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
@@ -58,6 +59,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
     }
     callback(null, user);
   });
+  return;
 },
 
   destroyAuthToken (user, firebaseInstanceId, callback) {
