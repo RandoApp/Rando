@@ -20,7 +20,7 @@ module.exports = {
   }, (err, instanceIdFound) => {
     if (err){
       logger.log(err);
-      callback("err finding instanceId");
+      return callback("err finding instanceId");
     }
     if(instanceIdFound){
       logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
@@ -47,7 +47,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
   }, (err, instanceIdFound) => {
     if (err){
       logger.log(err);
-      callback("err finding instanceId");
+      return callback("err finding instanceId");
     }
     if(instanceIdFound){
       logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
