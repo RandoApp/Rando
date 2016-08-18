@@ -65,6 +65,10 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
   destroyAuthToken (user, firebaseInstanceId, callback) {
     user.authToken = "";
     this.deactivateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+      if (err && firebaseInstanceId) {
+            logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "] error setting firebaseInstanceId");
+            return callback(Errors.System(err));
+         }
       db.user.update(user);
       callback(null, {command: "logout", result: "done"});
     });
