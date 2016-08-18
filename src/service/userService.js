@@ -72,6 +72,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
       db.user.update(user);
       callback(null, {command: "logout", result: "done"});
     });
+    return;
   },
 
   buildRandoSync (rando) {
