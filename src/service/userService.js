@@ -8,16 +8,17 @@ var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
 
 module.exports = {
-  addOrUpdateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
+  addOrUpdateFirebaseInstanceId (user, firebaseInstanceId, callback) {
   if (user && firebaseInstanceId) {
     if (!user.firebaseInstanceIds){
       user.firebaseInstanceIds = [];
     }
-      async.detect(user.firebaseInstanceIds, (instanceIdTest, callback) => {
-      callback(null, instanceIdTest.instanceId === firebaseInstanceId);
+      async.detect(user.firebaseInstanceIds, (instanceIdTest, done) => {
+      done(null, instanceIdTest.instanceId === firebaseInstanceId);
     }, (err, instanceIdFound) => {
       if (err){
         logger.log(err);
+        done("err finding instanceId");
       }
       if(instanceIdFound){
         logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
@@ -27,28 +28,29 @@ module.exports = {
         user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
         logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Adding new firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
       }
-      if (resultCallback) {
-        resultCallback(null, user);
+      if (callback) {
+        callback(null, user);
       }
   });
   } else {
-    if (resultCallback){
-        resultCallback("user and firebaseInstanceId should be present", user);
+    if (callback){
+        callback("user and firebaseInstanceId should be present", user);
       }
   }
   return;
 },
 
-deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
+deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
   if (user && firebaseInstanceId) {
     if (!user.firebaseInstanceIds){
       user.firebaseInstanceIds = [];
     }
-    async.detect(user.firebaseInstanceIds, (instanceIdTest,callback) => {
-      callback(null, instanceIdTest.instanceId === firebaseInstanceId);
+    async.detect(user.firebaseInstanceIds, (instanceIdTest,done) => {
+      done(null, instanceIdTest.instanceId === firebaseInstanceId);
     }, (err, instanceIdFound) => {
       if (err){
         logger.log(err);
+        done("err finding instanceId");
       }
       if(instanceIdFound){
         logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
@@ -58,13 +60,13 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, resultCallback) {
         user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
         logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
       }
-      if (resultCallback){
-        resultCallback(null, user);
+      if (callback){
+        callback(null, user);
       }
   });
   } else {
-    if (resultCallback){
-        resultCallback("user and firebaseInstanceId should be present", user);
+    if (callback){
+        callback("user and firebaseInstanceId should be present", user);
       }
   }
 },
