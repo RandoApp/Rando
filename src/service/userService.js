@@ -164,7 +164,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
         });
         } else {
           logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "] user: ", email, " type incorrect password");
-          callback(Errors.LoginAndPasswordIncorrectArgs());
+          return callback(Errors.LoginAndPasswordIncorrectArgs());
         }
       } else {
         logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] user not exist. Try create him");
@@ -178,8 +178,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
         self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
          if (err && firebaseInstanceId) {
           logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "]error setting firebaseInstanceId");
-          callback(Errors.System(err));
-          return;
+          return callback(Errors.System(err));
          }
 
         logger.data("[userService.findOrCreateByLoginAndPassword, ", email, "] Try create user in db.");
@@ -200,15 +199,13 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
 findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
   var self = this;
   if (!id) {
-    callback(Errors.IncorrectAnonymousId());
-    return;
+    return callback(Errors.IncorrectAnonymousId());
   }
 
   var email =  id + "@" + config.app.anonymousEmailPosftix;
   db.user.getByEmail(email, function(err, user) {
     if (err) {
-      callback(Errors.System(err));
-      return;
+      return callback(Errors.System(err));
     }
 
     if (user) {
@@ -218,14 +215,12 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
          if (err && firebaseInstanceId) {
           logger.info("[userService.findOrCreateAnonymous, ", email, "] error setting firebaseInstanceId");
-          callback(Errors.System(err));
-          return;
+          return callback(Errors.System(err));
          }
       db.user.update(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateAnonymous, ", email, "] Can't update user with new authToken, because: ", err);
-          callback(Errors.System(err));
-          return;
+          return callback(Errors.System(err));
         }
         logger.debug("[userService.findOrCreateAnonymous, ", email, "] User authToken updated in db: ", user.authToken);
         callback(null, {token: user.authToken});
@@ -243,14 +238,12 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
          if (err && firebaseInstanceId) {
           logger.info("[userService.findOrCreateAnonymous, ", email, "]error setting firebaseInstanceId");
-          callback(Errors.System(err));
-          return;
+          return callback(Errors.System(err));
          }
       db.user.create(user, function (err) {
         if (err) {
           logger.warn("[userService.findOrCreateAnonymous, ", newUser.email, "] Can't create user because: ", err);
-          callback(Errors.System(err));
-          return;
+          return callback(Errors.System(err));
         }
         logger.data("[userService.findOrCreateAnonymous, ", newUser.email, "] Anonymous user created.");
         callback(null, {token: newUser.authToken});
