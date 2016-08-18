@@ -30,9 +30,7 @@ module.exports = {
       user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
       logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Adding new firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
     }
-    if (callback) {
       callback(null, user);
-    }
   });
   return;
 },
