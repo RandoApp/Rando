@@ -53,16 +53,17 @@ function checkAccess (req, res, next) {
     }
 
     var firebaseInstanceId = req.get("FirebaseInstanceId");
-    if (firebaseInstanceId){
-      userService.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId);
+    userService.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+    if(!err){
       req.firebaseInstanceId = firebaseInstanceId;
+      logger.debug("[access.checkAccess] Log in: ", user.email , " <== ", token," FirebaseInstanceId: ", firebaseInstanceId);
     }
-    logger.debug("[access.checkAccess] Log in: ", user.email , " <== ", token," FirebaseInstanceId: ", firebaseInstanceId);
     updateIp(user, ip);
     db.user.update(user);
     req.user = user;
     req.ip = ip;
     next();
+  });
   });
 }
 

@@ -32,7 +32,6 @@ module.exports = {
     }
       callback(null, user);
   });
-  return;
 },
 
 deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
@@ -57,17 +56,16 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
       user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
       logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
     }
-    if (callback){
-      callback(null, user);
-    }
+    callback(null, user);
   });
 },
 
   destroyAuthToken (user, firebaseInstanceId, callback) {
     user.authToken = "";
-    this.deactivateFirebaseInstanceId(user, firebaseInstanceId);
-    db.user.update(user);
-    callback(null, {command: "logout", result: "done"});
+    this.deactivateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+      db.user.update(user);
+      callback(null, {command: "logout", result: "done"});
+    });
   },
 
   buildRandoSync (rando) {
