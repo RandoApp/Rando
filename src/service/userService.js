@@ -30,9 +30,8 @@ module.exports = {
       user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
       logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Adding new firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
     }
-      callback(null, user);
+      return callback(null, user);
   });
-  return;
 },
 
 deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
@@ -57,9 +56,8 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
       user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
       logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
     }
-    callback(null, user);
+    return callback(null, user);
   });
-  return;
 },
 
   destroyAuthToken (user, firebaseInstanceId, callback) {
@@ -191,6 +189,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
           logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] User created.");
           callback(null, {token: newUser.authToken});
         });
+        return;
       });
       }
     });
@@ -223,7 +222,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
           return callback(Errors.System(err));
         }
         logger.debug("[userService.findOrCreateAnonymous, ", email, "] User authToken updated in db: ", user.authToken);
-        callback(null, {token: user.authToken});
+        return callback(null, {token: user.authToken});
       });
     });
     } else {
@@ -246,7 +245,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
           return callback(Errors.System(err));
         }
         logger.data("[userService.findOrCreateAnonymous, ", newUser.email, "] Anonymous user created.");
-        callback(null, {token: newUser.authToken});
+        return callback(null, {token: newUser.authToken});
       });
     });
     }
@@ -270,11 +269,11 @@ verifyFacebookAndFindOrCreateUser (id, email, token, ip, firebaseInstanceId, cal
         self.findOrCreateByFBData({email, id, ip, firebaseInstanceId}, callback);
       } else {
         logger.debug("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Emails is not equals. Return incorrect args");
-        callback(Errors.FBIncorrectArgs());
+        return callback(Errors.FBIncorrectArgs());
       }
     }).on("error", function(e){
       logger.warn("[userService.verifyFacebookAndFindOrCreateUser, ", id, " - ", email, "] Error in communication with Facebook: ", e);
-      callback(Errors.FacebookError());
+      return callback(Errors.FacebookError());
     });
   });
 },
@@ -298,8 +297,7 @@ verifyGoogleAndFindOrCreateUser (email, familyName, token, ip, firebaseInstanceI
         json = JSON.parse(googleJson);
       } catch (e) {
         logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Bad JSON: ", e.message);
-        callback(Errors.GoogleError());
-        return;
+        return callback(Errors.GoogleError());
       }
       logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
       if (json.family_name = familyName) {
@@ -307,11 +305,11 @@ verifyGoogleAndFindOrCreateUser (email, familyName, token, ip, firebaseInstanceI
         self.findOrCreateByGoogleData(json.id, email, ip, firebaseInstanceId, callback);
       } else {
         logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
-        callback(Errors.GoogleIncorrectArgs());
+        return callback(Errors.GoogleIncorrectArgs());
       }
     }).on("error", function (e) {
       logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
-      callback(Errors.GoogleError());
+      return callback(Errors.GoogleError());
     });
   });
 },
