@@ -31,6 +31,7 @@ if (cluster.isMaster) {
 
   require("randoDB").connect(config.db.url);
 
+  app.use(require('express-status-monitor')({path: config.app.monitor.url}));
   app.use(express.static(__dirname + "/static", {maxAge: config.app.cacheControl}));
   app.use(morgan("combined"));
   app.use(bodyParser());
