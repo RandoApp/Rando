@@ -33,7 +33,7 @@ if (cluster.isMaster) {
 
   app.use(require("express-status-monitor")({
     path: config.app.monitor.url,
-    title: config.app.monitor.title,
+    title: config.app.monitor.title
   }));
 
   app.use(express.static(__dirname + "/static", {maxAge: config.app.cacheControl}));
