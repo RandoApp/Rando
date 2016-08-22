@@ -53,6 +53,9 @@ app:
             image: image/
             map: map/
             name: static/
+    monitor:
+        title: Rando 4Me server status
+        url: /monitor
 db:
     url: mongodb://localhost/rando
     name: rando
