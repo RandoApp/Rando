@@ -579,7 +579,6 @@ describe("FirebaseInstanceId operations. ", function () {
 
   describe("DeactivateFirebaseInstanceId: Positive flow. ", function () {
   it("Should deactivate FirebaseInstanceId and don't change others when id exists" , function (done) {
-    var firebaseInstanceId = "FirebaseInstanceId1";
     var user = {
       authToken: "someToken2",
       email: "FirebaseInstanceId1@email.com",
