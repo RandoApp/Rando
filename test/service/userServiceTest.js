@@ -635,17 +635,6 @@ describe("FirebaseInstanceId operations. ", function () {
 });
 
 describe("DeactivateFirebaseInstanceId: Negative flow. ", function () {
-   var firebaseInstanceId = "FirebaseInstanceId1";
-    var user = {
-      authToken: "someToken",
-      firebaseInstanceIds: [
-    {
-        instanceId: "firebaseInstanceId2",
-        active: false,
-        createdDate: 300,
-        lastUsedDate: 400
-    }]};
-
   it("Should not fail and return error to callback when user is undefined" , function (done) {
     var isCallbackCalled = false;
 
