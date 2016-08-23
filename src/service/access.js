@@ -54,16 +54,17 @@ function checkAccess (req, res, next) {
 
     var firebaseInstanceId = req.get("FirebaseInstanceId");
     userService.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-    if(!err){
-      req.firebaseInstanceId = firebaseInstanceId;
+      if (err){
+        var response = Errors.toResponse(Errors.System(err));
+        res.status(response.status).send(response);
+        return;
+      }
       logger.debug("[access.checkAccess] Log in: ", user.email , " <== ", token," FirebaseInstanceId: ", firebaseInstanceId);
-    }
-    updateIp(user, ip);
-    db.user.update(user);
-    req.user = user;
-    req.ip = ip;
-    next();
-  });
+      updateIp(user, ip);
+      db.user.update(user);
+      req.user = user;
+      next();
+  } );
   });
 }
 

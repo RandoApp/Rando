@@ -9,8 +9,13 @@ var passwordUtil = require("../util/password");
 
 module.exports = {
   addOrUpdateFirebaseInstanceId (user, firebaseInstanceId, callback) {
-  if (!user || !firebaseInstanceId) {
-    return callback("user and firebaseInstanceId should be present", user);
+  if (!user) {
+    return callback("user should be present", user);
+  }
+  //This if is needed to support old clients
+  //TODO: Remove when all clients will be on 1.0.15+
+  if (!firebaseInstanceId){
+    return callback(null, user);
   }
   if (!user.firebaseInstanceIds){
     user.firebaseInstanceIds = [];
@@ -20,7 +25,7 @@ module.exports = {
   }, (err, instanceIdFound) => {
     if (err){
       logger.log(err);
-      return callback("err finding instanceId");
+      callback(new Error("err finding instanceId"));
     }
     if(instanceIdFound){
       logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
@@ -34,37 +39,26 @@ module.exports = {
   });
 },
 
-deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
-  if (!user || !firebaseInstanceId) {
-    return callback("user and firebaseInstanceId should be present", user);
+deactivateFirebaseInstanceId (user, callback) {
+  if (!user) {
+    return callback("user should be present", user);
   }
   if (!user.firebaseInstanceIds){
     user.firebaseInstanceIds = [];
   }
-  async.detect(user.firebaseInstanceIds, (instanceIdTest,done) => {
-    done(null, instanceIdTest.instanceId === firebaseInstanceId);
-  }, (err, instanceIdFound) => {
-    if (err){
-      logger.log(err);
-      return callback("err finding instanceId");
-    }
-    if(instanceIdFound){
-      logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
-      instanceIdFound.lastUsedDate = Date.now();
-      instanceIdFound.active = false;
-    } else {
-      user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: false, createdDate: Date.now(), lastUsedDate: Date.now() } );
-      logger.debug("[userService.deactivateFirebaseInstanceId] ", "Deactivating never used firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
-    }
-    return callback(null, user);
+  async.each(user.firebaseInstanceIds, (instanceId, done) => {
+      instanceId.active = false;
+      done();
+  }, (err) => {
+    return callback(err, user);
   });
 },
 
-  destroyAuthToken (user, firebaseInstanceId, callback) {
+  destroyAuthToken (user, callback) {
     user.authToken = "";
-    this.deactivateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-      if (err && firebaseInstanceId) {
-            logger.info("[userService.findOrCreateByLoginAndPassword, ", user.email, "] error setting firebaseInstanceId");
+    this.deactivateFirebaseInstanceId(user, function (err, user) {
+      if (err) {
+            logger.info("[userService.destroyAuthToken, ", user.email, "] error deactivating firebaseInstanceIds");
             return callback(Errors.System(err));
          }
       db.user.update(user);
@@ -109,15 +103,14 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
     }, function (err) {
       if (err) {
         logger.warn("[userService.getUser ] Error when each randos in parallel for : ", user);
-        callback(Errors.System(err));
-        return;
+        return callback(Errors.System(err));
       }
 
       backwardCompatibility.makeUserBackwardCompaitble(userJSON, function (err, compatibleUserJSON) {
         if (err) {
           logger.warn("[userService.getUser] Error when make user backward compaitble");
-          callback(Errors.System(err));
-          return;
+          return callback(Errors.System(err));
+          
         }
         callback(null, compatibleUserJSON);
       });
@@ -130,15 +123,14 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
 
     if (!email || !/.+@.+\..+/.test(email) || !password) {
       logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
-      callback(Errors.LoginAndPasswordIncorrectArgs());
-      return;
+      return callback(Errors.LoginAndPasswordIncorrectArgs());
     }
 
     db.user.getByEmail(email, function(err, user) {
       if (err) {
         logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't db.user.getByEmail, because: ", err);
-        callback(Errors.System(err));
-        return;
+        return callback(Errors.System(err));
+        
       }
       if (user) {
         logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
@@ -146,10 +138,10 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
           user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
           user.ip = ip;
           self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-          if (err && firebaseInstanceId) {
+          if (err) {
             logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "] error setting firebaseInstanceId");
-            callback(Errors.System(err));
-            return;
+            return callback(Errors.System(err));
+            
          }
           db.user.update(user, function (err) {
             if (err) {
@@ -174,7 +166,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
           firebaseInstanceIds: []
         };
         self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
-         if (err && firebaseInstanceId) {
+         if (err) {
           logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "]error setting firebaseInstanceId");
           return callback(Errors.System(err));
          }
@@ -187,7 +179,7 @@ deactivateFirebaseInstanceId (user, firebaseInstanceId, callback) {
           }
 
           logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] User created.");
-          callback(null, {token: newUser.authToken});
+          return callback(null, {token: newUser.authToken});
         });
         return;
       });
@@ -212,7 +204,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
       user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
       user.ip = ip;
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-         if (err && firebaseInstanceId) {
+         if (err) {
           logger.info("[userService.findOrCreateAnonymous, ", email, "] error setting firebaseInstanceId");
           return callback(Errors.System(err));
          }
@@ -235,7 +227,7 @@ findOrCreateAnonymous (id, ip, firebaseInstanceId, callback) {
         firebaseInstanceIds: []
       };
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
-         if (err && firebaseInstanceId) {
+         if (err) {
           logger.info("[userService.findOrCreateAnonymous, ", email, "]error setting firebaseInstanceId");
           return callback(Errors.System(err));
          }
@@ -300,7 +292,7 @@ verifyGoogleAndFindOrCreateUser (email, familyName, token, ip, firebaseInstanceI
         return callback(Errors.GoogleError());
       }
       logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
-      if (json.family_name = familyName) {
+      if (json.family_name === familyName) {
         logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
         self.findOrCreateByGoogleData(json.id, email, ip, firebaseInstanceId, callback);
       } else {
@@ -402,7 +394,7 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
       user.googleId = id;
       user.ip = ip;
       self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-         if (err && firebaseInstanceId) {
+         if (err) {
           logger.info("[userService.findOrCreateByGoogleData, ", user.email, "] error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;
@@ -426,7 +418,7 @@ findOrCreateByGoogleData (id, email, ip, firebaseInstanceId, callback) {
         ip: ip
       }
       self.addOrUpdateFirebaseInstanceId(newUser, firebaseInstanceId, function (err, user) {
-         if (err && firebaseInstanceId) {
+         if (err) {
           logger.info("[userService.findOrCreateByGoogleData, ", user.email, "] error setting firebaseInstanceId");
           callback(Errors.System(err));
           return;

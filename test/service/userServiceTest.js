@@ -443,9 +443,16 @@ describe("Destroy auth token.", function () {
         active: true,
         createdDate: 300,
         lastUsedDate: 400
-    }]
+    },
+    {
+        instanceId: "firebaseInstanceId2",
+        active: true,
+        createdDate: 500,
+        lastUsedDate: 600
+    }
+    ]
     };
-    userService.destroyAuthToken(user, "firebaseInstanceId", function (err, result) {
+    userService.destroyAuthToken(user, function (err, result) {
       should.not.exist(err);
       isSaveCalled.should.be.true();
       user.authToken.should.be.empty();
@@ -456,6 +463,42 @@ describe("Destroy auth token.", function () {
         command: "logout",
         result: "done"
       });
+
+      done();
+    });
+  });
+
+   it("Should fail and return 500 when error thrown in deactivateFirebaseInstanceId", function (done) {
+    var isSaveCalled = false;
+    var user = {
+      authToken: "someToken",
+      email: "email",
+      save () {
+        isSaveCalled = true;
+      },
+      firebaseInstanceIds: [
+    {
+        instanceId: "firebaseInstanceId",
+        active: true,
+        createdDate: 300,
+       lastUsedDate: 400
+    }
+    ]
+    };
+
+    sinon.stub(userService, "deactivateFirebaseInstanceId", function (user, callback) {
+        userService.deactivateFirebaseInstanceId.restore();
+        callback(new Error("err finding instanceId"), user);
+      });
+
+    userService.destroyAuthToken(user, function (err, result) {
+      should.exist(err);
+      isSaveCalled.should.be.false();
+      user.authToken.should.be.empty();
+      user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId");
+      user.firebaseInstanceIds[0].active.should.be.true();
+
+      should.not.exist();
 
       done();
     });
@@ -502,7 +545,8 @@ describe("FirebaseInstanceId operations. ", function () {
     var isCallbackCalled = false;
     userService.addOrUpdateFirebaseInstanceId(user, null, function (err, user) {
       should.exist(user);
-      err.should.be.eql("user and firebaseInstanceId should be present");
+      should.not.exist(err);
+      user.should.have.property("authToken", "someToken");
       isCallbackCalled = true;
     });
     isCallbackCalled.should.be.true();
@@ -513,7 +557,7 @@ describe("FirebaseInstanceId operations. ", function () {
     var isCallbackCalled = false;
     userService.addOrUpdateFirebaseInstanceId(null, firebaseInstanceId, function (err, user) {
       should.not.exist(user);
-      err.should.be.eql("user and firebaseInstanceId should be present");
+      err.should.be.eql("user should be present");
       isCallbackCalled = true;
     });
     isCallbackCalled.should.be.true();
@@ -524,7 +568,7 @@ describe("FirebaseInstanceId operations. ", function () {
     var isCallbackCalled = false;
     userService.addOrUpdateFirebaseInstanceId(null, null, function (err, user) {
       should.not.exist(user);
-      err.should.be.eql("user and firebaseInstanceId should be present");
+      err.should.be.eql("user should be present");
       isCallbackCalled = true;
     });
     isCallbackCalled.should.be.true();
@@ -540,7 +584,7 @@ describe("FirebaseInstanceId operations. ", function () {
       authToken: "someToken2",
       email: "FirebaseInstanceId1@email.com",
       firebaseInstanceIds: [{
-        instanceId: firebaseInstanceId,
+        instanceId: "FirebaseInstanceId1",
         active: true,
         createdDate: 100,
         lastUsedDate: 200
@@ -554,15 +598,15 @@ describe("FirebaseInstanceId operations. ", function () {
 
     var isCallbackCalled = false;
 
-    userService.deactivateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+    userService.deactivateFirebaseInstanceId(user, function (err, user) {
 
     should.not.exist(err);
 
     user.firebaseInstanceIds.length.should.be.eql(2);
-    user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);
+    user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId1");
     user.firebaseInstanceIds[0].active.should.be.false();
     user.firebaseInstanceIds[0].createdDate.should.be.eql(100);
-    user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(200);
+    user.firebaseInstanceIds[0].lastUsedDate.should.be.eql(200);
 
     user.firebaseInstanceIds[1].instanceId.should.be.eql("firebaseInstanceId2");
     user.firebaseInstanceIds[1].active.should.be.false();
@@ -574,59 +618,18 @@ describe("FirebaseInstanceId operations. ", function () {
     done();
   });
 
-  it("Should add deactivated FirebaseInstanceId and don't change others when id is not in list" , function (done) {
-    var firebaseInstanceId = "FirebaseInstanceId1";
-    var user = {
-      authToken: "someToken",
-      firebaseInstanceIds: [
-    {
-        instanceId: "firebaseInstanceId2",
-        active: false,
-        createdDate: 300,
-        lastUsedDate: 400
-    }]};
-
-    var isCallbackCalled = false;
-
-    userService.deactivateFirebaseInstanceId(user,firebaseInstanceId, function (err, user) {
-
-      should.not.exist(err);
-
-      user.firebaseInstanceIds.length.should.be.eql(2);
-      user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId2");
-      user.firebaseInstanceIds[0].active.should.be.false();
-      user.firebaseInstanceIds[0].createdDate.should.be.eql(300);
-      user.firebaseInstanceIds[0].lastUsedDate.should.be.eql(400);
-
-      user.firebaseInstanceIds[1].instanceId.should.be.eql(firebaseInstanceId);
-      user.firebaseInstanceIds[1].active.should.be.false();
-      isCallbackCalled = true;
-    });
-
-    isCallbackCalled.should.be.true();
-
-    done();
-  });
-
   it("Should deactivate FirebaseInstanceId or user doesn't have user.firebaseInstanceIds defined" , function (done) {
-    var firebaseInstanceId = "FirebaseInstanceId1";
     var user = {
       authToken: "someToken"
       };
     var isCallbackCalled = false;
 
-    userService.deactivateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
-      
+    userService.deactivateFirebaseInstanceId(user, function (err, user) {
       should.not.exist(err);
-
-      user.firebaseInstanceIds.length.should.be.eql(1);
-      user.firebaseInstanceIds[0].instanceId.should.be.eql(firebaseInstanceId);
-      user.firebaseInstanceIds[0].active.should.be.false();
+      user.authToken.should.be.eql("someToken");
       isCallbackCalled = true;
     });
-
     isCallbackCalled.should.be.true();
-
     done();
   });
 
@@ -644,36 +647,12 @@ describe("DeactivateFirebaseInstanceId: Negative flow. ", function () {
         lastUsedDate: 400
     }]};
 
-  it("Should not fail and return error to callback when user is passed and FirebaseInstanceId is undefined" , function (done) {
+  it("Should not fail and return error to callback when user is undefined" , function (done) {
     var isCallbackCalled = false;
 
-    userService.deactivateFirebaseInstanceId(user, null, function (err, user) {
-      should.exist(user);
-      err.should.be.eql("user and firebaseInstanceId should be present");
-      isCallbackCalled = true;
-    });
-    isCallbackCalled.should.be.true();
-    done();
-  });
-
-
-  it("Should not fail and return error to callback when user is undefined and FirebaseInstanceId is passed" , function (done) {
-    var isCallbackCalled = false;
-    userService.deactivateFirebaseInstanceId(null, firebaseInstanceId, function (err, user) {
+    userService.deactivateFirebaseInstanceId(null, function (err, user) {
       should.not.exist(user);
-      err.should.be.eql("user and firebaseInstanceId should be present");
-      isCallbackCalled = true;
-    });
-
-    isCallbackCalled.should.be.true();
-    done();
-  });
-  it("Should not fail and return error to callback when FirebaseInstanceId and user is undefined" , function (done) {
-    var isCallbackCalled = false;
-
-    userService.deactivateFirebaseInstanceId(null, null, function (err, user) {
-      should.not.exist(user);
-      err.should.be.eql("user and firebaseInstanceId should be present");
+      err.should.be.eql("user should be present");
       isCallbackCalled = true;
     });
     isCallbackCalled.should.be.true();

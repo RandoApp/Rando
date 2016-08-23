@@ -4,6 +4,7 @@ var access = require("../../src/service/access");
 var config = require("config");
 var Errors = require("../../src/error/errors");
 var db = require("randoDB");
+var userService = require("../../src/service/userService");
 
 describe("Access service.", function () {
   describe("No Spam.", function () {
@@ -136,7 +137,7 @@ describe("Access service.", function () {
 });
 
 describe("For user with token.", function () {
-  it("Should return Unauthorized error when authorization header is passed", function (done) {
+  it("Should return Unauthorized error when no authorization header is passed", function (done) {
     access.byToken({ip: "127.0.0.1", headers: {}, connection: {remoteAddress : "127.0.0.1" } } , {
       status: function(status) {
         status.should.be.eql(401);
@@ -193,6 +194,42 @@ describe("For user with token.", function () {
     });
 
     access.byToken({headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }}, {
+      status: function(status) {
+        status.should.be.eql(500);
+        return this;
+      },
+      send: function (response) {
+        response.should.be.eql(Errors.System(new Error()).rando);
+        done();
+      }
+    }, function () {
+      should.fail("Should not next be called");
+    });
+  });
+
+    it("Should return System error when error updating FirebaseInstanceId", function (done) {
+      sinon.stub(userService, "addOrUpdateFirebaseInstanceId", function (user, firebaseInstanceId, callback) {
+        userService.addOrUpdateFirebaseInstanceId.restore();
+        callback(new Error("err finding instanceId"));
+      });
+
+      var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
+
+      sinon.stub(req, "get", function (header){
+        if (header === "FirebaseInstanceId") {
+          return "FirebaseInstanceId12345";
+        } else {
+          return null;
+        }
+      });
+
+    var user = {email: "user@mail.com", firebaseInstanceIds: []};
+    sinon.stub(db.user, "getByToken", function (token, callback) {
+      db.user.getByToken.restore();
+      callback(null, user);
+    });
+
+    access.byToken(req, {
       status: function(status) {
         status.should.be.eql(500);
         return this;

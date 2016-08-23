@@ -184,7 +184,7 @@ if (cluster.isMaster) {
   });
 
   function logout(req, res) {
-    userService.destroyAuthToken(req.user, req.firebaseInstanceId, function (err, response) {
+    userService.destroyAuthToken(req.user, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         logger.data("POST /logout DONE with error: ", response.code);
