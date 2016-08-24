@@ -1,6 +1,11 @@
 language: node_js
 node_js:
-  - "0.10"
+  - 4
+  - 5
+  - 6
+  - node
+git:
+  depth: 3
 
 after_script:
   - npm run-script coveralls

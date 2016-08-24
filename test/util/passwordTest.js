@@ -1,8 +1,10 @@
 var should = require("should");
 var sinon = require("sinon");
 var passwordUtil = require("../../src/util/password");
+var config = require("config");
 
 describe("Password Util.", function () {
+  config.app.secret = "STUB";
   describe("Is password correct.", function () {
     it("Same passwords return true", function (done) {
       var user = {
@@ -11,6 +13,7 @@ describe("Password Util.", function () {
       };
 
       var actual = passwordUtil.isPasswordCorrect("passwordForSha1", user, "STUB");
+      actual.should.be.true();
       done();
     });
 
@@ -21,7 +24,7 @@ describe("Password Util.", function () {
       };
 
       var actual = passwordUtil.isPasswordCorrect("differentPassword", user, "STUB");
-      actual.should.be.false;
+      actual.should.be.false();
       done();
     });
   });

@@ -4,6 +4,7 @@ var access = require("../../src/service/access");
 var config = require("config");
 var Errors = require("../../src/error/errors");
 var db = require("randoDB");
+var userService = require("../../src/service/userService");
 
 describe("Access service.", function () {
   describe("No Spam.", function () {
@@ -136,8 +137,8 @@ describe("Access service.", function () {
 });
 
 describe("For user with token.", function () {
-  it("Empty token should return Unauthorized error", function (done) {
-    access.byToken({ip: "127.0.0.1", query: {}}, {
+  it("Should return Unauthorized error when no authorization header is passed", function (done) {
+    access.byToken({ip: "127.0.0.1", headers: {}, connection: {remoteAddress : "127.0.0.1" } } , {
       status: function(status) {
         status.should.be.eql(401);
         return this;
@@ -151,33 +152,48 @@ describe("For user with token.", function () {
     });
   });
 
-  it("Not found user with token should return Unauthorized error", function (done) {
+  it("Should return Unauthorized error when user with token Not found", function (done) {
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
       callback();
     });
 
-    access.byToken({query: {token: "12345"}, ip: "127.0.0.1"}, {
+    access.byToken ( {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }}, {
       status: function(status) {
         status.should.be.eql(401);
         return this;
       },
       send: function (response) {
         response.should.be.eql(Errors.Unauthorized().rando);
-        done()
+        done();
       }
     }, function () {
       should.fail("Should not next be called");
     });
   });
 
-  it("DB error should return System error", function (done) {
+ it("Should return Unauthorized error when empty token passed", function (done) {
+  access.byToken ( {headers: { authorization: "Token"}, connection: {remoteAddress : "127.0.0.1" }}, {
+      status: function(status) {
+        status.should.be.eql(401);
+        return this;
+      },
+      send: function (response) {
+        response.should.be.eql(Errors.Unauthorized().rando);
+        done();
+      }
+    }, function () {
+      should.fail("Should not next be called");
+    });
+  });
+
+  it("Should return System error when DB error", function (done) {
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
       callback(new Error("DB error"));
     });
 
-    access.byToken({query: {token: "12345"}, ip: "127.0.0.1"}, {
+    access.byToken({headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }}, {
       status: function(status) {
         status.should.be.eql(500);
         return this;
@@ -191,8 +207,44 @@ describe("For user with token.", function () {
     });
   });
 
-  it("Exist user should be returend without error", function (done) {
-    var user = {email: "user@mail.com"};
+    it("Should return System error when error updating FirebaseInstanceId", function (done) {
+      sinon.stub(userService, "addOrUpdateFirebaseInstanceId", function (user, firebaseInstanceId, callback) {
+        userService.addOrUpdateFirebaseInstanceId.restore();
+        callback(new Error("err finding instanceId"));
+      });
+
+      var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
+
+      sinon.stub(req, "get", function (header){
+        if (header === "FirebaseInstanceId") {
+          return "FirebaseInstanceId12345";
+        } else {
+          return null;
+        }
+      });
+
+    var user = {email: "user@mail.com", firebaseInstanceIds: []};
+    sinon.stub(db.user, "getByToken", function (token, callback) {
+      db.user.getByToken.restore();
+      callback(null, user);
+    });
+
+    access.byToken(req, {
+      status: function(status) {
+        status.should.be.eql(500);
+        return this;
+      },
+      send: function (response) {
+        response.should.be.eql(Errors.System(new Error()).rando);
+        done();
+      }
+    }, function () {
+      should.fail("Should not next be called");
+    });
+  });
+
+  it("Should return existing user without error and set FirebaseInstanceId", function (done) {
+    var user = {email: "user@mail.com", firebaseInstanceIds: []};
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
       callback(null, user);
@@ -200,13 +252,24 @@ describe("For user with token.", function () {
 
     sinon.stub(db.user, "update", function (user, callback) {
       db.user.update.restore();
+      user.firebaseInstanceIds.length.should.be.eql(1);
+      user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId12345");
+      user.firebaseInstanceIds[0].active.should.be.true();
     });
 
-    var req = {query: {token: "12345"}, ip: "127.0.0.1"};
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
+    
+    sinon.stub(req, "get", function (header){
+      if (header === "FirebaseInstanceId") {
+        return "FirebaseInstanceId12345";
+      } else {
+        return null;
+      }
+    });
 
     access.byToken(req, {
       send: function (response) {
-        should.fail("Should not send be called");
+        should.fail(" Send should not be called");
       }
     }, function () {
       req.user.should.be.eql(user);
@@ -215,8 +278,77 @@ describe("For user with token.", function () {
   });
 });
 
+it("Should return existing user without error and add FirebaseInstanceId", function (done) {
+    var user = {email: "user@mail.com", firebaseInstanceIds: [{instanceId: "12345", active: true}]};
+    sinon.stub(db.user, "getByToken", function (token, callback) {
+      db.user.getByToken.restore();
+      callback(null, user);
+    });
+
+    sinon.stub(db.user, "update", function (user, callback) {
+      db.user.update.restore();
+      user.firebaseInstanceIds.length.should.be.eql(2);
+      user.firebaseInstanceIds[1].instanceId.should.be.eql("FirebaseInstanceId12345");
+      user.firebaseInstanceIds[1].active.should.be.true();
+    });
+
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
+    
+    sinon.stub(req, "get", function (header){
+      if (header === "FirebaseInstanceId") {
+        return "FirebaseInstanceId12345";
+      } else {
+        return null;
+      }
+    });
+
+    access.byToken(req, {
+      send: function (response) {
+        should.fail(" Send should not be called");
+      }
+    }, function () {
+      req.user.should.be.eql(user);
+      done();
+    });
+  });
+
+it("Should return existing user without error and bump lastUsedDate for FirebaseInstanceId", function (done) {
+    var user = {email: "user@mail.com", firebaseInstanceIds: [{instanceId: "FirebaseInstanceId12345", active: true, lastUsedDate: 200, createdDate: 1}]};
+    sinon.stub(db.user, "getByToken", function (token, callback) {
+      db.user.getByToken.restore();
+      callback(null, user);
+    });
+
+    sinon.stub(db.user, "update", function (user, callback) {
+      db.user.update.restore();
+      user.firebaseInstanceIds.length.should.be.eql(1);
+      user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId12345");
+      user.firebaseInstanceIds[0].active.should.be.true();
+      user.firebaseInstanceIds[0].lastUsedDate.should.not.be.eql(200);
+    });
+
+    var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
+    
+    sinon.stub(req, "get", function (header){
+      if (header === "FirebaseInstanceId"){
+        return "FirebaseInstanceId12345";
+      } else {
+        return null;
+      }
+    });
+
+    access.byToken(req, {
+      send: function (response) {
+        should.fail(" Send should not be called");
+      }
+    }, function () {
+      req.user.should.be.eql(user);
+      done();
+    });
+  });
+
 describe("Update ip.", function () {
-  it("User with same ip should not be updated", function (done) {
+  it("Should not update ip when User has same ip ", function (done) {
     var user = {email: "user@mail.com", ip: "127.0.0.1"};
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
@@ -224,16 +356,18 @@ describe("Update ip.", function () {
     });
 
     sinon.stub(db.user, "update", function (user, callback) {
-      should.fail("Should not db.user.update be called");
+      if (user.ip !== "127.0.0.1") {
+        should.fail("Should not db.user.update be called");
+      }
     });
 
-    access.byToken({query: {token: "123"}, ip: "127.0.0.1"}, {}, function () {
+    access.byToken({headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}}, {}, function () {
       db.user.update.restore();
       done();
     });
   });
 
-  it("User with old ip should be updated with new ip", function (done) {
+  it("Should update user with new ip", function (done) {
     var user = {email: "user@mail.com", ip: "127.1.1.1"};
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
@@ -246,12 +380,12 @@ describe("Update ip.", function () {
       done();
     });
 
-    access.byToken({query: {token: "123"}, ip: "127.0.0.1"}, {}, function () {
+    access.byToken({headers: { authorization: "Token 123"}, connection: {remoteAddress : "127.0.0.1" }, get(){}}, {}, function () {
                 //do nothing
               });
   });
 
-  it("User without any ip should be updated with new ip", function (done) {
+  it("Should update ip for user without ip", function (done) {
     var user = {email: "user@mail.com"};
     sinon.stub(db.user, "getByToken", function (token, callback) {
       db.user.getByToken.restore();
@@ -264,7 +398,7 @@ describe("Update ip.", function () {
       done();
     });
 
-    access.byToken({query: {token: "123"}, ip: "127.0.0.1"}, {}, function () {
+    access.byToken({headers: { authorization: "Token 123"}, connection: {remoteAddress : "127.0.0.1" }, get(){}}, {}, function () {
                 //do nothing
               });
   });

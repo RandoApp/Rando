@@ -1,15 +1,16 @@
 var logger = require("../log/logger");
 var crypto = require("crypto");
+var config = require("config");
 
 module.exports = {
-  generateHashForPassword: function (email, password, sold) {
+  generateHashForPassword (email, password, salt) {
     logger.data("[password.generateHashForPassword, ", email, "] Try generate hash.");
     var sha1sum = crypto.createHash("sha1");
-    sha1sum.update(password + email + sold);
+    sha1sum.update(password + email + salt);
     return sha1sum.digest("hex");
   },
-  isPasswordCorrect: function (password, user) {
-    logger.data("[userService.isPasswordCorrect, ", user.email, "] Try compare passwords: ", user.password, " == ", this.generateHashForPassword(user.email, password));
-    return user.password == this.generateHashForPassword(user.email, password);
+  isPasswordCorrect (password, user, salt) {
+    logger.data("[userService.isPasswordCorrect, ", user.email, "] Try compare passwords: ", user.password, " === ", this.generateHashForPassword(user.email, password));
+    return user.password === this.generateHashForPassword(user.email, password, salt);
   }
 };

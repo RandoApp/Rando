@@ -38,7 +38,10 @@ if (cluster.isMaster) {
 
   app.use(express.static(__dirname + "/static", {maxAge: config.app.cacheControl}));
   app.use(morgan("combined"));
-  app.use(bodyParser());
+  app.use(bodyParser.urlencoded({
+    extended: true
+  }));
+  app.use(bodyParser.json());
 
   (function checkSources() {
     if (!fs.existsSync(config.app.citiesJson)) {
@@ -92,7 +95,7 @@ if (cluster.isMaster) {
 
     var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, ip, function (err, response) {
+    userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, ip, req.body.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
@@ -130,7 +133,7 @@ if (cluster.isMaster) {
 
     var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    userService.findOrCreateAnonymous(req.body.id, ip, function (err, response) {
+    userService.findOrCreateAnonymous(req.body.id, ip, req.body.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
@@ -150,7 +153,7 @@ if (cluster.isMaster) {
 
     var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, ip, function (err, response) {
+    userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
@@ -170,7 +173,7 @@ if (cluster.isMaster) {
 
     var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, ip, function (err, response) {
+    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
@@ -185,12 +188,8 @@ if (cluster.isMaster) {
     });
   });
 
-  app.post("/logout", access.byToken, function (req, res) {
-    logout(req.user, res);
-  });
-
-  function logout(user, res) {
-    userService.destroyAuthToken(user, function (err, response) {
+  function logout(req, res) {
+    userService.destroyAuthToken(req.user, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         logger.data("POST /logout DONE with error: ", response.code);
@@ -202,6 +201,10 @@ if (cluster.isMaster) {
       res.status(200).send(response);
     });
   };
+
+  app.post("/logout", access.byToken, function (req, res) {
+    logout(req, res);
+  });
 
   app.post("/log", function (req, res) {
     logger.data("Start process user request. POST /log. Token: ", req.params.token);
@@ -258,7 +261,7 @@ if (cluster.isMaster) {
     //@deprecated
     app.post("/logout/:token", tokenConverter, access.byToken, function (req, res) {
       logger.warn("DEPRECATED API CALL: POST /logout/:token");
-      logout(req.user, res);
+      logout(req, res);
     });
 
     //@deprecated
@@ -275,12 +278,11 @@ if (cluster.isMaster) {
     });
 
     //@deprecated
-    app.post("/image/:token", tokenConverter, access.byToken, access.noSpam, function (req, res) {
+    app.post("/image/:token", tokenConverter, access.byToken, access.noSpam, upload.single("image"), function (req, res) {
       logger.warn("DEPRECATED API CALL: POST /image/:token");
-      postImage(req.user, req.files.image.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
+      postImage(req.user, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
     });
     //=========================================================================================================
-
 
     app.listen(config.app.port, /*config.app.host,*/ function () {
       logger.info("Express server listening on port " + config.app.port + " and host: " + config.app.host);
