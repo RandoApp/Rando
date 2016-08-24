@@ -497,8 +497,7 @@ describe("Destroy auth token.", function () {
       user.authToken.should.be.empty();
       user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId");
       user.firebaseInstanceIds[0].active.should.be.true();
-
-      should.not.exist();
+      should.not.exist(result);
 
       done();
     });

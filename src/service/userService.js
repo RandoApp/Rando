@@ -25,7 +25,7 @@ module.exports = {
   }, (err, instanceIdFound) => {
     if (err){
       logger.log(err);
-      callback(new Error("err finding instanceId"));
+      return callback(new Error("err finding instanceId"));
     }
     if(instanceIdFound){
       logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
@@ -62,7 +62,7 @@ deactivateFirebaseInstanceId (user, callback) {
             return callback(Errors.System(err));
          }
       db.user.update(user);
-      callback(null, {command: "logout", result: "done"});
+      return callback(null, {command: "logout", result: "done"});
     });
     return;
   },
@@ -181,7 +181,6 @@ deactivateFirebaseInstanceId (user, callback) {
           logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] User created.");
           return callback(null, {token: newUser.authToken});
         });
-        return;
       });
       }
     });

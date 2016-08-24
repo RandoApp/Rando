@@ -32,14 +32,15 @@ function checkAccess (req, res, next) {
     return;
   }
 
-  var authHeaderSplit = authHeader.split(/\s+/);
-  if (authHeaderSplit.length !==2 ||  authHeaderSplit[0]!=="Token"){
+  var tokenRegExp = /Token\s+(\w+)/;
+  //var authHeaderSplit = authHeader.split(/\s+/);
+  if (!tokenRegExp.test(authHeader)){
     logger.debug("[access.checkAccess] Bad to token format. Send Unauthorized");
     sendUnauthorized(res);
     return;
   }
 
-  var token = authHeaderSplit[1];
+  var token = /Token\s+(\w+)/.exec(authHeader)[1];
   db.user.getByToken(token, function (err, user) {
     if (err) {
       logger.warn("[access.checkAccess] Error when db.user.getByToken: ", err);
