@@ -79,7 +79,7 @@ describe("User service.", function () {
     });
 
     it("Same passwords should return user", function (done) {
-      sinon.stub(passwordUtil, "isPasswordCorrect", function (password, user) {
+      sinon.stub(passwordUtil, "isPasswordCorrect", function (password, user, salt) {
         passwordUtil.isPasswordCorrect.restore();
         should.exist(user);
         user.email.should.be.eql("user@mail.com");

@@ -12,7 +12,7 @@ describe("Password Util.", function () {
         password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5" //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
       };
 
-      var actual = passwordUtil.isPasswordCorrect("passwordForSha1", user);
+      var actual = passwordUtil.isPasswordCorrect("passwordForSha1", user, "STUB");
       actual.should.be.true();
       done();
     });
@@ -23,7 +23,7 @@ describe("Password Util.", function () {
         password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5" //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
       };
 
-      var actual = passwordUtil.isPasswordCorrect("differentPassword", user);
+      var actual = passwordUtil.isPasswordCorrect("differentPassword", user, "STUB");
       actual.should.be.false();
       done();
     });

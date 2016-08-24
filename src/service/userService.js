@@ -133,7 +133,7 @@ deactivateFirebaseInstanceId (user, callback) {
       }
       if (user) {
         logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
-        if (passwordUtil.isPasswordCorrect(password, user)) {
+        if (passwordUtil.isPasswordCorrect(password, user, config.app.secret)) {
           user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
           user.ip = ip;
           self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
@@ -158,7 +158,7 @@ deactivateFirebaseInstanceId (user, callback) {
         var newUser = {
           authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
           email,
-          password: passwordUtil.generateHashForPassword(email, password),
+          password: passwordUtil.generateHashForPassword(email, password, config.app.secret),
           ip,
           firebaseInstanceIds: []
         };
