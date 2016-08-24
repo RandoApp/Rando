@@ -10,21 +10,23 @@
     "url": "https://github.com/RandoApp/Rando.git"
   },
   "dependencies": {
-    "express": "4.14.0",
     "body-parser": "1.15.2",
-    "multer": "1.1.0",
-    "morgan": "1.7.0",
-    "serve-static": "1.11.1",
+    "config": "1.21.0",
+    "express": "4.14.0",
     "express-redirect": "1.2.2",
-    "mongodb": "2.1.18",
+    "express-status-monitor": "0.0.10",
+    "gm": "1.22.0",
     "js-yaml": "3.6.1",
     "config": "1.21.0",
     "winston": "2.2.0",
     "async": "2.0.1",
+    "morgan": "1.7.0",
+    "multer": "1.1.0",
     "mv": "2.1.1",
-    "gm": "1.22.0",
+    "randoDB": "RandoApp/Rando-db",
     "s3": "4.4.0",
-    "randoDB": "git+https://github.com/RandoApp/Rando-db.git"
+    "serve-static": "1.11.1",
+    "winston": "2.2.0"
   },
   "devDependencies": {
     "mongoose": "4.5.2",
