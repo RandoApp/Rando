@@ -165,12 +165,10 @@ this.updateRando
 ], function (err, rando) {
   if (err) {
     logger.warn("[randoService.saveImage, ", user.email, "] Can't save image, because: ", err);
-    callback(err);
-    return;
+    return callback(err);
   }
-
   logger.debug("[randoService.saveImage, ", user.email, "] save done");
-  callback(null, {rando: rando});
+  return callback(null, rando);
 });
 },
 updateRando: function (user, randoId, imageURL, imageSizeURL, location, callback) {
