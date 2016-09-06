@@ -11,6 +11,31 @@ var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
 var fs = require("fs");
 
+function buildPostImageResponse (rando) {
+  return {
+    //1.0.15+
+    randoId: rando.randoId,
+    //1.0.1+
+    creation: rando.creation,
+    //1.0.1+
+    imageURL: rando.imageURL,
+    //1.0.15+
+    imageSizeURL: {
+      small: rando.imageSizeURL.small,
+      medium: rando.imageSizeURL.medium,
+      large: rando.imageSizeURL.large
+    },
+    //1.0.15+
+    mapURL: null,
+    //1.0.15+
+    mapSizeURL: {
+      small: null,
+      medium: null,
+      large: null
+    }
+  };
+};
+
 module.exports =  {
   saveImage: function (user, imagePath, location, callback) {
     logger.debug("[randoService.saveImage, ", user.email, "] Try save image from: ", imagePath, " for: ", user.email, " location: ", location);
@@ -172,7 +197,8 @@ module.exports =  {
     });
   },
   updateRando: function (user, randoId, imageURL, imageSizeURL, location, callback) {
-    logger.debug("[randoService.updateRando, ", user.email, "] Try update rando for: ", user.email, " location: ", location, " randoId: ", randoId, " url: ", imageURL, " image url: ", imageSizeURL);
+    logger.debug("[randoService.updateRando,", user.email, "] Try update rando for:", user.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
+    var self = this;
     var mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
     var creation = Date.now();
 
@@ -180,13 +206,13 @@ module.exports =  {
       addRando: function (done) {
         var randoParams = {
           email: user.email,
-          location: location,
-          creation: creation,
-          randoId: randoId,
-          imageURL: imageURL,
-          imageSizeURL: imageSizeURL,
+          location,
+          creation,
+          randoId,
+          imageURL,
+          imageSizeURL,
           mapURL: mapSizeURL.large,
-          mapSizeURL: mapSizeURL
+          mapSizeURL
         };
 
         db.rando.add(randoParams, function (err) {
@@ -201,21 +227,13 @@ module.exports =  {
       updateUser: function (done) {
         var newRando = {
           email: user.email,
-          location: location,
-          randoId: randoId,
-          imageURL: imageURL,
-          imageSizeURL: {
-            small: imageSizeURL.small,
-            medium: imageSizeURL.medium,
-            large: imageSizeURL.large 
-          },
+          location,
+          randoId,
+          imageURL,
+          imageSizeURL,
           mapURL: mapSizeURL.large,
-          mapSizeURL: {
-            small: mapSizeURL.small,
-            medium: mapSizeURL.medium,
-            large: mapSizeURL.large 
-          },
-          creation: creation,
+          mapSizeURL,
+          creation,
           delete: 0
         };
         user.out.push(newRando);
@@ -225,13 +243,14 @@ module.exports =  {
         done(null, newRando);
       }
     },
-    function (err, res) {
+    function (err, results) {
       if (err) {
         logger.debug("[randoService.updateRando, ", user.email, "] async parallel get error: ", err);
         callback(err);
         return;
       }
-      callback(null, res.updateUser);
+      var randoForResponse = buildPostImageResponse(results.updateUser);
+      callback(null, randoForResponse);
     });
   }
 };
