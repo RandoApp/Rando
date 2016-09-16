@@ -67,14 +67,14 @@ module.exports = {
     });
     return;
   },
-  buildRandoSync (rando) {
+  buildRandoSync (rando, isUserMap) {
     return {
       creation: rando.creation,
       randoId: rando.randoId,
       imageURL: rando.imageURL,
       imageSizeURL: rando.imageSizeURL,
-      mapURL: rando.mapURL,
-      mapSizeURL: rando.mapSizeURL
+      mapURL: isUserMap ? rando.mapURL : rando.strangerMapURL,
+      mapSizeURL: isUserMap ? rando.mapSizeURL : rando.strangerMapSizeURL
     };
   },
   getUser (user, callback) {
@@ -89,13 +89,13 @@ module.exports = {
     async.parallel({
       buildOut (parallelDone) {
         async.each(user.out, function (rando, done) {
-          userJSON.out.push( self.buildRandoSync(rando) );
+          userJSON.out.push( self.buildRandoSync(rando, false) );
           done();
         }, parallelDone);
       },
       buildIn (parallelDone) {
         async.each(user.in, function (rando, done) {
-          userJSON.in.push( self.buildRandoSync(rando) );
+          userJSON.in.push( self.buildRandoSync(rando, true) );
           done();
         }, parallelDone);
       }
