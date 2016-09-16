@@ -77,16 +77,16 @@ module.exports = {
     };
   },
   buildInRandoSync (rando) {
-    var rando = this.buildRandoWithoutMapSync(rando);
-    rando.mapURL = rando.mapURL;
-    rando.mapSizeURL = util.getSizeableOrEmpty(rando.mapSizeURL);
-    return rando;
+    var cleanRando = this.buildRandoWithoutMapSync(rando);
+    cleanRando.mapURL = rando.mapURL ? rando.mapURL : "";
+    cleanRando.mapSizeURL = util.getSizeableOrEmpty(rando.mapSizeURL);
+    return cleanRando;
   },
   buildOutRandoSync (rando) {
-    var rando = this.buildRandoWithoutMapSync(rando);
-    rando.mapURL = rando.strangerMapURL;
-    rando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapURL);
-    return rando;
+    var cleanRando = this.buildRandoWithoutMapSync(rando);
+    cleanRando.mapURL = rando.strangerMapURL ? rando.strangerMapURL : "";
+    cleanRando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapURL);
+    return cleanRando;
   },
   getUser (user, callback) {
     logger.debug("[userService.getUser, ", user.email, "] Try get user");
