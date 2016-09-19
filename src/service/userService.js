@@ -85,7 +85,7 @@ module.exports = {
   buildOutRandoSync (rando) {
     var cleanRando = this.buildRandoWithoutMapSync(rando);
     cleanRando.mapURL = rando.strangerMapURL ? rando.strangerMapURL : "";
-    cleanRando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapURL);
+    cleanRando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapSizeURL);
     return cleanRando;
   },
   getUser (user, callback) {
