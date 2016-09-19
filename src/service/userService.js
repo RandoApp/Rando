@@ -6,6 +6,7 @@ var crypto = require("crypto");
 var Errors = require("../error/errors");
 var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
+var util = require("../util/util");
 
 module.exports = {
   addOrUpdateFirebaseInstanceId (user, firebaseInstanceId, callback) {
@@ -67,15 +68,25 @@ module.exports = {
     });
     return;
   },
-  buildRandoSync (rando) {
+  buildRandoWithoutMapSync (rando) {
     return {
-      creation: rando.creation,
-      randoId: rando.randoId,
-      imageURL: rando.imageURL,
-      imageSizeURL: rando.imageSizeURL,
-      mapURL: rando.mapURL,
-      mapSizeURL: rando.mapSizeURL
+      creation: rando.creation ? rando.creation : 0,
+      randoId: rando.randoId ? rando.randoId : "",
+      imageURL: rando.imageURL ? rando.imageURL : "",
+      imageSizeURL: util.getSizeableOrEmpty(rando.imageSizeURL)
     };
+  },
+  buildInRandoSync (rando) {
+    var cleanRando = this.buildRandoWithoutMapSync(rando);
+    cleanRando.mapURL = rando.mapURL ? rando.mapURL : "";
+    cleanRando.mapSizeURL = util.getSizeableOrEmpty(rando.mapSizeURL);
+    return cleanRando;
+  },
+  buildOutRandoSync (rando) {
+    var cleanRando = this.buildRandoWithoutMapSync(rando);
+    cleanRando.mapURL = rando.strangerMapURL ? rando.strangerMapURL : "";
+    cleanRando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapSizeURL);
+    return cleanRando;
   },
   getUser (user, callback) {
     logger.debug("[userService.getUser, ", user.email, "] Try get user");
@@ -89,13 +100,13 @@ module.exports = {
     async.parallel({
       buildOut (parallelDone) {
         async.each(user.out, function (rando, done) {
-          userJSON.out.push( self.buildRandoSync(rando) );
+          userJSON.out.push( self.buildOutRandoSync(rando) );
           done();
         }, parallelDone);
       },
       buildIn (parallelDone) {
         async.each(user.in, function (rando, done) {
-          userJSON.in.push( self.buildRandoSync(rando) );
+          userJSON.in.push( self.buildInRandoSync(rando) );
           done();
         }, parallelDone);
       }

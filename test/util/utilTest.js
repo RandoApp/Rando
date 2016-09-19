@@ -55,4 +55,31 @@ describe("Util.", function () {
       });
     });
   });
+
+  describe("getSizeableOrEmpty.", function () {
+    it("Should return good object when arg is ok", function (done) {
+      var actual = util.getSizeableOrEmpty({small: "small", medium: "medium", large: "large"});
+      actual.should.be.eql({small: "small", medium: "medium", large: "large"});
+      done();
+    });
+
+    it("Should return empty object when arg is null", function (done) {
+      var actual = util.getSizeableOrEmpty();
+      actual.should.be.eql({small: "", medium: "", large: ""});
+      done();
+    });
+
+    it("Should return empty object when some sizable properties are empty", function (done) {
+      var actual = util.getSizeableOrEmpty({small: "small", medium: "medium"});
+      actual.should.be.eql({small: "small", medium: "medium", large: ""});
+
+      actual = util.getSizeableOrEmpty({small: "small", large: "large"});
+      actual.should.be.eql({small: "small", medium: "", large: "large"});
+
+      actual = util.getSizeableOrEmpty({medium: "medium", large: "large"});
+      actual.should.be.eql({small: "", medium: "medium", large: "large"});
+      done();
+    });
+  });
+
 });

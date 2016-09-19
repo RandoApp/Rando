@@ -43,6 +43,27 @@ module.exports = {
 
       callback(null, buf.toString("hex"));
     });
+  },
+  getSizeableOrEmpty (sizableObject) {
+    var result = {
+      small: "",
+      medium: "",
+      large: ""
+    };
+
+    if (sizableObject && sizableObject.small) {
+      result.small = sizableObject.small;
+    }
+
+    if (sizableObject && sizableObject.medium) {
+      result.medium = sizableObject.medium;
+    }
+
+    if (sizableObject && sizableObject.large) {
+      result.large = sizableObject.large;
+    }
+
+    return result;
   }
 };
 
