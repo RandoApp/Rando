@@ -291,6 +291,7 @@ module.exports = {
       }).on("end", function (chunk) {
         var json;
         try {
+          logger.debug("[userService.verifyGoogleAndFindOrCreateUser, parsing JSON: ", googleJson);
           json = JSON.parse(googleJson);
         } catch (e) {
           logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Bad JSON: ", e.message);
