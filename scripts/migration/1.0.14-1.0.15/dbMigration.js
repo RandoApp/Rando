@@ -145,8 +145,7 @@ var NewUser = mongoose.model("newUser", new mongoose.Schema({
 
 var userSrv = {
   saveNewUser: function (user, callback) {
-   winston.info("DB.User: Create user: ", user.email);
-
+    winston.info("DB.User: Create user: ", user.email);
     new NewUser(user).save(function (err) {
       if (err) {
         winston.warn("DB.User: Can't create user with email: ", user.email, " because: ", err.message);
@@ -162,59 +161,20 @@ var userSrv = {
     OldUser.findOne({email: email}, callback);
   },
   forAll: function (processor, closer) {
-   var stream = OldUser.find().lean().stream();
-   stream.on('data', function (doc) {
-	stream.pause();
+    var stream = OldUser.find().lean().stream();
+    stream.on('data', function (doc) {
+      stream.pause();
       processor(doc, function () {
-		stream.resume();
-	});
-   }).on('error', function (err) {
+        stream.resume();
+      });
+    }).on('error', function (err) {
       console.log(">>>> error");
-   }).on('close', function () {
+    }).on('close', function () {
       console.log(">>>> close");
       closer();
-   });
+    });
   }
 };
-
-var dbSrv = {
-   connect: function (mongoURL) {
-    mongoose.connect(mongoURL);
-    var db = mongoose.connection;
-
-    db.on("error", function (e) {
-      winston.error("Monodb connection error: " + e);
-    });
-
-    db.on("open", function () {
-      winston.info("Connection to mongodb established");
-    });
-    return db;
-  },
-  disconnect: function () {
-    mongoose.disconnect();
-    winston.info("Connections to mongodb closed");
-  },
-};
-
-dbSrv.connect("mongodb://localhost/rando");
-
-userSrv.forAll(function (oldUser, done) {
-   console.log("user: ", oldUser);
-   newUser = processUser(oldUser);
-   userSrv.saveNewUser(newUser, function (err) {
-      if (err) {
-         console.log("ERROR!!!!!!!: ", err);
-      } else {
-         console.log("User updated")
-      }
-	done();
-   });
-}, function () {
-   var end = Date.now();
-    var timeSpent = (end-start) / 1000;
-    console.log("===> Migration finish at " + new Date(), " Time spent:", timeSpent, "sec");
-});
 
 function processUser (user, callback) {
    var newUser = {
@@ -256,3 +216,23 @@ function processUser (user, callback) {
    return newUser;
 }
 
+module.exports =  {
+  run () {
+    userSrv.forAll(function (oldUser, done) {
+       console.log("user: ", oldUser);
+       newUser = processUser(oldUser);
+       userSrv.saveNewUser(newUser, function (err) {
+          if (err) {
+             console.log("ERROR!!!!!!!: ", err);
+          } else {
+             console.log("User updated")
+          }
+      done();
+       });
+    }, function () {
+       var end = Date.now();
+        var timeSpent = (end-start) / 1000;
+        console.log("===> Migration finish at " + new Date(), " Time spent:", timeSpent, "sec");
+    });
+  }
+}
