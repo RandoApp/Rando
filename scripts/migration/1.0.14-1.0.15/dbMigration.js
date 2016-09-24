@@ -148,10 +148,7 @@ var userSrv = {
       if (err) {
         winston.warn("DB.User: Can't create user with email: ", user.email, " because: ", err.message);
       }
-
-      if (callback) {
-        callback(err);
-      }
+      return callback(err);
     });
   },
   getOldUserByEmail (email, callback) {
@@ -172,7 +169,7 @@ var userSrv = {
       closer();
     });
   },
-  processUser (user, callback) {
+  processUser (user) {
    var newUser = {
       email: user.email,
       authToken: user.authToken,
