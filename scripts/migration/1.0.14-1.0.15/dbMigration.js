@@ -1,5 +1,4 @@
 var mongoose = require("mongoose");
-var async = require("async");
 var winston = require("winston");
 var start = Date.now();
 
