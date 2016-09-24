@@ -1,8 +1,7 @@
 var mongoose = require("mongoose");
 var async = require("async");
 var winston = require("winston");
-var config = require("config");
-var start = Date.now()
+var start = Date.now();
 
 var OldUser = mongoose.model("user", new mongoose.Schema({
     email: {type: String, unique: true, lowercase: true},
@@ -144,7 +143,7 @@ var NewUser = mongoose.model("newUser", new mongoose.Schema({
 }));
 
 var userSrv = {
-  saveNewUser: function (user, callback) {
+  saveNewUser (user, callback) {
     winston.info("DB.User: Create user: ", user.email);
     new NewUser(user).save(function (err) {
       if (err) {
@@ -156,21 +155,21 @@ var userSrv = {
       }
     });
   },
-  getOldUserByEmail: function (email, callback) {
+  getOldUserByEmail (email, callback) {
     winston.info("DB.User: Get by email: ", email);
     OldUser.findOne({email: email}, callback);
   },
-  forAll: function (processor, closer) {
+  forAll (processor, closer) {
     var stream = OldUser.find().lean().stream();
-    stream.on('data', function (doc) {
+    stream.on("data", function (doc) {
       stream.pause();
       processor(doc, function () {
         stream.resume();
       });
-    }).on('error', function (err) {
-      console.log(">>>> error");
-    }).on('close', function () {
-      console.log(">>>> close");
+    }).on("error", function (err) {
+      winston.log(">>>> error");
+    }).on("close", function () {
+      winston.log(">>>> close");
       closer();
     });
   }
@@ -192,8 +191,10 @@ function processUser (user, callback) {
    };
 
    for (var i = 0; i < user.randos.length; i++) {
-      console.log("Process pair[" + i + "/" + user.randos.length + "]:", user.randos[i]);
-      if (!user.randos[i]) continue;
+      winston.log("Process pair[" + i + "/" + user.randos.length + "]:", user.randos[i]);
+      if (!user.randos[i]) {
+        continue;
+      }
 
       var userRando = user.randos[i].user;
       var strangerRando = user.randos[i].stranger;
@@ -219,20 +220,20 @@ function processUser (user, callback) {
 module.exports =  {
   run () {
     userSrv.forAll(function (oldUser, done) {
-       console.log("user: ", oldUser);
-       newUser = processUser(oldUser);
+       winston.log("user: ", oldUser);
+       var newUser = processUser(oldUser);
        userSrv.saveNewUser(newUser, function (err) {
           if (err) {
-             console.log("ERROR!!!!!!!: ", err);
+             winston.log("ERROR!!!!!!!: ", err);
           } else {
-             console.log("User updated")
+             winston.log("User updated");
           }
       done();
        });
     }, function () {
        var end = Date.now();
         var timeSpent = (end-start) / 1000;
-        console.log("===> Migration finish at " + new Date(), " Time spent:", timeSpent, "sec");
+        winston.log("===> Migration finish at " + new Date(), " Time spent:", timeSpent, "sec");
     });
   }
 }
