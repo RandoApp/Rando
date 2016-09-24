@@ -25,6 +25,7 @@ var db = {
 };
 
 db.connect(function () {
-  dbMigration.run();
-  db.disconnect();
+  dbMigration.run(function () {
+    db.disconnect();
+  });
 });

@@ -216,7 +216,7 @@ var userSrv = {
 };
 
 module.exports = {
-  run () {
+  run (callback) {
     userSrv.forAll(function (oldUser, done) {
        winston.log("user: ", oldUser);
        var newUser = userSrv.processUser(oldUser);
@@ -232,6 +232,7 @@ module.exports = {
        var end = Date.now();
         var timeSpent = (end-start) / 1000;
         winston.log("===> Migration finish at " + new Date(), " Time spent:", timeSpent, "sec");
+        callback();
     });
   }
 };
