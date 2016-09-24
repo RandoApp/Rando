@@ -157,7 +157,7 @@ var userSrv = {
   },
   getOldUserByEmail (email, callback) {
     winston.info("DB.User: Get by email: ", email);
-    OldUser.findOne({email: email}, callback);
+    OldUser.findOne({email}, callback);
   },
   forAll (processor, closer) {
     var stream = OldUser.find().lean().stream();
@@ -167,15 +167,13 @@ var userSrv = {
         stream.resume();
       });
     }).on("error", function (err) {
-      winston.log(">>>> error");
+      winston.log(">>>> error: ", err);
     }).on("close", function () {
       winston.log(">>>> close");
       closer();
     });
-  }
-};
-
-function processUser (user, callback) {
+  },
+  processUser (user, callback) {
    var newUser = {
       email: user.email,
       authToken: user.authToken,
@@ -215,13 +213,16 @@ function processUser (user, callback) {
       }
    }
    return newUser;
-}
+  }
+};
+
+function 
 
 module.exports =  {
   run () {
     userSrv.forAll(function (oldUser, done) {
        winston.log("user: ", oldUser);
-       var newUser = processUser(oldUser);
+       var newUser = userSrv.processUser(oldUser);
        userSrv.saveNewUser(newUser, function (err) {
           if (err) {
              winston.log("ERROR!!!!!!!: ", err);
