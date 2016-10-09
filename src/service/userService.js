@@ -100,7 +100,7 @@ module.exports = {
     async.parallel({
       buildOut (parallelDone) {
         async.each(user.out, function (rando, done) {
-          if (!rando.delete === 1){
+          if (!rando.delete || !rando.delete === 1){
             userJSON.out.push( self.buildOutRandoSync(rando) );
           }
           done();
@@ -108,7 +108,7 @@ module.exports = {
       },
       buildIn (parallelDone) {
         async.each(user.in, function (rando, done) {
-          if (!rando.delete === 1){
+          if (!rando.delete || !rando.delete === 1){
             userJSON.in.push( self.buildInRandoSync(rando) );
           }
           done();
