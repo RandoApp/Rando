@@ -19,11 +19,18 @@ if (cluster.isMaster) {
   var tokenConverter = require("./src/util/backwardCompatibility").tokenConverter;
   var config = require("config");
   var logger = require("./src/log/logger");
+  
   var userService = require("./src/service/userService");
   var commentService = require("./src/service/commentService");
   var randoService = require("./src/service/randoService");
   var logService = require("./src/service/logService");
   var statusService = require("./src/service/statusService");
+  var shareService = require("./src/service/shareService");
+  
+  var fireBaseFilter = require("./src/filter/firebaseFilter");
+  var ipFilter = require("./src/filter/ipFilter");
+  var flushUserMetaToDBFilter = require("./src/filter/flushUserMetaToDBFilter");
+
   var Errors = require("./src/error/errors");
   var app = express();
   var upload = multer({ dest: "/tmp/" });
@@ -222,6 +229,29 @@ if (cluster.isMaster) {
 
       logger.data("POST /log DONE");
       res.status(200);
+      res.send(response);
+    });
+  });
+
+  app.get("/s/:randoId", function (req, res) {
+    logger.data("Start process user request. GET /s/", req.params.randoId);
+    shareService.generateHtmlWithRando(req.params.randoId, function (err, html) {
+      res.send(html);
+    });
+  });
+
+  app.post("/share/:randoId", access.byTokenFast, fireBaseFilter.run, ipFilter.run, flushUserMetaToDBFilter.run, function (req, res) {
+    logger.data("Start process user request. POST /share. randoId:", req.params.randoId, "for user:", req.lightUser.email);
+
+    shareService.generateShortLink(req.params.randoId, function (err, response) {
+      if (err) {
+        var response = Errors.toResponse(err);
+        logger.data("GET /share DONE with error: ", response.code);
+        res.status(response.status).send(response);
+        return;
+      }
+
+      logger.data("GET /share DONE");
       res.send(response);
     });
   });

@@ -21,6 +21,7 @@ function updateIp (user, ip) {
   }
 }
 
+//DEPRECATED. Please use checkAccessFast
 function checkAccess (req, res, next) {
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
@@ -68,6 +69,36 @@ function checkAccess (req, res, next) {
   });
 }
 
+function getTokenFromRequestOrSendUnauthorized (req, res) {
+  logger.debug("[access.getTokenFromRequestOrSendUnauthorized] start. Authorization header:", req.headers.authorization);
+  var token = /Token\s+(\w+)/.exec(req.headers.authorization);
+  if (token && token[1]) {
+    return token[1];
+  } else {
+    sendUnauthorized(res);
+  }
+}
+
+function checkAccessFast (req, res, next) {
+  var token = getTokenFromRequestOrSendUnauthorized(req, res);
+
+  db.user.getLightUserByToken(token, function (err, user) {
+    if (err) {
+      logger.warn("[access.checkAccess] Error when db.user.getByToken: ", err);
+      var response = Errors.toResponse(Errors.System(err));
+      res.status(response.status).send(response);
+      return;
+    } else if (!user) {
+      logger.warn("[access.checkAccess] User with token: ", token, " not exists. Send Unauthorized");
+      sendUnauthorized(res);
+      return;
+    }
+
+    req.lightUser = user;
+    next();
+  });
+}
+
 function checkSpam (req, res, next) {
   var user = req.user;
   if (user.ban && Date.now() <= user.ban) {
@@ -106,5 +137,6 @@ function checkSpam (req, res, next) {
 
 module.exports = {
   byToken: checkAccess,
+  byTokenFast: checkAccessFast,
   noSpam: checkSpam
 };
