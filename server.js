@@ -240,22 +240,6 @@ if (cluster.isMaster) {
     });
   });
 
-  app.post("/share/:randoId", access.byTokenFast, fireBaseFilter.run, ipFilter.run, flushUserMetaToDBFilter.run, function (req, res) {
-    logger.data("Start process user request. POST /share. randoId:", req.params.randoId, "for user:", req.lightUser.email);
-
-    shareService.generateShortLink(req.params.randoId, function (err, response) {
-      if (err) {
-        var response = Errors.toResponse(err);
-        logger.data("GET /share DONE with error: ", response.code);
-        res.status(response.status).send(response);
-        return;
-      }
-
-      logger.data("GET /share DONE");
-      res.send(response);
-    });
-  });
-
   app.post("/log", access.byToken, function (req, res) {
     log(req.user, req.body, res);
   });

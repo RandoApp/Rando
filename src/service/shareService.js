@@ -12,18 +12,6 @@ var fs = require("fs");
 var shareRandoHtmlTemplate = fs.readFileSync("static/share.html").toString();
 
 module.exports = {
-  generateShortLink (randoId, callback) {
-    var bitly = new Bitly(config.app.shorter.token);
-    var longUrl = config.app.shorter.longUrl + randoId;
-    logger.debug("[shareService.generateShortLink]", "Sending requst to bitly with long url:", longUrl);
-    bitly.shorten(longUrl, (data) => {
-      logger.info("[shareService.generateShortLink]", "Generated short link:", data.url);
-      callback(null, data.url);
-    }, (err) => {
-      logger.err(err);
-      callback(Errors.BitlyError(err));
-    });
-  }, 
   generateHtmlWithRando (randoId, callback)  {
     db.user.getLightRandoByRandoId(randoId, function (err, data) {
       logger.debug("[shareService.generateHtmlWithRando]", "Start rendering html");
