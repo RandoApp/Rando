@@ -1,4 +1,5 @@
 var db = require("randoDB");
+var config = require("config");
 var logger = require("../log/logger");
 var fs = require("fs");
 
