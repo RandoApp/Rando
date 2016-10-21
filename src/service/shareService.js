@@ -14,9 +14,9 @@ module.exports = {
       if (!err && data && data.out[0]) {
         var rando = data.out[0];
         html = shareRandoHtmlTemplate
-          .replace("{{RANDO_URL}}", rando.imageURL)
-          .replace("{{MAP_URL}}", rando.mapURL)
-          .replace("{{SHARE_LINK}}", config.app.share.url + randoId);
+          .replace(/{{RANDO_URL}}/g, rando.imageURL)
+          .replace(/{{MAP_URL}}/g, rando.mapURL)
+          .replace(/{{SHARE_LINK}}/g, config.app.share.url + randoId);
       } else {
         logger.warn("[shareService.generateHtmlWithRando]", "Cannot render html because rando is empty:", data);
         html = notFoundRandoHtmlTemplate;
