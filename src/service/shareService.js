@@ -14,7 +14,8 @@ module.exports = {
         var rando = data.out[0];
         html = shareRandoHtmlTemplate
           .replace("{{RANDO_URL}}", rando.imageURL)
-          .replace("{{MAP_URL}}", rando.mapURL);
+          .replace("{{MAP_URL}}", rando.mapURL)
+          .replace("{{SHARE_LINK}}", config.app.share.url + randoId);
       } else {
         logger.warn("[shareService.generateHtmlWithRando]", "Cannot render html because rando is empty:", data);
         html = notFoundRandoHtmlTemplate;

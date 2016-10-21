@@ -4,12 +4,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Anti social network. Exchange unique rando photos and moments of life with random strangers all over the world. Experimental photo exchange platform. No likes, no comments. Rando 4Me.">
+  <meta name="description" content="Anti social network. Exchange unique rando photos and moments of life with random strangers all over the world. Experimental photo exchange 
+  platform. No likes, no comments. Rando 4Me.">
+  <meta name="keywords" content="rando,photos,unique,random,stranger,rando4me">
   <meta name="author" content="Rando 4Me">
+
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:title" content="Rando 4Me" />
+  <meta property="twitter:description" content="We have mystical image for you" />
+  <meta property="twitter:image" content="{{RANDO_URL}}" />
+  <meta property="twitter:site" content="@rando4me" />
+  <meta property="twitter:creator" content="@rando4me" />
+  <meta property="twitter:url" content="{{SHARE_LINK}}" />
+
+  <meta http-equiv="imagetoolbar" content="no" /> 
 
   <title>Rando 4Me</title>
 
   <link href="https://rando4.me/site/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Sriracha" rel="stylesheet"> 
 
   <style type="text/css" media="screen">
     #rando, img {
@@ -57,92 +70,14 @@
     .back {
       transform: rotateY(180deg);
     }
-  </style>
 
-
-  <style>
-.char1 {
-    transform: rotate(6deg);
-}
-.char2 {
-    transform: rotate(12deg);
-}
-.char3 {
-    transform: rotate(18deg);
-}
-.char4 {
-    transform: rotate(24deg);
-}
-.char5 {
-    transform: rotate(30deg);
-}
-.char6 {
-    transform: rotate(36deg);
-}
-.char7 {
-    transform: rotate(42deg);
-}
-.char8 {
-    transform: rotate(48deg);
-}
-.char9 {
-    transform: rotate(54deg);
-}
-.char10 {
-    transform: rotate(60deg);
-}
-.char11 {
-    transform: rotate(66deg);
-}
-.char12 {
-    transform: rotate(72deg);
-}
-.char13 {
-    transform: rotate(78deg);
-}
-.char14 {
-    transform: rotate(84deg);
-}
-.char15 {
-    transform: rotate(90deg);
-}
-.char16 {
-    transform: rotate(96deg);
-}
-.char17 {
-    transform: rotate(102deg);
-}
-.char18 {
-    transform: rotate(108deg);
-}
-.char19 {
-    transform: rotate(114deg);
-}
-.char20 {
-    transform: rotate(120deg);
-}
-.char21 {
-    transform: rotate(126deg);
-}
-.char22 {
-    transform: rotate(132deg);
-}
-.char23 {
-    transform: rotate(138deg);
-}
-.char24 {
-    transform: rotate(144deg);
-}
-
-h1 span {
-    font: 26px Monaco,monospace;
-    height: 200px;
-    left: 0;
-    position: absolute;
-    top: 0;
-    transform-origin: center bottom 0;
-    width: 20px;
-}
+    .signature {
+      font-family: 'Sriracha', cursive;
+      position: absolute;
+      right: 0px;
+      bottom: 0px;
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -173,10 +108,12 @@ h1 span {
       <img class="back" src="{{MAP_URL}}"/>
     </div>
     <div class="creation"><h1></h1></div>
+    <div class="signature"><h1>Rando 4Me</h1></div>
   </div>
 
 
   <script src="https://rando4.me/site/js/jquery-1.10.2.js"></script>
+  
   <script src="https://rando4.me/site/js/bootstrap.min.js"></script>
   <script>
     $(document).ready(function () {
@@ -187,6 +124,12 @@ h1 span {
       $("#rando").on("touch", function () {
         $(this).toggleClass("flipped");
       });
+
+      $('img').bind('contextmenu', function(e) {
+        return false;
+      }); 
+
+      // $(".signature h1").circleType({radius: 384, dir:-1});
 
       // var text = $(".creation").text();
       // for (var i = 0; i < text.length; i++) {
