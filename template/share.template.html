@@ -36,8 +36,7 @@
       left: 50%;
       top: 50%;
       margin-left: -240px;
-      margin-top: -240px;
-    }
+      margin-top: -240px;    }
     
     .creation {
       position: absolute;
@@ -78,6 +77,55 @@
       bottom: 0px;
       color: red;
     }
+
+
+    .banner {
+      position: fixed;
+      bottom: 0px;
+      color: #f8f8f8;
+      background-color: #f8f8f8;
+      width: 100%;
+      background-size: cover;
+    }
+
+    .banner h2 {
+      margin: 0;
+      font-size: 2em;
+    }
+
+    .banner ul {
+      margin-bottom: 0;
+    }
+
+    .banner-social-buttons {
+      float: right;
+      margin-top: 0;
+    }
+
+    @media (max-width: 1199px) {
+      ul.banner-social-buttons {
+        float: left;
+        margin-top: 15px;
+      } 
+    }
+
+    @media (max-width: 767px) {
+      .banner h2 {
+        margin: 0;
+        text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
+        font-size: 3em;
+      }
+
+      ul.banner-social-buttons > li {
+        display: block;
+        margin-bottom: 20px;
+        padding: 0;
+      }
+
+      ul.banner-social-buttons > li:last-child {
+        margin-bottom: 0;
+      } 
+    }
   </style>
 </head>
 <body>
@@ -110,6 +158,33 @@
     <div class="creation"><h1></h1></div>
     <div class="signature"><h1>Rando 4Me</h1></div>
   </div>
+
+ <footer class="banner">
+
+    <div id="contact" class="container">
+
+        <div class="row">
+            <div class="col-lg-6">
+                <h2>Connect to Rando 4Me:</h2>
+            </div>
+            <div class="col-lg-6">
+                <ul class="list-inline banner-social-buttons">
+                    <li><a href="https://play.google.com/store/apps/details?id=com.github.randoapp" class="btn btn-lg" target="_blank">
+                        <img alt="Get it on Google Play" src="site/img/en_generic_rgb_wo_45.png" /> </a>
+                    </li>
+                    <li><a href="https://twitter.com/rando4me" class="btn btn-default btn-lg" target="_blank"><i class="fa fa-twitter fa-fw"></i> <span class="network-name">Twitter</span></a>
+                    </li>
+                    <li><a href="https://github.com/RandoApp" class="btn btn-default btn-lg" target="_blank"><i class="fa fa-github fa-fw"></i> <span class="network-name">Github</span></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+</footer>
+<!-- /.banner -->
 
 
   <script src="https://rando4.me/site/js/jquery-1.10.2.js"></script>
