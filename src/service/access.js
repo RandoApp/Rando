@@ -75,7 +75,7 @@ function getTokenFromRequestOrSendUnauthorized (req, res) {
   if (token && token[1]) {
     return token[1];
   } else {
-    sendUnauthorized(res);
+    return sendUnauthorized(res);
   }
 }
 

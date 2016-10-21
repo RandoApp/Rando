@@ -44,16 +44,16 @@ module.exports = {
       }
     });
 
-    downloader.on('error', function(err) {
+    downloader.on("error", function(err) {
       logger.error("[s3Service.download]", "Cannot download, because err:", err);
       callback(err);
     });
 
-    downloader.on('progress', function() {
+    downloader.on("progress", function() {
       logger.trace("[s3Service.download]", "progress of download");
     });
 
-    downloader.on('end', function() {
+    downloader.on("end", function() {
       logger.debug("[s3Service.download]", "Downloaded");
       callback(null, localRandoPath);
     });
@@ -75,7 +75,7 @@ module.exports = {
     return {
       localFile: config.app.static.folder.name + file,
       s3Params: {
-        Bucket: config.s3.bucket.img[size],
+        Bucket: bucket,
         Key: this.getS3FileName(file),
         ContentType: "image/" + this.getImageType(file),
         CacheControl: "public, max-age=" + config.app.cacheControl,

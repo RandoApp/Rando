@@ -138,15 +138,6 @@ module.exports =  {
     }
     return  err;
   },
-  BitlyError: function (err) {
-    err.rando = {
-      status: 500,
-      code: 504,
-      message: "Bitly Server Error",
-      description: "See https://github.com/RandoApp/Rando/wiki/Errors"
-    }
-    return  err;
-  },
   toResponse: function (error) {
     if (error.rando) {
       return error.rando;

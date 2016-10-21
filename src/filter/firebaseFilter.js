@@ -8,10 +8,10 @@ function run (req, res, next) {
 
   userService.addOrUpdateFirebaseInstanceId(req.lightUser, firebaseInstanceId, function (err) {
     if (!err) {
-      next();
+      return next();
     } else {
       var response = Errors.toResponse(Errors.System(err));
-      res.status(response.status).send(response);
+      return res.status(response.status).send(response);
     }
   });
 }

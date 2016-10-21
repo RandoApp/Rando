@@ -27,10 +27,6 @@ if (cluster.isMaster) {
   var statusService = require("./src/service/statusService");
   var shareService = require("./src/service/shareService");
   
-  var fireBaseFilter = require("./src/filter/firebaseFilter");
-  var ipFilter = require("./src/filter/ipFilter");
-  var flushUserMetaToDBFilter = require("./src/filter/flushUserMetaToDBFilter");
-
   var Errors = require("./src/error/errors");
   var app = express();
   var upload = multer({ dest: "/tmp/" });
@@ -236,6 +232,12 @@ if (cluster.isMaster) {
   app.get("/s/:randoId", function (req, res) {
     logger.data("Start process user request. GET /s/", req.params.randoId);
     shareService.generateHtmlWithRando(req.params.randoId, function (err, html) {
+      if (err) {
+        var response = Errors.toResponse(err);
+        logger.data("GET /s/:randoId DONE with error: ", err);
+        res.status(response.status).send(response);
+        return;
+      }
       res.send(html);
     });
   });
