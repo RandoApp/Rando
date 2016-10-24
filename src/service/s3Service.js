@@ -4,7 +4,7 @@ var logger = require("../log/logger");
 var async = require("async");
 var Errors = require("../error/errors");
 
-var clinet = s3.createClient({
+var client = s3.createClient({
   maxAsyncS3: Infinity,
   s3RetryCount: 3,
   s3RetryDelay: 1000,
@@ -15,22 +15,50 @@ var clinet = s3.createClient({
 });
 
 module.exports = {
-  upload: function (files, size, callback) {
-    logger.trace("[s3Service.upload]"); 
-    var self = this;
-    var params = this.buildParams(files, size);
+  upload (files, size, callback) {
+    this.uploadToBucket(files[size], config.s3.bucket.img[size], callback);
+  },
+  uploadToShare (file, callback) {
+    this.uploadToBucket(file, config.s3.bucket.img.large, callback);
+  },
+  uploadToBucket (file, bucket, callback) {
+    logger.trace("[s3Service.uploadToBucket]"); 
+    var params = this.buildParams(file, bucket);
     logger.trace("[s3Service.upload]", " Params generated: ", params); 
-    var uploader = clinet.uploadFile(params);
+    var uploader = client.uploadFile(params);
     this.processUploader(uploader, function (err) {
       if (err) {
-        callback(Errors.System(err));
-        return;
+        return callback(Errors.System(err));
       }
       var url = s3.getPublicUrlHttp(params.s3Params.Bucket, params.s3Params.Key, true);
-      callback(null, url);
+      return callback(null, url);
     });
   },
-  processUploader: function (uploader, callback) {
+  download (path, callback) {
+    var localRandoPath = config.app.shorter.folder + path;
+    var downloader = client.downloadFile({
+      localFile: localRandoPath,
+      s3Params: {
+        Bucket: config.s3.bucket.img.large,
+        Key: path
+      }
+    });
+
+    downloader.on("error", function(err) {
+      logger.error("[s3Service.download]", "Cannot download, because err:", err);
+      callback(err);
+    });
+
+    downloader.on("progress", function() {
+      logger.trace("[s3Service.download]", "progress of download");
+    });
+
+    downloader.on("end", function() {
+      logger.debug("[s3Service.download]", "Downloaded");
+      callback(null, localRandoPath);
+    });
+  },
+  processUploader (uploader, callback) {
     logger.trace("[s3Service.processUploader]"); 
     uploader.on("progress", function () {
       logger.debug("[s3Service.upload.progress] amount: ", uploader.progressAmount, " total: ", uploader.progressTotal); 
@@ -42,25 +70,37 @@ module.exports = {
       callback(Errors.System(err));
     });
   },
-  buildParams: function (files, size) {
+  buildParams (file, bucket) {
     logger.trace("[s3Service.buildParams]"); 
     return {
-      localFile: config.app.static.folder.name + files[size],
+      localFile: config.app.static.folder.name + file,
       s3Params: {
-        Bucket: config.s3.bucket.img[size],
-        Key: this.getS3FileName(files[size]),
-        ContentType: "image/jpg",
+        Bucket: bucket,
+        Key: this.getS3FileName(file),
+        ContentType: "image/" + this.getImageType(file),
         CacheControl: "public, max-age=" + config.app.cacheControl,
         ACL: "public-read",
         StorageClass: "STANDARD"
       }
     };
   },
-  getS3FileName: function (file) {
-    var s3File = /[\w\d]+\.jpg$/.exec(file);
-    if (Array.isArray(s3File)) {
-      return s3File[0];
+  getImageType (file) {
+    return this.getImageParams(file).type;
+  },
+  getS3FileName (file) {
+    return this.getImageParams(file).name;
+  },
+  getImageParams (file) {
+    var fileNameAndType = {
+      name: "",
+      type: ""
+    };
+
+    var fileParams = /[\w\d]+\.(jpg|png|gif)$/.exec(file);
+    if (Array.isArray(fileParams) && fileParams[0] && fileParams[1]) {
+      fileNameAndType.name = fileParams[0];
+      fileNameAndType.type = fileParams[1];
     }
-    return s3File;
+    return fileNameAndType;
   }
 };

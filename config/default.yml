@@ -56,6 +56,8 @@ app:
     monitor:
         title: Rando 4Me server status
         url: /monitor
+    share:
+        url: https://rando4.me/s/
 db:
     url: mongodb://localhost/rando
     name: rando
@@ -65,6 +67,8 @@ s3:
     key: AccessKeyIdSTUB
     secret: SecretAccessKeySTUB
     bucket:
+        share:
+            large: share.l.rnd4.me
         img:
             small: img.s.rando4me
             medium: img.m.rando4me

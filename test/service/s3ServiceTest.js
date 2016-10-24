@@ -19,7 +19,7 @@ describe("S3 service.", function () {
 
     it("S3 file name should be just filename and extension", function (done) {
       var s3FileName = s3Service.getS3FileName("not a jpg file");
-      should.not.exist(s3FileName);
+      s3FileName.should.be.empty();
       done();
     });
   });

@@ -19,11 +19,14 @@ if (cluster.isMaster) {
   var tokenConverter = require("./src/util/backwardCompatibility").tokenConverter;
   var config = require("config");
   var logger = require("./src/log/logger");
+  
   var userService = require("./src/service/userService");
   var commentService = require("./src/service/commentService");
   var randoService = require("./src/service/randoService");
   var logService = require("./src/service/logService");
   var statusService = require("./src/service/statusService");
+  var shareService = require("./src/service/shareService");
+  
   var Errors = require("./src/error/errors");
   var app = express();
   var upload = multer({ dest: "/tmp/" });
@@ -223,6 +226,19 @@ if (cluster.isMaster) {
       logger.data("POST /log DONE");
       res.status(200);
       res.send(response);
+    });
+  });
+
+  app.get("/s/:randoId", function (req, res) {
+    logger.data("Start process user request. GET /s/", req.params.randoId);
+    shareService.generateHtmlWithRando(req.params.randoId, function (err, html) {
+      if (err) {
+        var response = Errors.toResponse(err);
+        logger.data("GET /s/:randoId DONE with error: ", err);
+        res.status(response.status).send(response);
+        return;
+      }
+      res.send(html);
     });
   });
 

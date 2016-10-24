@@ -26,19 +26,26 @@ module.exports = {
     async.detect(user.firebaseInstanceIds, (instanceIdTest, done) => {
       done(null, instanceIdTest.instanceId === firebaseInstanceId);
     }, (err, instanceIdFound) => {
-      if (err){
-        logger.log(err);
-        return callback(new Error("err finding instanceId"));
+      if (err) {
+        logger.log("[userService.addOrUpdateFirebaseInstanceId]", err);
+        return callback(Errors.System(err));
       }
-      if(instanceIdFound){
-        logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Activating firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+
+      if (instanceIdFound) {
+        logger.debug("[userService.addOrUpdateFirebaseInstanceId]", "Activating firebaseInstanceId:", firebaseInstanceId, "for user:", user.email);
         instanceIdFound.lastUsedDate = Date.now();
         instanceIdFound.active = true;
       } else {
-        user.firebaseInstanceIds.push( { instanceId: firebaseInstanceId, active: true, createdDate: Date.now(), lastUsedDate: Date.now() } );
-        logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Adding new firebaseInstanceId: ", firebaseInstanceId, " for user: ", user.email);
+        logger.debug("[userService.addOrUpdateFirebaseInstanceId] ","Adding new firebaseInstanceId:", firebaseInstanceId, " for user:", user.email);
+        var now = Date.now();
+        user.firebaseInstanceIds.push({
+          instanceId: firebaseInstanceId,
+          active: true,
+          createdDate: now,
+          lastUsedDate: now
+        });
       }
-        return callback(null, user);
+      return callback(null, user);
     });
   },
   deactivateFirebaseInstanceId (user, callback) {
