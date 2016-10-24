@@ -167,7 +167,7 @@
             <img class="back" src="{{MAP_URL}}"/>
           </div>
           <div class="creation"><h1></h1></div>
-          <div class="signature"><h1>Rando 4Me</h1></div>
+          <div class="signature"><h1></h1></div>
         </div>
       </div>
     </div>
@@ -217,7 +217,7 @@
 
       var freeSize = $(window).width() < $(window).height() ? $(window).width() : $(window).height();
       freeSize = freeSize - 60;
-      var ratio = 0.7;
+      var ratio = 0.75;
       var randoSize = freeSize * ratio;
 
       $("#rando").width(randoSize);
@@ -231,13 +231,6 @@
       });
 
       $(".content").height($(window).height() - 70);
-
-      // $(".signature h1").circleType({radius: 384, dir:-1});
-
-      // var text = $(".creation").text();
-      // for (var i = 0; i < text.length; i++) {
-      //   $(".creation h1").append('<span style="transform: rotate(' + i*30 + 'deg);">' + text[i] +'</span>');
-      // }
     });
   </script>
 
