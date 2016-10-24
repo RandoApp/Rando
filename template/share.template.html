@@ -80,8 +80,6 @@
 
 
     .banner {
-      position: fixed;
-      bottom: 0px;
       color: #f8f8f8;
       background-color: #f8f8f8;
       width: 100%;
@@ -159,13 +157,20 @@
     </div>
   </nav>
 
-  <div id="rando" class="flip-container">
-    <div class="flipper">
-      <img class="front" src="{{RANDO_URL}}"/>
-      <img class="back" src="{{MAP_URL}}"/>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="content"></div>
+        <div id="rando" class="flip-container">
+          <div class="flipper">
+            <img class="front" src="{{RANDO_URL}}"/>
+            <img class="back" src="{{MAP_URL}}"/>
+          </div>
+          <div class="creation"><h1></h1></div>
+          <div class="signature"><h1>Rando 4Me</h1></div>
+        </div>
+      </div>
     </div>
-    <div class="creation"><h1></h1></div>
-    <div class="signature"><h1>Rando 4Me</h1></div>
   </div>
 
  <footer class="banner">
@@ -225,6 +230,7 @@
         top: $(window).height() / 2 - randoSize / 2
       });
 
+      $(".content").height($(window).height() - 70);
 
       // $(".signature h1").circleType({radius: 384, dir:-1});
 
