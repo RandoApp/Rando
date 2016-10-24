@@ -208,7 +208,23 @@
 
       $('img').bind('contextmenu', function(e) {
         return false;
-      }); 
+      });
+
+      var freeSize = $(window).width() < $(window).height() ? $(window).width() : $(window).height();
+      freeSize = freeSize - 60;
+      var ratio = 0.7;
+      var randoSize = freeSize * ratio;
+
+      $("#rando").width(randoSize);
+      $("#rando").height(randoSize);
+      $("#rando img").width(randoSize);
+      $("#rando img").height(randoSize);
+
+      $("#rando").offset({
+        left: $(window).width() / 2 - randoSize / 2,
+        top: $(window).height() / 2 - randoSize / 2
+      });
+
 
       // $(".signature h1").circleType({radius: 384, dir:-1});
 
