@@ -26,7 +26,7 @@ module.exports =  {
     });
   },
   drawRando (originalRandoPath, drawedRandoPath, callback) {
-    gm(originalRandoPath).composite(config.app.shorter.maskPath).write(drawedRandoPath, function (err) {
+    gm(originalRandoPath).composite(config.scripts.maskPath).write(drawedRandoPath, function (err) {
       if (err) {
         logger.error("[imageService.drawRando] gm.drawRando.write done with error: ", err);
         callback(err);
