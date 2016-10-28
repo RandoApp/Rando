@@ -192,7 +192,7 @@ if (cluster.isMaster) {
   });
 
   function logout(req, res) {
-    userService.destroyAuthToken(req.user, function (err, response) {
+    userService.destroyAuthToken(req.lightUser.email, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         logger.data("POST /logout DONE with error: ", response.code);
@@ -205,7 +205,7 @@ if (cluster.isMaster) {
     });
   };
 
-  app.post("/logout", access.byToken, function (req, res) {
+  app.post("/logout", access.byTokenFast, function (req, res) {
     logout(req, res);
   });
 

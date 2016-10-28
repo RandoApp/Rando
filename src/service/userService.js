@@ -48,32 +48,21 @@ module.exports = {
       return callback(null, user);
     });
   },
-  deactivateFirebaseInstanceId (user, callback) {
-    if (!user) {
-      return callback("user should be present", user);
-    }
-
-    if (!user.firebaseInstanceIds) {
-      user.firebaseInstanceIds = [];
-    }
-    async.each(user.firebaseInstanceIds, (instanceId, done) => {
-      instanceId.active = false;
-      done();
-    }, (err) => {
-      return callback(err, user);
-    });
-  },
-  destroyAuthToken (user, callback) {
-    user.authToken = "";
-    this.deactivateFirebaseInstanceId(user, function (err, user) {
+  destroyAuthToken (email, callback) {
+    async.parallel([
+      function (done) {
+        db.user.updateUserMetaByEmail(email, {authToken: ""}, done)
+      },
+      function (done) {
+        db.user.updateActiveForAllFirabaseIdsByEmail(email, false, done);
+      }
+    ], function (err) {
       if (err) {
-        logger.info("[userService.destroyAuthToken, ", user.email, "] error deactivating firebaseInstanceIds");
+        logger.info("[userService.destroyAuthToken, ", email, "] error deactivating firebaseInstanceIds");
         return callback(Errors.System(err));
       }
-      db.user.update(user);
       return callback(null, {command: "logout", result: "done"});
     });
-    return;
   },
   buildRandoWithoutMapSync (rando) {
     return {
