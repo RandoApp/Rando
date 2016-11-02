@@ -51,7 +51,7 @@ module.exports = {
   destroyAuthToken (email, callback) {
     async.parallel([
       function (done) {
-        db.user.updateUserMetaByEmail(email, {authToken: ""}, done)
+        db.user.updateUserMetaByEmail(email, {authToken: ""}, done);
       },
       function (done) {
         db.user.updateActiveForAllFirabaseIdsByEmail(email, false, done);
