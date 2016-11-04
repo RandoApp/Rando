@@ -77,10 +77,10 @@ if (cluster.isMaster) {
     });
   };
 
-  app.post("/delete/:randoId", access.byToken, function (req, res) {
-    logger.data("Start process user request. POST /delete. Id:", req.params.id ," for user: ", req.user);
+  app.post("/delete/:randoId", access.byTokenFast, function (req, res) {
+    logger.data("Start process user request. POST /delete. Id:", req.params.randoId ," for user: ", req.lightUser.email);
 
-    commentService.delete(req.user, req.params.randoId, function (err, response) {
+    commentService.delete(req.lightUser, req.params.randoId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         logger.data("POST /delete DONE with error: ", response.code);
@@ -301,7 +301,7 @@ if (cluster.isMaster) {
     //=========================================================================================================
 
     app.listen(config.app.port, /*config.app.host,*/ function () {
-      logger.info("Express server listening on port " + config.app.port + " and host: " + config.app.host);
+      logger.info("Express server: http://" + config.app.host + ":" + config.app.port);
     });
 
   }
