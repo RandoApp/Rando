@@ -11,7 +11,8 @@ var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
 var fs = require("fs");
 
-function buildPostImageResponse (rando) {
+function buildPostImageResponseSync (rando) {
+  logger.trace("[randoService.buildPostImageResponseSync] rando:", rando);
   return {
     //1.0.15+
     randoId: rando.randoId,
@@ -37,37 +38,35 @@ function buildPostImageResponse (rando) {
 };
 
 module.exports =  {
-  saveImage: function (user, imagePath, location, callback) {
-    logger.debug("[randoService.saveImage, ", user.email, "] Try save image from: ", imagePath, " for: ", user.email, " location: ", location);
+  saveImage: function (lightUser, imagePath, location, callback) {
+    logger.debug("[randoService.saveImage, ", lightUser.email, "] Try save image from: ", imagePath, " for: ", lightUser.email, " location: ", location);
 
     async.waterfall([
-      function (done) {
+      function checkArgs (done) {
         if (!imagePath || !location) {
-          logger.warn("[randoService.saveImage, ", user.email, "] Incorect args. user: ", user.email, "; imagePath: ", imagePath, "; location: " , location);
-          done(Errors.IncorrectArgs());
-          return;
+          logger.warn("[randoService.saveImage, ", lightUser.email, "] Incorect args. user: ", lightUser.email, "; imagePath: ", imagePath, "; location: " , location);
+          return done(Errors.IncorrectArgs());
         }
-        logger.debug("[randoService.saveImage, ", user.email, "] args validation done");
-        done();
+        logger.debug("[randoService.saveImage, ", lightUser.email, "] args validation done");
+        return done();
       },
-      function (done) {
+      function generateImageName (done) {
         util.generateImageName(done);
       },
-      function (randoId, imagePaths, done) {
+      function prepareUploadedImage (randoId, imagePaths, done) {
         var newRandoPath = config.app.static.folder.name + imagePaths.origin;
-        logger.data("[randoService.saveImage, ", user.email, "] move: ", imagePath, " --> ", newRandoPath);
+        logger.data("[randoService.saveImage, ", lightUser.email, "] move: ", imagePath, " --> ", newRandoPath);
         mv(imagePath, newRandoPath, {mkdirp: true}, function (err) {
           if (err) {
-            logger.warn("[randoService.saveImage, ", user.email, "] Can't move  ", imagePath, " to ", newRandoPath, " because: ", err);
-            done(Errors.System(err));
-            return;
+            logger.warn("[randoService.saveImage, ", lightUser.email, "] Can't move  ", imagePath, " to ", newRandoPath, " because: ", err);
+            return done(Errors.System(err));
           }
 
-          done(null, newRandoPath, imagePaths, user, randoId, location);
+          return done(null, newRandoPath, imagePaths, lightUser, randoId, location);
         });
       },
-      function (imagePath, imagePaths, user, randoId, location, done) {
-        logger.data("[randoService.saveImage, ", user.email, "] Try resize images to small, medium and large sizes");
+      function convertToSizes (imagePath, imagePaths, lightUser, randoId, location, done) {
+        logger.data("[randoService.saveImage, ", lightUser.email, "] Try resize images to small, medium and large sizes");
 
         async.parallel({
           small: function (parallelCallback) {
@@ -81,176 +80,151 @@ module.exports =  {
           }
         }, function (err) {
           if (err) {
-            logger.error("[randoService.saveImage, ", user.email, "] Can not resize images because: ", err);
-            done(err);
-            return;
+            logger.error("[randoService.saveImage, ", lightUser.email, "] Can not resize images because: ", err);
+            return done(err);
           }
-          logger.debug("[randoService.saveImage, ", user.email, "] All images resized successfully. Go to next step");
-          done(null, imagePaths, user, randoId, location);
+
+          logger.debug("[randoService.saveImage, ", lightUser.email, "] All images resized successfully. Go to next step");
+          return done(null, imagePaths, lightUser, randoId, location);
         });
       },
-      function (imagePaths, user, randoId, location, done) {
+      function uploadToS3 (imagePaths, lightUser, randoId, location, done) {
           var imageSizeURL = {}; //will be filled after each size upload to S3
 
           async.parallel({
             uploadSmall: function (parallelCallback) {
               s3Service.upload(imagePaths, "small", function (err, url) {
                 if (err) {
-                  parallelCallback(err);
-                  return;
+                  return parallelCallback(err);
                 }
                 imageSizeURL.small = url;
-                parallelCallback();
+                return parallelCallback();
               });
             },
             uploadMedium: function (parallelCallback) {
               s3Service.upload(imagePaths, "medium", function (err, url) {
                 if (err) {
-                  parallelCallback(err);
-                  return;
+                  return parallelCallback(err);
                 }
                 imageSizeURL.medium = url;
-                parallelCallback();
+                return parallelCallback();
               });
             },
             uploadLarge: function (parallelCallback) {
               s3Service.upload(imagePaths, "large", function (err, url) {
                 if (err) {
-                  parallelCallback(err);
-                  return;
+                  return parallelCallback(err);
                 }
                 imageSizeURL.large = url;
-                parallelCallback();
+                return parallelCallback();
               });
             }
           }, function (err) {
             if (err) {
-              logger.error("[randoService.saveImage, ", user.email, "] Can not upload image to S3, because: ", err);
-              done(err);
-              return;
+              logger.error("[randoService.saveImage, ", lightUser.email, "] Can not upload image to S3, because: ", err);
+              return done(err);
             }
-            logger.debug("[randoService.saveImage, ", user.email, "] All images uploaded to S3 successfully. Go to next step");
-            done(null, imagePaths, user, randoId, imageSizeURL.large, imageSizeURL, location);
+
+            logger.debug("[randoService.saveImage, ", lightUser.email, "] All images uploaded to S3 successfully. Go to next step");
+            return done(null, imagePaths, lightUser, randoId, imageSizeURL.large, imageSizeURL, location);
           });
       },
-      function (imagePaths, user, randoId, imageURL, imageSizeURL, location, done) {
+      function rmImages (imagePaths, lightUser, randoId, imageURL, imageSizeURL, location, done) {
         async.parallel({
           rmOrigin: function (parallelCallback) {
             var originFile = config.app.static.folder.name + imagePaths.origin;
             fs.unlink(originFile, function (err) {
               if (err) {
-                parallelCallback(err);
-                return;
+                return parallelCallback(err);
               }
-              parallelCallback();
+              return parallelCallback();
             });
           },
           rmSmall: function (parallelCallback) {
             var smallFile = config.app.static.folder.name + imagePaths.small;
             fs.unlink(smallFile, function (err) {
               if (err) {
-                parallelCallback(err);
-                return;
+                return parallelCallback(err);
               }
-              parallelCallback();
+              return parallelCallback();
             });
           },
           rmMedium: function (parallelCallback) {
             var mediumFile = config.app.static.folder.name + imagePaths.medium;
             fs.unlink(mediumFile, function (err) {
               if (err) {
-                parallelCallback(err);
-                return;
+                return parallelCallback(err);
               }
-              parallelCallback();
+              return parallelCallback();
             });
           },
           rmLarge: function (parallelCallback) {
             var largeFile = config.app.static.folder.name + imagePaths.large;
             fs.unlink(largeFile, function (err) {
               if (err) {
-                parallelCallback(err);
-                return;
+                return parallelCallback(err);
               }
-              parallelCallback();
+              return parallelCallback();
             });
           }
         }, function (err) {
           if (err) {
-            logger.error("[randoService.saveImage, ", user.email, "] Can not remove image from fs, because: ", err);
-            done(err);
-            return;
+            logger.error("[randoService.saveImage, ", lightUser.email, "] Can not remove image from fs, because: ", err);
+            return done(err);
           };
 
-          logger.debug("[randoService.saveImage, ", user.email, "] All tmp images deleted from fs. Go to next step");
-          done(null, user, randoId, imageURL, imageSizeURL, location);
+          logger.debug("[randoService.saveImage, ", lightUser.email, "] All tmp images deleted from fs. Go to next step");
+          return done(null, lightUser, randoId, imageURL, imageSizeURL, location);
         });
       },
-      this.updateRando
+      function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, callback) {
+        logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for:", lightUser.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
+        var self = this;
+        var mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
+
+        var newRando = {
+          email: lightUser.email,
+          creation: Date.now(),
+          randoId,
+          imageURL,
+          mapURL: mapSizeURL.large,
+          location,
+          imageSizeURL,
+          mapSizeURL,
+          ip: lightUser.ip,
+          delete: 0
+        };
+
+        async.parallel({
+          addRandoToDBBucket: function (done) {
+            logger.trace("[randoService.updateRandoInDB.addRandoToDBBucket,", lightUser.email, "]");
+            db.rando.add(newRando, done);
+          },
+          addRandoToUserOut: function (done) {
+            logger.trace("[randoService.updateRandoInDB.addRandoToUserOut,", lightUser.email, "]");
+            db.user.addRandoToUserOutByEmail(lightUser.email, newRando, done);
+          }
+        }, function (err) {
+          if (err) {
+            logger.debug("[randoService.updateRandoInDB, ", lightUser.email, "] async parallel get error:", err);
+            return callback(Errors.System(err));
+          }
+          return callback(null, newRando);
+        });
+      },
+      function buildRando (err, rando, done) {
+        logger.trace("[randoService.buildRando,", lightUser.email, "]");
+        var randoForResponse = buildPostImageResponseSync(rando);
+        return done(null, randoForResponse);
+      }
     ], function (err, rando) {
       if (err) {
-        logger.warn("[randoService.saveImage, ", user.email, "] Can't save image, because: ", err);
+        logger.warn("[randoService.saveImage, ", lightUser.email, "] Can't save image, because: ", err);
         return callback(err);
       }
-      logger.debug("[randoService.saveImage, ", user.email, "] save done");
+      logger.debug("[randoService.saveImage, ", lightUser.email, "] save done");
       return callback(null, rando);
     });
   },
-  updateRando: function (user, randoId, imageURL, imageSizeURL, location, callback) {
-    logger.debug("[randoService.updateRando,", user.email, "] Try update rando for:", user.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
-    var self = this;
-    var mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
-    var creation = Date.now();
 
-    async.parallel({
-      addRando: function (done) {
-        var randoParams = {
-          email: user.email,
-          location,
-          creation,
-          randoId,
-          imageURL,
-          imageSizeURL,
-          mapURL: mapSizeURL.large,
-          mapSizeURL
-        };
-
-        db.rando.add(randoParams, function (err) {
-          if (err) {
-            logger.warn("[randoService.updateRando.addRando, ", user.email, "] Can't add rando because: ", err);
-            done(Errors.System(err));
-            return;
-          }
-          done();
-        });
-      },
-      updateUser: function (done) {
-        var newRando = {
-          email: user.email,
-          location,
-          randoId,
-          imageURL,
-          imageSizeURL,
-          mapURL: mapSizeURL.large,
-          mapSizeURL,
-          creation,
-          delete: 0
-        };
-        user.out.push(newRando);
-
-        logger.data("[randoService.updateRando.updateUser, ", user.email, "] Try update user");
-        db.user.update(user);
-        done(null, newRando);
-      }
-    },
-    function (err, results) {
-      if (err) {
-        logger.debug("[randoService.updateRando, ", user.email, "] async parallel get error: ", err);
-        callback(err);
-        return;
-      }
-      var randoForResponse = buildPostImageResponse(results.updateUser);
-      callback(null, randoForResponse);
-    });
-  }
 };

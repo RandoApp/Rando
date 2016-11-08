@@ -64,6 +64,16 @@ module.exports = {
     }
 
     return result;
+  },
+  getTokenFromRequest (req) {
+    logger.debug("[until.getTokenFromRequest]. Authorization header:", req.headers.authorization);
+
+    var token = /Token\s+(\w+)/.exec(req.headers.authorization);
+    if (token && token[1]) {
+      return token[1];
+    }
+
+    return null;
   }
 };
 

@@ -9,6 +9,7 @@ var passwordUtil = require("../util/password");
 var util = require("../util/util");
 
 module.exports = {
+  //Deprecated. See firebaseService
   addOrUpdateFirebaseInstanceId (user, firebaseInstanceId, callback) {
     if (!user) {
       return callback("user should be present", user);
@@ -50,10 +51,10 @@ module.exports = {
   },
   destroyAuthToken (email, callback) {
     async.parallel([
-      function (done) {
+      function destroyAuthToken (done) {
         db.user.updateUserMetaByEmail(email, {authToken: ""}, done);
       },
-      function (done) {
+      function destroyFirebaseIds (done) {
         db.user.updateActiveForAllFirabaseIdsByEmail(email, false, done);
       }
     ], function (err) {

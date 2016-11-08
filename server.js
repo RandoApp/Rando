@@ -26,6 +26,15 @@ if (cluster.isMaster) {
   var logService = require("./src/service/logService");
   var statusService = require("./src/service/statusService");
   var shareService = require("./src/service/shareService");
+
+  var accessByTokenFilter = require("./src/filter/accessByTokenFilter");
+  var ipFilter = require("./src/filter/ipFilter");
+  var fireBaseFilter = require("./src/filter/firebaseFilter");
+  var blockBannedFilter = require("./src/filter/blockBannedFilter");
+  var flushUserMetaToDBFilter = require("./src/filter/flushUserMetaToDBFilter");
+  var noSpamFilter = require("./src/filter/noSpamFilter");
+
+  var baseFilters = [accessByTokenFilter.run, ipFilter.run, fireBaseFilter.run, blockBannedFilter.run, flushUserMetaToDBFilter.run];
   
   var Errors = require("./src/error/errors");
   var app = express();
@@ -59,33 +68,31 @@ if (cluster.isMaster) {
     });
   });
 
-  app.post("/image", access.byToken, access.noSpam, upload.single("image") , function (req, res) {
-    postImage(req.user, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
-  });
-
-  function postImage(user, filePath, location, res) {
-    randoService.saveImage(user, filePath, location, function (err, response) {
+  function postImage(lightUser, filePath, location, res) {
+    randoService.saveImage(lightUser, filePath, location, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         logger.data("POST /image DONE with error: ", response.code);
-        res.status(response.status).send(response);
-        return;
+        return res.status(response.status).send(response);
       }
 
       logger.data("POST /image DONE");
-      res.status(200).send(response);
+      return res.status(200).send(response);
     });
   };
 
-  app.post("/delete/:randoId", access.byTokenFast, function (req, res) {
-    logger.data("Start process user request. POST /delete. Id:", req.params.randoId ," for user: ", req.lightUser.email);
+  app.post("/image", baseFilters, noSpamFilter.run, upload.single("image") , function (req, res) {
+    postImage(req.lightUser, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
+  });
+
+  app.post("/delete/:randoId", baseFilters, function (req, res) {
+    logger.data("Start process user request. POST /delete. Id:", req.params.randoId , "for user:", req.lightUser.email);
 
     commentService.delete(req.lightUser, req.params.randoId, function (err, response) {
       if (err) {
         var response = Errors.toResponse(err);
         logger.data("POST /delete DONE with error: ", response.code);
-        res.status(response.status).send(response);
-        return;
+        return res.status(response.status).send(response);
       }
 
       logger.data("POST /delete DONE");
@@ -112,10 +119,6 @@ if (cluster.isMaster) {
     });
   });
 
-  app.get("/user", access.byToken, function (req, res) {
-    getUser(req, res);
-  });
-
   function getUser(req, res) {
     logger.data("Start process user request. GET /user. for: ", req.user.email);
     userService.getUser(req.user, function (err, user) {
@@ -130,6 +133,10 @@ if (cluster.isMaster) {
       res.send(user);
     });
   };
+
+  app.get("/user", access.byToken, function (req, res) {
+    getUser(req, res);
+  });
 
   app.post("/anonymous", function (req, res) {
     logger.data("Start process user request. POST /anonymous. id: ", req.body.id);
@@ -196,38 +203,18 @@ if (cluster.isMaster) {
       if (err) {
         var response = Errors.toResponse(err);
         logger.data("POST /logout DONE with error: ", response.code);
-        res.status(response.status).send(response);
-        return;
+        return res.status(response.status).send(response);
       }
 
       logger.data("POST /logout DONE");
-      res.status(200).send(response);
+      return res.status(200).send(response);
     });
   };
 
-  app.post("/logout", access.byTokenFast, function (req, res) {
+  app.post("/logout", accessByTokenFilter.run, ipFilter.run, flushUserMetaToDBFilter.run, function (req, res) {
     logout(req, res);
   });
 
-  app.post("/log", function (req, res) {
-    logger.data("Start process user request. POST /log. Token: ", req.params.token);
-    var email = "anonymous";
-    var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-
-    logService.storeLog(email, req.body, function (err, response) {
-      if (err) {
-        var response = Errors.toResponse(err);
-        res.status(response.status);
-        logger.data("POST /log DONE with error: ", response.code);
-        res.send(response);
-        return;
-      }
-
-      logger.data("POST /log DONE");
-      res.status(200);
-      res.send(response);
-    });
-  });
 
   app.get("/s/:randoId", function (req, res) {
     logger.data("Start process user request. GET /s/", req.params.randoId);
@@ -242,30 +229,50 @@ if (cluster.isMaster) {
     });
   });
 
-  app.post("/log", access.byToken, function (req, res) {
-    log(req.user, req.body, res);
-  });
+  //----------Delete this deprecation section, when all users will upgrade to up than 1.0.16 version----------
 
-  function log (user, reqBody, res) {
-    var email = "anonymous";
-    if (user) {
-      email = user.email;
-    }
+    //@deprecated
+    app.post("/log", function (req, res) {
+      logger.warn("DEPRECATED API CALL: POST /log");
+      
+      logger.data("Start process user request. POST /log. Token: ", req.params.token);
+      var email = "anonymous";
+      var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    logService.storeLog(email, reqBody, function (err, response) {
-      if (err) {
-        var response = Errors.toResponse(err);
-        logger.data("POST /log DONE with error: ", response.code);
-        res.status(response.status).send(response);
-        return;
+      logService.storeLog(email, req.body, function (err, response) {
+        if (err) {
+          var response = Errors.toResponse(err);
+          res.status(response.status);
+          logger.data("POST /log DONE with error: ", response.code);
+          res.send(response);
+          return;
+        }
+
+        logger.data("POST /log DONE");
+        res.status(200);
+        res.send(response);
+      });
+    });
+
+    function log (user, reqBody, res) {
+      var email = "anonymous";
+      if (user) {
+        email = user.email;
       }
 
-      logger.data("POST /log DONE");
-      res.status(200).send(response);
-    });
-  };
+      logService.storeLog(email, reqBody, function (err, response) {
+        if (err) {
+          var response = Errors.toResponse(err);
+          logger.data("POST /log DONE with error: ", response.code);
+          res.status(response.status).send(response);
+          return;
+        }
 
-  
+        logger.data("POST /log DONE");
+        res.status(200).send(response);
+      });
+    };
+
     //----------Delete this deprecation section, when all users will upgrade to up than 1.0.14 version----------
 
     //@deprecated
