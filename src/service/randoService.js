@@ -38,7 +38,7 @@ function buildPostImageResponseSync (rando) {
 };
 
 module.exports =  {
-  saveImage: function (lightUser, imagePath, location, callback) {
+  saveImage (lightUser, imagePath, location, callback) {
     logger.debug("[randoService.saveImage, ", lightUser.email, "] Try save image from: ", imagePath, " for: ", lightUser.email, " location: ", location);
 
     async.waterfall([
@@ -69,13 +69,13 @@ module.exports =  {
         logger.data("[randoService.saveImage, ", lightUser.email, "] Try resize images to small, medium and large sizes");
 
         async.parallel({
-          small: function (parallelCallback) {
+          small (parallelCallback) {
             imageService.resize("small", imagePaths, randoId, imagePath, parallelCallback);
           },
-          medium: function (parallelCallback) {
+          medium (parallelCallback) {
             imageService.resize("medium", imagePaths, randoId, imagePath, parallelCallback);
           },
-          large: function (parallelCallback) {
+          large (parallelCallback) {
             imageService.resize("large", imagePaths, randoId, imagePath, parallelCallback);
           }
         }, function (err) {
@@ -92,7 +92,7 @@ module.exports =  {
           var imageSizeURL = {}; //will be filled after each size upload to S3
 
           async.parallel({
-            uploadSmall: function (parallelCallback) {
+            uploadSmall (parallelCallback) {
               s3Service.upload(imagePaths, "small", function (err, url) {
                 if (err) {
                   return parallelCallback(err);
@@ -101,7 +101,7 @@ module.exports =  {
                 return parallelCallback();
               });
             },
-            uploadMedium: function (parallelCallback) {
+            uploadMedium (parallelCallback) {
               s3Service.upload(imagePaths, "medium", function (err, url) {
                 if (err) {
                   return parallelCallback(err);
@@ -110,7 +110,7 @@ module.exports =  {
                 return parallelCallback();
               });
             },
-            uploadLarge: function (parallelCallback) {
+            uploadLarge (parallelCallback) {
               s3Service.upload(imagePaths, "large", function (err, url) {
                 if (err) {
                   return parallelCallback(err);
@@ -131,7 +131,7 @@ module.exports =  {
       },
       function rmImages (imagePaths, lightUser, randoId, imageURL, imageSizeURL, location, done) {
         async.parallel({
-          rmOrigin: function (parallelCallback) {
+          rmOrigin (parallelCallback) {
             var originFile = config.app.static.folder.name + imagePaths.origin;
             fs.unlink(originFile, function (err) {
               if (err) {
@@ -140,7 +140,7 @@ module.exports =  {
               return parallelCallback();
             });
           },
-          rmSmall: function (parallelCallback) {
+          rmSmall (parallelCallback) {
             var smallFile = config.app.static.folder.name + imagePaths.small;
             fs.unlink(smallFile, function (err) {
               if (err) {
@@ -149,7 +149,7 @@ module.exports =  {
               return parallelCallback();
             });
           },
-          rmMedium: function (parallelCallback) {
+          rmMedium (parallelCallback) {
             var mediumFile = config.app.static.folder.name + imagePaths.medium;
             fs.unlink(mediumFile, function (err) {
               if (err) {
@@ -158,7 +158,7 @@ module.exports =  {
               return parallelCallback();
             });
           },
-          rmLarge: function (parallelCallback) {
+          rmLarge (parallelCallback) {
             var largeFile = config.app.static.folder.name + imagePaths.large;
             fs.unlink(largeFile, function (err) {
               if (err) {
@@ -196,11 +196,11 @@ module.exports =  {
         };
 
         async.parallel({
-          addRandoToDBBucket: function (done) {
+          addRandoToDBBucket (done) {
             logger.trace("[randoService.updateRandoInDB.addRandoToDBBucket,", lightUser.email, "]");
             db.rando.add(newRando, done);
           },
-          addRandoToUserOut: function (done) {
+          addRandoToUserOut (done) {
             logger.trace("[randoService.updateRandoInDB.addRandoToUserOut,", lightUser.email, "]");
             db.user.addRandoToUserOutByEmail(lightUser.email, newRando, done);
           }
@@ -212,7 +212,7 @@ module.exports =  {
           return callback(null, newRando);
         });
       },
-      function buildRando (err, rando, done) {
+      function buildRando (rando, done) {
         logger.trace("[randoService.buildRando,", lightUser.email, "]");
         var randoForResponse = buildPostImageResponseSync(rando);
         return done(null, randoForResponse);
@@ -225,6 +225,5 @@ module.exports =  {
       logger.debug("[randoService.saveImage, ", lightUser.email, "] save done");
       return callback(null, rando);
     });
-  },
-
+  }
 };

@@ -1,5 +1,12 @@
 var db = require("randoDB");
 var logger = require("../log/logger");
+var config = require("config");
+var Errors = require("../error/errors");
+
+function sendForbidden(res, ban) {
+  var response = Errors.toResponse(Errors.Forbidden(ban));
+  res.status(response.status).send(response);
+}
 
 module.exports = {
   run (req, res, next) {

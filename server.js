@@ -71,9 +71,9 @@ if (cluster.isMaster) {
   function postImage(lightUser, filePath, location, res) {
     randoService.saveImage(lightUser, filePath, location, function (err, response) {
       if (err) {
-        var response = Errors.toResponse(err);
-        logger.data("POST /image DONE with error: ", response.code);
-        return res.status(response.status).send(response);
+        var errResponse = Errors.toResponse(err);
+        logger.data("POST /image DONE with error: ", errResponse.code);
+        return res.status(errResponse.status).send(errResponse);
       }
 
       logger.data("POST /image DONE");

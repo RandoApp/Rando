@@ -1,4 +1,3 @@
-var db = require("randoDB");
 var logger = require("../log/logger");
 
 module.exports = {

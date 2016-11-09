@@ -26,7 +26,7 @@ module.exports = {
       }
 
       req.lightUser = user;
-      next();
+      return next();
     });
   }
 };
