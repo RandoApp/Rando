@@ -9,11 +9,11 @@ module.exports = {
     async.parallel([
       function deleteFromOut(done) {
         logger.trace("[commentService.delete, ", user.email, "]", "deleteFromOut: ", randoId);
-        db.user.updateDeleteFlagForOutRando(user.email, randoId, true, done);
+        db.user.updateDeleteFlagForOutRando(user.email, randoId, 1, done);
       },
       function deleteFromIn(done) {
         logger.trace("[commentService.delete, ", user.email, "]", "deleteFromIn: ", randoId);
-        db.user.updateDeleteFlagForInRando(user.email, randoId, true, done);
+        db.user.updateDeleteFlagForInRando(user.email, randoId, 1, done);
       }
     ], function (err) {
       logger.trace("[commentService.delete, ", user.email, "]", "Processing db updated results for rando: ", randoId);

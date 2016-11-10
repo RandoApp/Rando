@@ -121,20 +121,20 @@ if (cluster.isMaster) {
 
   function getUser(req, res) {
     logger.data("Start process user request. GET /user. for: ", req.user.email);
-    userService.getUser(req.user, function (err, user) {
+    
+    userService.getUser(req.lightUser, function (err, user) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
         logger.data("GET /user DONE with error: ", response.code);
-        res.send(response);
-        return;
+        return res.send(response);
       }
       logger.data("GET /user DONE");
-      res.send(user);
+      return res.send(user);
     });
   };
 
-  app.get("/user", access.byToken, function (req, res) {
+  app.get("/user", baseFilters, function (req, res) {
     getUser(req, res);
   });
 
