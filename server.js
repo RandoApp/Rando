@@ -119,10 +119,10 @@ if (cluster.isMaster) {
     });
   });
 
-  function getUser(req, res) {
-    logger.data("Start process user request. GET /user. for: ", req.user.email);
+  app.get("/user", baseFilters, function (req, res) {
+    logger.data("Start process user request. GET /user. for: ", req.lightUser.email);
     
-    userService.getUser(req.lightUser, function (err, user) {
+    userService.getUser(req.lightUser.email, function (err, user) {
       if (err) {
         var response = Errors.toResponse(err);
         res.status(response.status);
@@ -132,10 +132,6 @@ if (cluster.isMaster) {
       logger.data("GET /user DONE");
       return res.send(user);
     });
-  };
-
-  app.get("/user", baseFilters, function (req, res) {
-    getUser(req, res);
   });
 
   app.post("/anonymous", function (req, res) {
@@ -290,7 +286,19 @@ if (cluster.isMaster) {
     //@deprecated
     app.get("/user/:token", tokenConverter, access.byToken, function (req, res) {
       logger.warn("DEPRECATED API CALL: GET /user/:token");
-      getUser(req, res);
+      
+      logger.data("Start process user request. GET /user. for: ", req.user.email);
+    
+      userService.getBackwardCompatibleUser(req.user.email, function (err, user) {
+        if (err) {
+          var response = Errors.toResponse(err);
+          res.status(response.status);
+          logger.data("GET /user DONE with error: ", response.code);
+          return res.send(response);
+        }
+        logger.data("GET /user DONE");
+        return res.send(user);
+      });
     });
 
     //@deprecated

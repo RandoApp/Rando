@@ -23,7 +23,7 @@ describe("Rando service.", function () {
         util.generateImageName.restore();
       }
     });
-/*
+
     it("Should return incorrect args error when rando path is undefined", function (done) {
       randoService.saveImage({email: "user@mail.com"}, null, {latitude: "32", longitude: "23"}, function (err) {
         err.should.eql(Errors.IncorrectArgs());
@@ -103,7 +103,7 @@ describe("Rando service.", function () {
         done();
       });
     });
-*/
+
     it("Should successful save image", function (done) {
       mapService.cities = [{name: "Lida", latitude: 53.8884794302, longitude: 25.2846475817}];
       var renameCalled = false;

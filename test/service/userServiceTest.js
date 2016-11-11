@@ -336,20 +336,39 @@ describe("Find or create by Google data.", function () {
   });
 });
 
-    //TODO: !!!!!!!make assertion more strict!!!!!!!!
-    describe("Get user.", function () {
-      it("Get user successfully", function (done) {
-        userService.getUser({email: "user@mail.com", out: [{randoId: 123}], in: [{randoId: 456}]}, function (err, user) {
-          should.not.exist(err);
-          should.exist(user);
-    //TODO: make assertion more strongly;
-    user.should.have.property("email", "user@mail.com");
-    user.out.should.not.be.empty();
-    user.in.should.not.be.empty();
-    done();
-  });
+  describe("Get user.", function () {
+    afterEach(function() {
+      mockUtil.clean(db);
+    });
+
+    it("Get user successfully", function (done) {
+      sinon.stub(db.user, "getAllLightInAndOutRandosByEmail", function (email, callback) {
+        callback(null, {
+          out: [
+            {randoId: 1, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}, strangerMapURL: "url", strangerMapSizeURL: {large: "largeUrl", medium: "mediumUrl", small: "smallUrl"}},
+            {randoId: 2, delete: 1, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}, strangerMapURL: "url", strangerMapSizeURL: {large: "largeUrl", medium: "mediumUrl", small: "smallUrl"}},
+            {randoId: 3, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}, strangerMapURL: "url", strangerMapSizeURL: {large: "largeUrl", medium: "mediumUrl", small: "smallUrl"}}
+          ],
+          in: [
+            {randoId: 9, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}},
+            {randoId: 8, delete: 1, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}},
+            {randoId: 7, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}}
+          ]
+        })
+      });
+
+      userService.getUser("user@mail.com", function (err, user) {
+        should.not.exist(err);
+        should.exist(user);
+        user.should.have.property("email", "user@mail.com");
+        user.out.should.not.be.empty();
+        user.in.should.not.be.empty();
+        done();
       });
     });
+  });
+
+
     describe("Find Or Create Anonymouse.", function () {
       it("Not defined id should return error", function (done) {
         userService.findOrCreateAnonymous(null, "127.0.0.1", "FireBaseInstanceId", function (err, response) {
