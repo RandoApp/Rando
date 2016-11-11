@@ -80,8 +80,8 @@ module.exports = {
         return callback(Errors.System(err));
       }
 
-      user.in = randos.in.filter(rando => {return rando.delete !== 1 || !randoId});
-      user.out = randos.out.filter(rando => {return rando.delete !== 1 || !randoId});
+      user.in = randos.in.filter(rando => {return rando.delete !== 1 || !rando.randoId});
+      user.out = randos.out.filter(rando => {return rando.delete !== 1 || !rando.randoId});
 
       user.in.forEach(rando => {
         delete rando.delete;
