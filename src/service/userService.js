@@ -80,14 +80,19 @@ module.exports = {
         return callback(Errors.System(err));
       }
 
-      user.in = randos.in.filter(rando => {return rando.delete !== 1});
-      user.out = randos.out.filter(rando => {return rando.delete !== 1});
+      user.in = randos.in.filter(rando => {return rando.delete !== 1 || !randoId});
+      user.out = randos.out.filter(rando => {return rando.delete !== 1 || !randoId});
+
+      user.in.forEach(rando => {
+        delete rando.delete;
+      });
 
       user.out.forEach(rando => {
         rando.mapURL = rando.strangerMapURL ? rando.strangerMapURL : "";
         rando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapSizeURL);
         delete rando.strangerMapURL;
         delete rando.strangerMapSizeURL;
+        delete rando.delete;
       });
 
       callback(null, user);
