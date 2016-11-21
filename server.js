@@ -34,7 +34,7 @@ if (cluster.isMaster) {
   var flushUserMetaToDBFilter = require("./src/filter/flushUserMetaToDBFilter");
   var noSpamFilter = require("./src/filter/noSpamFilter");
 
-  var baseFilters = [accessByTokenFilter.run, ipFilter.run, fireBaseFilter.run, blockBannedFilter.run, flushUserMetaToDBFilter.run];
+  var baseFilters = [accessByTokenFilter.run, ipFilter.run, fireBaseFilter.run, flushUserMetaToDBFilter.run];
   
   var Errors = require("./src/error/errors");
   var app = express();
@@ -81,7 +81,7 @@ if (cluster.isMaster) {
     });
   };
 
-  app.post("/image", baseFilters, noSpamFilter.run, upload.single("image") , function (req, res) {
+  app.post("/image", baseFilters, noSpamFilter.run, blockBannedFilter.run, upload.single("image") , function (req, res) {
     postImage(req.lightUser, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
   });
 
