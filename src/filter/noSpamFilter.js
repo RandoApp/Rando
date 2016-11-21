@@ -12,13 +12,18 @@ module.exports = {
   run (req, res, next) {
     logger.info("Start noSpamFilter for user:", req.lightUser.email);
     var user = req.lightUser;
-    db.user.getLastLightOutRandosByEmail(user.email, config.app.limit.images, function (err, randos) {
-      if (err) {
+    db.user.getLastLightOutRandosByEmail(user.email, config.app.limit.images, function (err, userWithOut) {
+      if (err || !userWithOut || !userWithOut.out) {
         logger.err("[noSpamFilter]", "Cannot fetch last N randos from DB, because:", err);
+        return next();
       }
 
-      if (!err && randos && randos.length === config.app.limit.images) {
-        var timeBetwenImagesLimit = Date.now() - randos[randos.length - 1].creation;
+      var randos = userWithOut.out;
+      randos.sort((a, b) => a.creation - b.creation);
+
+      if (randos.length >= config.app.limit.images) {
+        var lastRando = randos[randos.length - 1];
+        var timeBetwenImagesLimit = Date.now() - lastRando.creation;
 
         if (timeBetwenImagesLimit <= config.app.limit.time) {
           logger.warn("[noSpamFilter, ", user.email, "] Spam found!!! Return Forbidden");
