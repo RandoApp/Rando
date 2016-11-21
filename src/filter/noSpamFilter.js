@@ -14,14 +14,17 @@ module.exports = {
     var user = req.lightUser;
     db.user.getLastLightOutRandosByEmail(user.email, config.app.limit.images, function (err, userWithOut) {
       if (err || !userWithOut || !userWithOut.out) {
-        logger.err("[noSpamFilter]", "Cannot fetch last N randos from DB, because:", err);
+        logger.error("[noSpamFilter]", "Cannot fetch last N randos from DB, because:", err);
         return next();
       }
 
       var randos = userWithOut.out;
       randos.sort((a, b) => a.creation - b.creation);
 
+      logger.debug("[noSpamFilter]", "Analyze randos array with length: ", randos.length);
+
       if (randos.length >= config.app.limit.images) {
+        logger.debug("[noSpamFilter]", "Randos size is bigger that limit. We should caclulate time");
         var lastRando = randos[randos.length - 1];
         var timeBetwenImagesLimit = Date.now() - lastRando.creation;
 
@@ -32,7 +35,7 @@ module.exports = {
             ban: Date.now() + config.app.limit.ban
           }, function (err) {
             if (err) {
-              logger.err("[noSpamFilter]", "Cannot update user ban field in DB, because:", err);
+              logger.error("[noSpamFilter]", "Cannot update user ban field in DB, because:", err);
             }
             return sendForbidden(res, user.ban);
           });
