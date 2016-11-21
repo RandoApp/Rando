@@ -1,4 +1,5 @@
 var logger = require("../log/logger");
+var Errors = require("../error/errors");
 
 function sendForbidden(res, ban) {
   var response = Errors.toResponse(Errors.Forbidden(ban));
