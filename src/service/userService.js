@@ -95,7 +95,7 @@ module.exports = {
         delete rando.delete;
       });
 
-      callback(null, user);
+      return callback(null, user);
     });
   },
   getBackwardCompatibleUser (email, callback) {

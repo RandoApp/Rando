@@ -197,9 +197,9 @@ if (cluster.isMaster) {
   function logout(req, res) {
     userService.destroyAuthToken(req.lightUser.email, function (err, response) {
       if (err) {
-        var response = Errors.toResponse(err);
-        logger.data("POST /logout DONE with error: ", response.code);
-        return res.status(response.status).send(response);
+        var errResponse = Errors.toResponse(err);
+        logger.data("POST /logout DONE with error: ", errResponse.code);
+        return res.status(errResponse.status).send(errResponse);
       }
 
       logger.data("POST /logout DONE");

@@ -1,5 +1,10 @@
 var logger = require("../log/logger");
 
+function sendForbidden(res, ban) {
+  var response = Errors.toResponse(Errors.Forbidden(ban));
+  res.status(response.status).send(response);
+}
+
 module.exports = {
   run (req, res, next) {
     var user = req.lightUser;

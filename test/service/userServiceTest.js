@@ -354,7 +354,7 @@ describe("Find or create by Google data.", function () {
             {randoId: 8, delete: 1, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}},
             {randoId: 7, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}}
           ]
-        })
+        });
       });
 
       userService.getUser("user@mail.com", function (err, user) {
