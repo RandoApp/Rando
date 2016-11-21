@@ -34,7 +34,7 @@ module.exports = {
         var timeBetwenImagesLimit = Date.now() - lastRando.creation;
 
         if (timeBetwenImagesLimit <= config.app.limit.time) {
-          logger.warn("[noSpamFilter, ", user.email, "] Spam found!!! Return Forbidden");
+          logger.warn("[noSpamFilter, ", user.email, "] Spam found!!! Return Forbidden. Now - randos #", config.app.limit.images, "creation is", timeBetwenImagesLimit);
 
           db.user.updateUserMetaByEmail(user.email, {
             ban: Date.now() + config.app.limit.ban
