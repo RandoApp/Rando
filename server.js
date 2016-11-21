@@ -81,7 +81,7 @@ if (cluster.isMaster) {
     });
   };
 
-  app.post("/image", baseFilters, noSpamFilter.run, blockBannedFilter.run, upload.single("image") , function (req, res) {
+  app.post("/image", baseFilters, blockBannedFilter.run, noSpamFilter.run, upload.single("image") , function (req, res) {
     postImage(req.lightUser, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
   });
 
