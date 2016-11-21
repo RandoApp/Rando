@@ -30,7 +30,7 @@ module.exports = {
 
       if (randos.length >= config.app.limit.images) {
         logger.debug("[noSpamFilter]", "Randos size is bigger that limit. We should caclulate time");
-        var lastRando = randos[randos.length - 1];
+        var lastRando = randos[config.app.limit.images - 1];
         var timeBetwenImagesLimit = Date.now() - lastRando.creation;
 
         if (timeBetwenImagesLimit <= config.app.limit.time) {
