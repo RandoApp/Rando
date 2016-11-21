@@ -11,6 +11,7 @@ function sendUnauthorized (res) {
 module.exports = {
   run (req, res, next) {
     var token = util.getTokenFromRequest(req);
+    logger.info("Start accessByTokenFilter by token:", token);
     if (!token) {
       return sendUnauthorized(res);
     }

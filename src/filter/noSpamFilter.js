@@ -10,6 +10,7 @@ function sendForbidden(res, ban) {
 
 module.exports = {
   run (req, res, next) {
+    logger.info("Start noSpamFilter for user:", req.lightUser.email);
     var user = req.lightUser;
     db.user.getLastLightOutRandosByEmail(user.email, config.app.limit.images, function (err, randos) {
       if (err) {

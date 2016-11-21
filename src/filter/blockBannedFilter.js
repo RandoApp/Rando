@@ -7,6 +7,7 @@ function sendForbidden(res, ban) {
 
 module.exports = {
   run (req, res, next) {
+    logger.info("Start blockBannedFilter for user:", req.lightUser.email);
     var user = req.lightUser;
     if (user.ban && Date.now() <= user.ban) {
       logger.warn("[blockBannedFilter, ", user.email, "] Banned user send request. Ban to: ", user.ban);
