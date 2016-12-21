@@ -9,8 +9,8 @@ app:
     tokenLength: 21
     citiesJson: src/map/cities.json
     limit:
-        time: 300000 #5 mins
-        images: 50 #50 images per 5 mins
+        time: 600000 #10 mins
+        images: 10 #10 images per 10 mins
         ban: 10800000 #3 hours
         imageSize: 30mb
     img:

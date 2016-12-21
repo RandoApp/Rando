@@ -4,6 +4,7 @@ var userService = require("../../src/service/userService");
 var Errors = require("../../src/error/errors");
 var db = require("randoDB");
 var passwordUtil = require("../../src/util/password");
+var mockUtil = require("../mockUtil");
 
 describe("User service.", function () {
   describe("Find or create user by login and password.", function () {
@@ -335,20 +336,39 @@ describe("Find or create by Google data.", function () {
   });
 });
 
-    //TODO: !!!!!!!make assertion more strict!!!!!!!!
-    describe("Get user.", function () {
-      it("Get user successfully", function (done) {
-        userService.getUser({email: "user@mail.com", out: [{randoId: 123}], in: [{randoId: 456}]}, function (err, user) {
-          should.not.exist(err);
-          should.exist(user);
-    //TODO: make assertion more strongly;
-    user.should.have.property("email", "user@mail.com");
-    user.out.should.not.be.empty();
-    user.in.should.not.be.empty();
-    done();
-  });
+  describe("Get user.", function () {
+    afterEach(function() {
+      mockUtil.clean(db);
+    });
+
+    it("Get user successfully", function (done) {
+      sinon.stub(db.user, "getAllLightInAndOutRandosByEmail", function (email, callback) {
+        callback(null, {
+          out: [
+            {randoId: 1, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}, strangerMapURL: "url", strangerMapSizeURL: {large: "largeUrl", medium: "mediumUrl", small: "smallUrl"}},
+            {randoId: 2, delete: 1, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}, strangerMapURL: "url", strangerMapSizeURL: {large: "largeUrl", medium: "mediumUrl", small: "smallUrl"}},
+            {randoId: 3, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}, strangerMapURL: "url", strangerMapSizeURL: {large: "largeUrl", medium: "mediumUrl", small: "smallUrl"}}
+          ],
+          in: [
+            {randoId: 9, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}},
+            {randoId: 8, delete: 1, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}},
+            {randoId: 7, delete: 0, mapURL: "mapURL", mapSizeURL: {large: "largeMapUrl", medium: "mediumUMaprl", small: "smallMapUrl"}}
+          ]
+        });
+      });
+
+      userService.getUser("user@mail.com", function (err, user) {
+        should.not.exist(err);
+        should.exist(user);
+        user.should.have.property("email", "user@mail.com");
+        user.out.should.not.be.empty();
+        user.in.should.not.be.empty();
+        done();
       });
     });
+  });
+
+
     describe("Find Or Create Anonymouse.", function () {
       it("Not defined id should return error", function (done) {
         userService.findOrCreateAnonymous(null, "127.0.0.1", "FireBaseInstanceId", function (err, response) {
@@ -430,34 +450,21 @@ describe("Find or create by Google data.", function () {
 
 
 describe("Destroy auth token.", function () {
+  afterEach(function() {
+    mockUtil.clean(db);
+  });
+
   it("AuthToken should be destroyed from user in db and return logout done as result", function (done) {
-    var isSaveCalled = false;
-    var user = {
-      authToken: "someToken",
-      save () {
-        isSaveCalled = true;
-      },
-      firebaseInstanceIds: [
-    {
-        instanceId: "firebaseInstanceId",
-        active: true,
-        createdDate: 300,
-        lastUsedDate: 400
-    },
-    {
-        instanceId: "firebaseInstanceId2",
-        active: true,
-        createdDate: 500,
-        lastUsedDate: 600
-    }
-    ]
-    };
-    userService.destroyAuthToken(user, function (err, result) {
+    sinon.stub(db.user, "updateUserMetaByEmail", function (email, meta, callback) {
+      callback();
+    });
+
+    sinon.stub(db.user, "updateActiveForAllFirabaseIdsByEmail", function (email, value, callback) {
+      callback();
+    });
+
+    userService.destroyAuthToken("user@mail.com", function (err, result) {
       should.not.exist(err);
-      isSaveCalled.should.be.true();
-      user.authToken.should.be.empty();
-      user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId");
-      user.firebaseInstanceIds[0].active.should.be.false();
 
       result.should.be.eql({
         command: "logout",
@@ -468,37 +475,15 @@ describe("Destroy auth token.", function () {
     });
   });
 
-   it("Should fail and return 500 when error thrown in deactivateFirebaseInstanceId", function (done) {
-    var isSaveCalled = false;
-    var user = {
-      authToken: "someToken",
-      email: "email",
-      save () {
-        isSaveCalled = true;
-      },
-      firebaseInstanceIds: [
-    {
-        instanceId: "firebaseInstanceId",
-        active: true,
-        createdDate: 300,
-       lastUsedDate: 400
-    }
-    ]
-    };
-
-    sinon.stub(userService, "deactivateFirebaseInstanceId", function (user, callback) {
-        userService.deactivateFirebaseInstanceId.restore();
-        callback(new Error("err finding instanceId"), user);
-      });
-
-    userService.destroyAuthToken(user, function (err, result) {
+   it("Should fail and return 500 when error thrown in destroyAuthToken", function (done) {
+    sinon.stub(db.user, "updateUserMetaByEmail", function (email, meta, callback) {
+      callback(new Error("DB error"));
+    });
+    
+    userService.destroyAuthToken("user@mail.com", function (err, result) {
       should.exist(err);
-      isSaveCalled.should.be.false();
-      user.authToken.should.be.empty();
-      user.firebaseInstanceIds[0].instanceId.should.be.eql("firebaseInstanceId");
-      user.firebaseInstanceIds[0].active.should.be.true();
       should.not.exist(result);
-
+      err.should.have.property("message", "DB error");
       done();
     });
   });
@@ -576,75 +561,5 @@ describe("FirebaseInstanceId operations. ", function () {
 
   });
 
-  describe("DeactivateFirebaseInstanceId: Positive flow. ", function () {
-  it("Should deactivate FirebaseInstanceId and don't change others when id exists" , function (done) {
-    var user = {
-      authToken: "someToken2",
-      email: "FirebaseInstanceId1@email.com",
-      firebaseInstanceIds: [{
-        instanceId: "FirebaseInstanceId1",
-        active: true,
-        createdDate: 100,
-        lastUsedDate: 200
-    },
-    {
-        instanceId: "firebaseInstanceId2",
-        active: false,
-        createdDate: 300,
-        lastUsedDate: 400
-    }]};
-
-    var isCallbackCalled = false;
-
-    userService.deactivateFirebaseInstanceId(user, function (err, user) {
-
-    should.not.exist(err);
-
-    user.firebaseInstanceIds.length.should.be.eql(2);
-    user.firebaseInstanceIds[0].instanceId.should.be.eql("FirebaseInstanceId1");
-    user.firebaseInstanceIds[0].active.should.be.false();
-    user.firebaseInstanceIds[0].createdDate.should.be.eql(100);
-    user.firebaseInstanceIds[0].lastUsedDate.should.be.eql(200);
-
-    user.firebaseInstanceIds[1].instanceId.should.be.eql("firebaseInstanceId2");
-    user.firebaseInstanceIds[1].active.should.be.false();
-    user.firebaseInstanceIds[1].createdDate.should.be.eql(300);
-    user.firebaseInstanceIds[1].lastUsedDate.should.be.eql(400);
-    isCallbackCalled = true;
-  });
-    isCallbackCalled.should.be.true();
-    done();
-  });
-
-  it("Should deactivate FirebaseInstanceId or user doesn't have user.firebaseInstanceIds defined" , function (done) {
-    var user = {
-      authToken: "someToken"
-      };
-    var isCallbackCalled = false;
-
-    userService.deactivateFirebaseInstanceId(user, function (err, user) {
-      should.not.exist(err);
-      user.authToken.should.be.eql("someToken");
-      isCallbackCalled = true;
-    });
-    isCallbackCalled.should.be.true();
-    done();
-  });
-
-});
-
-describe("DeactivateFirebaseInstanceId: Negative flow. ", function () {
-  it("Should not fail and return error to callback when user is undefined" , function (done) {
-    var isCallbackCalled = false;
-
-    userService.deactivateFirebaseInstanceId(null, function (err, user) {
-      should.not.exist(user);
-      err.should.be.eql("user should be present");
-      isCallbackCalled = true;
-    });
-    isCallbackCalled.should.be.true();
-    done();
-  });
-});
 });
 });

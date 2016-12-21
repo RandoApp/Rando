@@ -9,6 +9,7 @@ var passwordUtil = require("../util/password");
 var util = require("../util/util");
 
 module.exports = {
+  //Deprecated. See firebaseService
   addOrUpdateFirebaseInstanceId (user, firebaseInstanceId, callback) {
     if (!user) {
       return callback("user should be present", user);
@@ -48,86 +49,62 @@ module.exports = {
       return callback(null, user);
     });
   },
-  deactivateFirebaseInstanceId (user, callback) {
-    if (!user) {
-      return callback("user should be present", user);
-    }
-
-    if (!user.firebaseInstanceIds) {
-      user.firebaseInstanceIds = [];
-    }
-    async.each(user.firebaseInstanceIds, (instanceId, done) => {
-      instanceId.active = false;
-      done();
-    }, (err) => {
-      return callback(err, user);
-    });
-  },
-  destroyAuthToken (user, callback) {
-    user.authToken = "";
-    this.deactivateFirebaseInstanceId(user, function (err, user) {
+  destroyAuthToken (email, callback) {
+    async.parallel([
+      function destroyAuthToken (done) {
+        db.user.updateUserMetaByEmail(email, {authToken: ""}, done);
+      },
+      function destroyFirebaseIds (done) {
+        db.user.updateActiveForAllFirabaseIdsByEmail(email, false, done);
+      }
+    ], function (err) {
       if (err) {
-        logger.info("[userService.destroyAuthToken, ", user.email, "] error deactivating firebaseInstanceIds");
+        logger.info("[userService.destroyAuthToken, ", email, "] error deactivating firebaseInstanceIds");
         return callback(Errors.System(err));
       }
-      db.user.update(user);
       return callback(null, {command: "logout", result: "done"});
     });
-    return;
   },
-  buildRandoWithoutMapSync (rando) {
-    return {
-      creation: rando.creation ? rando.creation : 0,
-      randoId: rando.randoId ? rando.randoId : "",
-      imageURL: rando.imageURL ? rando.imageURL : "",
-      imageSizeURL: util.getSizeableOrEmpty(rando.imageSizeURL)
-    };
-  },
-  buildInRandoSync (rando) {
-    var cleanRando = this.buildRandoWithoutMapSync(rando);
-    cleanRando.mapURL = rando.mapURL ? rando.mapURL : "";
-    cleanRando.mapSizeURL = util.getSizeableOrEmpty(rando.mapSizeURL);
-    return cleanRando;
-  },
-  buildOutRandoSync (rando) {
-    var cleanRando = this.buildRandoWithoutMapSync(rando);
-    cleanRando.mapURL = rando.strangerMapURL ? rando.strangerMapURL : "";
-    cleanRando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapSizeURL);
-    return cleanRando;
-  },
-  getUser (user, callback) {
-    logger.debug("[userService.getUser, ", user.email, "] Try get user");
+  getUser (email, callback) {
+    logger.debug("[userService.getUser, ", email, "] Try get user");
     var self = this;
-    var userJSON = {
-      email: user.email,
+    var user = {
+      email: email,
       in: [],
       out: []
     };
 
-    async.parallel({
-      buildOut (parallelDone) {
-        async.each(user.out, function (rando, done) {
-          if (rando.delete !== 1) {
-            userJSON.out.push( self.buildOutRandoSync(rando) );
-          }
-          done();
-        }, parallelDone);
-      },
-      buildIn (parallelDone) {
-        async.each(user.in, function (rando, done) {
-          if (rando.delete !== 1) {
-            userJSON.in.push( self.buildInRandoSync(rando) );
-          }
-          done();
-        }, parallelDone);
-      }
-    }, function (err) {
+    db.user.getAllLightInAndOutRandosByEmail(email, function (err, randos) {
       if (err) {
-        logger.warn("[userService.getUser ] Error when each randos in parallel for : ", user);
+        logger.warn("[userService.getUser] Error when make getAllLightInAndOutRandosByEmail call to db, because: ", err);
         return callback(Errors.System(err));
       }
 
-      backwardCompatibility.makeUserBackwardCompaitble(userJSON, function (err, compatibleUserJSON) {
+      user.in = randos.in.filter(rando => {return rando.delete !== 1 && rando.randoId});
+      user.out = randos.out.filter(rando => {return rando.delete !== 1 && rando.randoId});
+
+      user.in.forEach(rando => {
+        delete rando.delete;
+      });
+
+      user.out.forEach(rando => {
+        rando.mapURL = rando.strangerMapURL ? rando.strangerMapURL : "";
+        rando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapSizeURL);
+        delete rando.strangerMapURL;
+        delete rando.strangerMapSizeURL;
+        delete rando.delete;
+      });
+
+      return callback(null, user);
+    });
+  },
+  getBackwardCompatibleUser (email, callback) {
+    this.getUser(email, function (err, user) {
+      if (err) {
+        return callback(err);
+      }
+
+      backwardCompatibility.makeUserBackwardCompaitble(user, function (err, compatibleUserJSON) {
         if (err) {
           logger.warn("[userService.getUser] Error when make user backward compaitble");
           return callback(Errors.System(err));
@@ -137,7 +114,6 @@ module.exports = {
       });
     });
   },
-
   findOrCreateByLoginAndPassword (email, password, ip, firebaseInstanceId, callback) {
     var self = this;
     logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
