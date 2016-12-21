@@ -1,4 +1,0 @@
-# robots.txt for http://rando4.me/
-
-User-agent: *
-Disallow: /s/
