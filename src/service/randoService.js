@@ -10,6 +10,7 @@ var s3Service = require("./s3Service");
 var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
 var fs = require("fs");
+var randoRecognition = require("randoRecognition");
 
 function buildPostImageResponseSync (rando) {
   logger.trace("[randoService.buildPostImageResponseSync] rando:", rando);
@@ -88,7 +89,19 @@ module.exports =  {
           return done(null, imagePaths, lightUser, randoId, location);
         });
       },
-      function uploadToS3 (imagePaths, lightUser, randoId, location, done) {
+      function recognizeImage (imagePaths, lightUser, randoId, location, done) {
+        randoRecognition.recognize(imagePaths.small, function (err, tags) {
+          if (err) {
+            tags = [];
+            logger.error("[randoService.recognizeImage, ", lightUser.email, "] Can not recognize image because: ", err, "Skip this step!");
+          }
+
+          logger.debug("[randoService.recognizeImage, ", lightUser.email, "] Image recognized successfully. Tags: ", tags);
+
+          return done(null, imagePaths, lightUser, randoId, location, tags);
+        });
+      },
+      function uploadToS3 (imagePaths, lightUser, randoId, location, tags, done) {
           var imageSizeURL = {}; //will be filled after each size upload to S3
 
           async.parallel({
@@ -126,10 +139,10 @@ module.exports =  {
             }
 
             logger.debug("[randoService.saveImage, ", lightUser.email, "] All images uploaded to S3 successfully. Go to next step");
-            return done(null, imagePaths, lightUser, randoId, imageSizeURL.large, imageSizeURL, location);
+            return done(null, imagePaths, lightUser, randoId, imageSizeURL.large, imageSizeURL, location, tags);
           });
       },
-      function rmImages (imagePaths, lightUser, randoId, imageURL, imageSizeURL, location, done) {
+      function rmImages (imagePaths, lightUser, randoId, imageURL, imageSizeURL, location, tags, done) {
         async.parallel({
           rmOrigin (parallelCallback) {
             var originFile = config.app.static.folder.name + imagePaths.origin;
@@ -174,10 +187,10 @@ module.exports =  {
           };
 
           logger.debug("[randoService.saveImage, ", lightUser.email, "] All tmp images deleted from fs. Go to next step");
-          return done(null, lightUser, randoId, imageURL, imageSizeURL, location);
+          return done(null, lightUser, randoId, imageURL, imageSizeURL, location, tags);
         });
       },
-      function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, callback) {
+      function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, tags, callback) {
         logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for:", lightUser.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
         var self = this;
         var mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
@@ -192,6 +205,7 @@ module.exports =  {
           imageSizeURL,
           mapSizeURL,
           ip: lightUser.ip,
+          tags,
           delete: 0
         };
 
