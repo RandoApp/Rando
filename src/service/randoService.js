@@ -90,7 +90,7 @@ module.exports =  {
         });
       },
       function recognizeImage (imagePaths, lightUser, randoId, location, done) {
-        randoRecognition.recognize(config.app.static.folder.name + imagePaths.small, function (err, tags) {
+        randoRecognition.recognizeWithScaners(config.app.static.folder.name + imagePaths.small, config.app.enabledScaners, function (err, tags) {
           if (err) {
             tags = [];
             logger.error("[randoService.recognizeImage, ", lightUser.email, "] Can not recognize image because: ", err, "Skip this step!");
