@@ -85,7 +85,7 @@ module.exports = {
 
       user.in.forEach(rando => {
         delete rando.delete;
-        detected: Array.isArray(rando.tags) ? rando.tags.map(tag => {
+        rando.detected = Array.isArray(rando.tags) ? rando.tags.map(tag => {
           for (detectedTag in config.app.detectedTagMap) {
             if (config.app.detectedTagMap[detectedTag].indexOf(tag) != -1) {
               return detectedTag;
@@ -101,7 +101,7 @@ module.exports = {
         delete rando.strangerMapSizeURL;
         delete rando.delete;
         delete rando.tags;
-        detected: Array.isArray(rando.tags) ? rando.tags.map(tag => {
+        rando.detected = Array.isArray(rando.tags) ? rando.tags.map(tag => {
           for (detectedTag in config.app.detectedTagMap) {
             if (config.app.detectedTagMap[detectedTag].indexOf(tag) != -1) {
               return detectedTag;
