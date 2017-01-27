@@ -42,7 +42,7 @@ function buildPostImageResponseSync (rando) {
           return detectedTag;
         }
       }
-    }).filter(tag => tag);
+    }).filter(tag => tag) : [];
   };
 };
 
