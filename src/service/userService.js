@@ -100,9 +100,9 @@ module.exports = {
             }
           }
         }).filter(tag => tag) : []
+        delete rando.tags;
       });
 
-      delete rando.tags;
 
       return callback(null, user);
     });
