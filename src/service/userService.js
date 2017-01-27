@@ -93,7 +93,6 @@ module.exports = {
         delete rando.strangerMapURL;
         delete rando.strangerMapSizeURL;
         delete rando.delete;
-        delete rando.tags;
         rando.detected = Array.isArray(rando.tags) ? rando.tags.map(tag => {
           for (detectedTag in config.app.detectedTagMap) {
             if (config.app.detectedTagMap[detectedTag].indexOf(tag) != -1) {
@@ -102,6 +101,8 @@ module.exports = {
           }
         }).filter(tag => tag) : []
       });
+
+      delete rando.tags;
 
       return callback(null, user);
     });
