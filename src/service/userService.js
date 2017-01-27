@@ -91,7 +91,7 @@ module.exports = {
               return detectedTag;
             }
           }
-        }).filter(tag => tag) : [];
+        }).filter(tag => tag) : []
       });
 
       user.out.forEach(rando => {
@@ -107,7 +107,7 @@ module.exports = {
               return detectedTag;
             }
           }
-        }).filter(tag => tag) : [];
+        }).filter(tag => tag) : []
       });
 
       return callback(null, user);
