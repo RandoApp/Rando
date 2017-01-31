@@ -37,8 +37,8 @@ function buildPostImageResponseSync (rando) {
     },
     //1.0.19+
     detected: Array.isArray(rando.tags) ? rando.tags.map(tag => {
-      for (detectedTag in config.app.detectedTagMap) {
-        if (config.app.detectedTagMap[detectedTag].indexOf(tag) != -1) {
+      for (var detectedTag in config.app.detectedTagMap) {
+        if (config.app.detectedTagMap[detectedTag].indexOf(tag) !== -1) {
           return detectedTag;
         }
       }
