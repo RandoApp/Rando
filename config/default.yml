@@ -62,6 +62,9 @@ app:
         - nude
         - rgbHistogram
         - face
+    detectedTagMap:
+        unwanted: 
+            - monocolor
 scripts:
     maskPath: scripts/resources/round-mask.png
 
