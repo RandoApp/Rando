@@ -10,6 +10,7 @@
     "url": "https://github.com/RandoApp/Rando.git"
   },
   "dependencies": {
+    "async": "2.0.1",
     "body-parser": "1.15.2",
     "config": "1.21.0",
     "express": "4.14.0",
@@ -17,9 +18,7 @@
     "express-status-monitor": "0.0.10",
     "gm": "1.22.0",
     "js-yaml": "3.6.1",
-    "config": "1.21.0",
-    "winston": "2.2.0",
-    "async": "2.0.1",
+    "maxmind": "2.1.0",
     "morgan": "1.7.0",
     "multer": "1.1.0",
     "mv": "2.1.1",

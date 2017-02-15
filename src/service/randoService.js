@@ -201,7 +201,15 @@ module.exports =  {
       function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, tags, callback) {
         logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for:", lightUser.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
         var self = this;
-        var mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
+        
+        var mapSizeURL = {};
+        var randoIp = lightUser.ip;
+
+        if (!location || (!location.latitude && !location.longitude)) {
+          mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
+        } else {
+          mapSizeURL = mapService.ipToMapURLSync(randoIp);
+        }
 
         var newRando = {
           email: lightUser.email,
@@ -212,7 +220,7 @@ module.exports =  {
           location,
           imageSizeURL,
           mapSizeURL,
-          ip: lightUser.ip,
+          ip: randoIp,
           tags,
           delete: 0
         };

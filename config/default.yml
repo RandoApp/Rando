@@ -62,6 +62,7 @@ app:
         - nude
         - rgbHistogram
         - face
+    geoipDBPath: GeoLite2-City.mmdb
     detectedTagMap:
         unwanted: 
             - monocolor

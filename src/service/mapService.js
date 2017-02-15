@@ -4,9 +4,23 @@ var async = require("async");
 var Errors = require("../error/errors");
 var fs = require("fs");
 var crypto = require("crypto");
+var maxmind = require("maxmind");
+var cityLookup = maxmind.openSync(config.app.geoipDBPath);
 
 module.exports =  {
   cities: null,
+  ipToMapURLSync (ip) {
+    var location = {
+      latitude: 0,
+      longitude: 0
+    }
+
+    if (ip) {
+      location = cityLookup.get(ip).location;
+    }
+
+    return this.locationToMapURLSync(location.latitude, location.longitude);
+  },
   locationToMapURLSync: function (latitude, longitude) {
     logger.debug("[mapService.locationToMapURLSync] latitude: ", latitude, " longitude: ", longitude);
     if (!this.cities) this.loadCitiesJson();
