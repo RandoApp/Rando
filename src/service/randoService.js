@@ -198,19 +198,25 @@ module.exports =  {
           return done(null, lightUser, randoId, imageURL, imageSizeURL, location, tags);
         });
       },
-      function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, tags, callback) {
-        logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for:", lightUser.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
-        var self = this;
-        
+      function lookupLocation (lightUser, randoId, imageURL, imageSizeURL, location, tags, done) {
+        logger.debug("[randoService.lookupLocation", lightUser.email, "] Lookup location");
         var mapSizeURL = {};
         var randoIp = lightUser.ip;
 
         if (!location || (!location.latitude && !location.longitude)) {
+          logger.debug("[randoService.lookupLocation", lightUser.email, "] GPS is enabled. Lookup city by lat and long");
           mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
         } else {
+          logger.debug("[randoService.lookupLocation", lightUser.email, "] GPS is disabled. Lookup city by ip");
           mapSizeURL = mapService.ipToMapURLSync(randoIp);
         }
 
+        return done(null, lightUser, randoId, imageURL, imageSizeURL, location, mapSizeURL, tags);
+      },
+      function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, mapSizeURL, tags, callback) {
+        logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for:", lightUser.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
+        var self = this;
+        
         var newRando = {
           email: lightUser.email,
           creation: Date.now(),

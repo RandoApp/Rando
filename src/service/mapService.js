@@ -10,6 +10,7 @@ var cityLookup = maxmind.openSync(config.app.geoipDBPath);
 module.exports =  {
   cities: null,
   ipToMapURLSync (ip) {
+    logger.debug("[mapService.ipToMapURLSync] ip: ", ip);
     var location = {
       latitude: 0,
       longitude: 0
@@ -17,6 +18,7 @@ module.exports =  {
 
     if (ip) {
       location = cityLookup.get(ip).location;
+      logger.debug("[mapService.ipToMapURLSync] Lookup ip to location: ", location);
     }
 
     return this.locationToMapURLSync(location.latitude, location.longitude);
