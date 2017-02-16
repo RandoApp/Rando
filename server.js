@@ -11,13 +11,27 @@ if (cluster.isMaster) {
   console.log("Star worker #" + cluster.worker.id);
 
   var fs = require("fs");
+  var config = require("config");
   var express = require("express");
   var morgan  = require("morgan");
   var bodyParser = require("body-parser");
   var multer  = require("multer");
+  
+  (function checkSources() {
+    if (!fs.existsSync(config.app.citiesJson)) {
+      console.error("File " + config.app.citiesJson + " not found. Did you run map.js script from git@github.com:RandoApp/Map.git repository before start server?\n");
+      process.exit(1);
+    }
+
+    if (!fs.existsSync(config.app.geoipDBPath)) {
+      console.error("File " + config.app.geoipDBPath + " not found. Did you download maxmind db file?\n");
+      process.exit(1);
+    }
+  })();
+
   var access = require("./src/service/access");
   var tokenConverter = require("./src/util/backwardCompatibility").tokenConverter;
-  var config = require("config");
+  
   var logger = require("./src/log/logger");
   
   var userService = require("./src/service/userService");
@@ -50,17 +64,6 @@ if (cluster.isMaster) {
   }));
   app.use(bodyParser.json());
 
-  (function checkSources() {
-    if (!fs.existsSync(config.app.citiesJson)) {
-      console.error("File " + config.app.citiesJson + " not found. Did you run map.js script from git@github.com:RandoApp/Map.git repository before start server?\n");
-      process.exit(1);
-    }
-
-    if (!fs.existsSync(config.app.geoipDBPath)) {
-      console.error("File " + config.app.geoipDBPath + " not found. Did you download maxmind db file?\n");
-      process.exit(1);
-    }
-  })();
 
   app.get("/status", function (req, res) {
     statusService.status(function (status) {
