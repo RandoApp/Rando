@@ -15,7 +15,6 @@
     "config": "1.21.0",
     "express": "4.14.0",
     "express-redirect": "1.2.2",
-    "express-status-monitor": "0.0.10",
     "gm": "1.22.0",
     "js-yaml": "3.6.1",
     "maxmind": "2.1.0",

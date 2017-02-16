@@ -43,11 +43,6 @@ if (cluster.isMaster) {
 
   require("randoDB").connect(config.db.url);
 
-  app.use(require("express-status-monitor")({
-    path: config.app.monitor.url,
-    title: config.app.monitor.title
-  }));
-
   app.use(express.static(__dirname + "/static", {maxAge: config.app.cacheControl}));
   app.use(morgan("combined"));
   app.use(bodyParser.urlencoded({
@@ -58,6 +53,11 @@ if (cluster.isMaster) {
   (function checkSources() {
     if (!fs.existsSync(config.app.citiesJson)) {
       console.error("File " + config.app.citiesJson + " not found. Did you run map.js script from git@github.com:RandoApp/Map.git repository before start server?\n");
+      process.exit(1);
+    }
+
+    if (!fs.existsSync(config.app.geoipDBPath)) {
+      console.error("File " + config.app.geoipDBPath + " not found. Did you download maxmind db file?\n");
       process.exit(1);
     }
   })();
