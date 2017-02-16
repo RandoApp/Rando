@@ -213,7 +213,7 @@ module.exports =  {
 
         return done(null, lightUser, randoId, imageURL, imageSizeURL, location, mapSizeURL, tags);
       },
-      function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, mapSizeURL, tags, callback) {
+      function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, mapSizeURL, tags, done) {
         logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for:", lightUser.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
         var self = this;
         
@@ -232,20 +232,20 @@ module.exports =  {
         };
 
         async.parallel({
-          addRandoToDBBucket (done) {
+          addRandoToDBBucket (addDone) {
             logger.trace("[randoService.updateRandoInDB.addRandoToDBBucket,", lightUser.email, "]");
-            db.rando.add(newRando, done);
+            db.rando.add(newRando, addDone);
           },
-          addRandoToUserOut (done) {
+          addRandoToUserOut (addDone) {
             logger.trace("[randoService.updateRandoInDB.addRandoToUserOut,", lightUser.email, "]");
-            db.user.addRandoToUserOutByEmail(lightUser.email, newRando, done);
+            db.user.addRandoToUserOutByEmail(lightUser.email, newRando, addDone);
           }
         }, function (err) {
           if (err) {
             logger.debug("[randoService.updateRandoInDB, ", lightUser.email, "] async parallel get error:", err);
-            return callback(Errors.System(err));
+            return done(Errors.System(err));
           }
-          return callback(null, newRando);
+          return done(null, newRando);
         });
       },
       function buildRando (rando, done) {
