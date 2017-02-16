@@ -82,7 +82,7 @@ if (cluster.isMaster) {
   };
 
   app.post("/image", baseFilters, blockBannedFilter.run, noSpamFilter.run, upload.single("image") , function (req, res) {
-    postImage(req.lightUser, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
+    postImage(req.lightUser, req.file.path, {latitude: parseFloat(req.body.latitude), longitude: parseFloat(req.body.longitude)}, res);
   });
 
   app.post("/delete/:randoId", baseFilters, function (req, res) {
