@@ -147,10 +147,10 @@ module.exports =  {
             }
 
             logger.debug("[randoService.saveImage, ", lightUser.email, "] All images uploaded to S3 successfully. Go to next step");
-            return done(null, imagePaths, lightUser, randoId, imageSizeURL.large, imageSizeURL, location, tags);
+            return done(null, imagePaths, lightUser, randoId, imageSizeURL, location, tags);
           });
       },
-      function rmImages (imagePaths, lightUser, randoId, imageURL, imageSizeURL, location, tags, done) {
+      function rmImages (imagePaths, lightUser, randoId, imageSizeURL, location, tags, done) {
         async.parallel({
           rmOrigin (parallelCallback) {
             var originFile = config.app.static.folder.name + imagePaths.origin;
@@ -195,20 +195,37 @@ module.exports =  {
           };
 
           logger.debug("[randoService.saveImage, ", lightUser.email, "] All tmp images deleted from fs. Go to next step");
-          return done(null, lightUser, randoId, imageURL, imageSizeURL, location, tags);
+          return done(null, lightUser, randoId, imageSizeURL, location, tags);
         });
       },
-      function updateRandoInDB (lightUser, randoId, imageURL, imageSizeURL, location, tags, callback) {
-        logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for:", lightUser.email, "location:", location, "randoId:", randoId, "url:", imageURL, "image url:", imageSizeURL);
-        var self = this;
-        var mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
+      function lookupLocation (lightUser, randoId, imageSizeURL, location, tags, done) {
+        logger.debug("[randoService.lookupLocation", lightUser.email, "] Lookup location");
+        var mapSizeURL = {};
+        var randoIp = lightUser.ip;
 
+        if (location.latitude && location.longitude) {
+          logger.debug("[randoService.lookupLocation", lightUser.email, "] GPS is enabled. Lookup city by location:", location);
+          mapSizeURL = mapService.locationToMapURLSync(location.latitude, location.longitude);
+        } else {
+          logger.debug("[randoService.lookupLocation", lightUser.email, "] GPS is disabled. Lookup city by ip:", randoIp);
+          mapSizeURL = mapService.ipToMapURLSync(randoIp);
+        }
+
+        return done(null, lightUser, randoId, imageSizeURL, location, mapSizeURL, tags);
+      },
+      function updateRandoInDB (lightUser, randoId, imageSizeURL, location, mapSizeURL, tags, done) {
+        var imageURL = imageSizeURL.large;
+        var mapURL = mapSizeURL.large;
+        var self = this;
+        
+        logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for this user, randoId:", randoId, "url:", imageURL, "map url:", mapURL);
+        
         var newRando = {
           email: lightUser.email,
           creation: Date.now(),
           randoId,
           imageURL,
-          mapURL: mapSizeURL.large,
+          mapURL,
           location,
           imageSizeURL,
           mapSizeURL,
@@ -218,20 +235,20 @@ module.exports =  {
         };
 
         async.parallel({
-          addRandoToDBBucket (done) {
+          addRandoToDBBucket (addDone) {
             logger.trace("[randoService.updateRandoInDB.addRandoToDBBucket,", lightUser.email, "]");
-            db.rando.add(newRando, done);
+            db.rando.add(newRando, addDone);
           },
-          addRandoToUserOut (done) {
+          addRandoToUserOut (addDone) {
             logger.trace("[randoService.updateRandoInDB.addRandoToUserOut,", lightUser.email, "]");
-            db.user.addRandoToUserOutByEmail(lightUser.email, newRando, done);
+            db.user.addRandoToUserOutByEmail(lightUser.email, newRando, addDone);
           }
         }, function (err) {
           if (err) {
             logger.debug("[randoService.updateRandoInDB, ", lightUser.email, "] async parallel get error:", err);
-            return callback(Errors.System(err));
+            return done(Errors.System(err));
           }
-          return callback(null, newRando);
+          return done(null, newRando);
         });
       },
       function buildRando (rando, done) {

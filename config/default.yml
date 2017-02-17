@@ -53,15 +53,13 @@ app:
             image: image/
             map: map/
             name: static/
-    monitor:
-        title: Rando 4Me server status
-        url: /monitor
     share:
         url: https://rando4.me/s/
     enabledScaners:
         - nude
         - rgbHistogram
         - face
+    geoipDBPath: GeoLite2-City.mmdb
     detectedTagMap:
         unwanted: 
             - monocolor
