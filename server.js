@@ -1,4 +1,5 @@
 var cluster = require("cluster");
+var heapdump = require("heapdump");
 
 if (cluster.isMaster) {
   console.log("Star master");
