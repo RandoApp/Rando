@@ -76,9 +76,10 @@ module.exports =  {
       },
       function preventDoubleSave (done) {
         logger.debug("[randoService.preventDoubleSave, ", lightUser.email, "]");
-        db.user.getLightOutRandoByOrigianlFileName(imageInfo.originalName, (err, savedRando) => {
-          if (savedRando) {
-            logger.data("[randoService.preventDoubleSave, ", lightUser.email, "] Duplicated rando is DETECTED. Send previously uploaded rando:", savedRando);
+        db.user.getLightOutRandoByOrigianlFileName(imageInfo.originalName, (err, data) => {
+          if (!err && data && data.out[0]) {
+            var savedRando = data.out[0];
+            logger.data("[randoService.preventDoubleSave, ", lightUser.email, "] Duplicated rando is DETECTED. Send previously uploaded rando:", savedRando.randoId);
             var randoForResponse = buildPostImageResponseSync(savedRando);
             return done("BREAK-WATERFALL", randoForResponse);
           }
