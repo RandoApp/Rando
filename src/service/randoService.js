@@ -79,7 +79,7 @@ module.exports =  {
         db.user.getLightOutRandoByOrigianlFileName(imageInfo.originalName, (err, savedRando) => {
           if (savedRando) {
             logger.data("[randoService.preventDoubleSave, ", lightUser.email, "] Duplicated rando is DETECTED. Send previously uploaded rando");
-            var randoForResponse = buildPostImageResponseSync(rando);
+            var randoForResponse = buildPostImageResponseSync(savedRando);
             return done("BREAK-WATERFALL", randoForResponse);
           }
 

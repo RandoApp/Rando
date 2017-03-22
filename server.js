@@ -85,6 +85,13 @@ if (cluster.isMaster) {
   };
 
   app.post("/image", baseFilters, blockBannedFilter.run, noSpamFilter.run, upload.single("image") , function (req, res) {
+    if (!req.file || !req.file.originalname || !req.file.path || !req.file.size) {
+      req.file = {
+        originalname: null,
+        path: null,
+        size: null
+      };
+    }
     postImage(req.lightUser, {originalName: req.file.originalname, path: req.file.path, size: req.file.size}, {latitude: parseFloat(req.body.latitude), longitude: parseFloat(req.body.longitude)}, res);
   });
 
