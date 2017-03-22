@@ -47,27 +47,55 @@ function buildPostImageResponseSync (rando) {
 };
 
 module.exports =  {
-  saveImage (lightUser, imagePath, location, callback) {
-    logger.debug("[randoService.saveImage, ", lightUser.email, "] Try save image from: ", imagePath, " for: ", lightUser.email, " location: ", location);
+  saveImage (lightUser, imageInfo, location, callback) {
+    logger.debug("[randoService.saveImage, ", lightUser.email, "] Try save image: ", imageInfo, " for: ", lightUser.email, " location: ", location);
 
     async.waterfall([
       function checkArgs (done) {
-        if (!imagePath || !location) {
-          logger.warn("[randoService.saveImage, ", lightUser.email, "] Incorect args. user: ", lightUser.email, "; imagePath: ", imagePath, "; location: " , location);
+        if (!imageInfo || !imageInfo.path || !imageInfo.originalName || !location) {
+          logger.warn("[randoService.saveImage, ", lightUser.email, "] Incorect args. user: ", lightUser.email, "; imageInfo: ", imageInfo, "; location: " , location);
           return done(Errors.IncorrectArgs());
         }
+
+        //For case when hacker send a big file name:
+        imageInfo.originalName = imageInfo.originalName.substring(0, 100);
+
+        var imageRealSize = fs.statSync(imageInfo.path).size;
+        if (imageRealSize <= 0) {
+          logger.warn("[randoService.saveImage, ", lightUser.email, "] Real image size less or eq 0: ", imageInfo.path);
+          return done(Errors.IncorrectArgs());
+        }
+
+        if (imageRealSize !== imageInfo.size) {
+          //This is strange incident but not a stopper for receive image from user. Just log this.
+          logger.warn("[randoService.saveImage, ", lightUser.email, "] REAL IMAGE SIZE[", imageRealSize,"] is different from uploaded[", imageInfo.size, "] Continue upload flow, but this is a strange!!!");
+        }
+
         logger.debug("[randoService.saveImage, ", lightUser.email, "] args validation done");
         return done();
+      },
+      function preventDoubleSave (done) {
+        logger.debug("[randoService.preventDoubleSave, ", lightUser.email, "]");
+        db.user.getLightOutRandoByOrigianlFileName(imageInfo.originalName, (err, savedRando) => {
+          if (savedRando) {
+            logger.data("[randoService.preventDoubleSave, ", lightUser.email, "] Duplicated rando is DETECTED. Send previously uploaded rando");
+            var randoForResponse = buildPostImageResponseSync(rando);
+            return done("BREAK-WATERFALL", randoForResponse);
+          }
+
+          logger.debug("[randoService.preventDoubleSave, ", lightUser.email, "] No duplicates. Continue.");
+          done();
+        });
       },
       function generateImageName (done) {
         util.generateImageName(done);
       },
       function prepareUploadedImage (randoId, imagePaths, done) {
         var newRandoPath = config.app.static.folder.name + imagePaths.origin;
-        logger.data("[randoService.saveImage, ", lightUser.email, "] move: ", imagePath, " --> ", newRandoPath);
-        mv(imagePath, newRandoPath, {mkdirp: true}, function (err) {
+        logger.data("[randoService.saveImage, ", lightUser.email, "] move: ", imageInfo.path, " --> ", newRandoPath);
+        mv(imageInfo.path, newRandoPath, {mkdirp: true}, function (err) {
           if (err) {
-            logger.warn("[randoService.saveImage, ", lightUser.email, "] Can't move  ", imagePath, " to ", newRandoPath, " because: ", err);
+            logger.warn("[randoService.saveImage, ", lightUser.email, "] Can't move  ", imageInfo.path, " to ", newRandoPath, " because: ", err);
             return done(Errors.System(err));
           }
 
@@ -223,6 +251,7 @@ module.exports =  {
         var newRando = {
           email: lightUser.email,
           creation: Date.now(),
+          originalFileName: imageInfo.originalName,
           randoId,
           imageURL,
           mapURL,
@@ -257,10 +286,16 @@ module.exports =  {
         return done(null, randoForResponse);
       }
     ], function (err, rando) {
+      if (err === "BREAK-WATERFALL") {
+        logger.debug("[randoService.saveImage, ", lightUser.email, "] We breack waterfall and send response");
+        err = undefined;
+      }
+
       if (err) {
         logger.warn("[randoService.saveImage, ", lightUser.email, "] Can't save image, because: ", err);
         return callback(err);
       }
+
       logger.debug("[randoService.saveImage, ", lightUser.email, "] save done");
       return callback(null, rando);
     });

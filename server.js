@@ -71,8 +71,8 @@ if (cluster.isMaster) {
     });
   });
 
-  function postImage(lightUser, filePath, location, res) {
-    randoService.saveImage(lightUser, filePath, location, function (err, response) {
+  function postImage(lightUser, file, location, res) {
+    randoService.saveImage(lightUser, file, location, function (err, response) {
       if (err) {
         var errResponse = Errors.toResponse(err);
         logger.data("POST /image DONE with error: ", errResponse.code);
@@ -85,7 +85,7 @@ if (cluster.isMaster) {
   };
 
   app.post("/image", baseFilters, blockBannedFilter.run, noSpamFilter.run, upload.single("image") , function (req, res) {
-    postImage(req.lightUser, req.file.path, {latitude: parseFloat(req.body.latitude), longitude: parseFloat(req.body.longitude)}, res);
+    postImage(req.lightUser, {originalName: req.file.originalname, path: req.file.path, size: req.file.size}, {latitude: parseFloat(req.body.latitude), longitude: parseFloat(req.body.longitude)}, res);
   });
 
   app.post("/delete/:randoId", baseFilters, function (req, res) {
@@ -314,7 +314,7 @@ if (cluster.isMaster) {
     //@deprecated
     app.post("/image/:token", tokenConverter, access.byToken, access.noSpam, upload.single("image"), function (req, res) {
       logger.warn("DEPRECATED API CALL: POST /image/:token");
-      postImage(req.user, req.file.path, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
+      postImage(req.user, {originalName: req.file.originalname, path: req.file.path, size: req.file.size}, {latitude: req.body.latitude, longitude: req.body.longitude}, res);
     });
     //=========================================================================================================
 
