@@ -76,7 +76,7 @@ module.exports =  {
       },
       function preventDoubleSave (done) {
         logger.debug("[randoService.preventDoubleSave, ", lightUser.email, "]");
-        db.user.getLightOutRandoByOrigianlFileName(imageInfo.originalName, (err, data) => {
+        db.user.getLightOutRandoByOrigianlFileName(lightUser.email, imageInfo.originalName, (err, data) => {
           if (!err && data && data.out[0]) {
             var savedRando = data.out[0];
             logger.data("[randoService.preventDoubleSave, ", lightUser.email, "] Duplicated rando is DETECTED. Send previously uploaded rando:", savedRando.randoId);
@@ -289,7 +289,7 @@ module.exports =  {
     ], function (err, rando) {
       if (err === "BREAK-WATERFALL") {
         logger.debug("[randoService.saveImage, ", lightUser.email, "] We breack waterfall and send response");
-        err = undefined;
+        err = null;
       }
 
       if (err) {
