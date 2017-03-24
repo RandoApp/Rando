@@ -85,7 +85,7 @@ module.exports =  {
           }
 
           logger.debug("[randoService.preventDoubleSave, ", lightUser.email, "] No duplicates. Continue.");
-          done();
+          return done();
         });
       },
       function generateImageName (done) {
@@ -288,7 +288,7 @@ module.exports =  {
       }
     ], function (err, rando) {
       if (err === "BREAK-WATERFALL") {
-        logger.debug("[randoService.saveImage, ", lightUser.email, "] We breack waterfall and send response");
+        logger.debug("[randoService.saveImage, ", lightUser.email, "] We break waterfall and send response");
         err = null;
       }
 
