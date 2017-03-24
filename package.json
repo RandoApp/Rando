@@ -25,7 +25,8 @@
     "randoRecognition": "RandoApp/Rando-recognition",
     "s3": "4.4.0",
     "serve-static": "1.11.1",
-    "winston": "2.2.0"
+    "winston": "2.2.0",
+    "heapdump": "0.3.7"
   },
   "devDependencies": {
     "mongoose": "4.5.2",
