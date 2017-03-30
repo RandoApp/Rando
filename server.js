@@ -51,13 +51,13 @@ if (cluster.isMaster) {
   var baseFilters = [accessByTokenFilter.run, ipFilter.run, fireBaseFilter.run, flushUserMetaToDBFilter.run];
   
   var Errors = require("./src/error/errors");
+  
   var app = express();
   var upload = multer({ dest: "/tmp/" });
 
 
   require("randoDB").connect(config.db.url);
 
-  app.use(express.static(__dirname + "/static", {maxAge: config.app.cacheControl}));
   app.use(morgan("combined"));
   app.use(bodyParser.urlencoded({
     extended: true
