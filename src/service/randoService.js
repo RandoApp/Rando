@@ -28,12 +28,12 @@ function buildPostImageResponseSync (rando) {
       large: rando.imageSizeURL.large
     },
     //1.0.15+
-    mapURL: null,
+    mapURL: "",
     //1.0.15+
     mapSizeURL: {
-      small: null,
-      medium: null,
-      large: null
+      small: "",
+      medium: "",
+      large: ""
     },
     //1.0.19+
     detected: Array.isArray(rando.tags) ? rando.tags.map(tag => {
