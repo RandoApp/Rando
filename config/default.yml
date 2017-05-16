@@ -59,6 +59,8 @@ app:
         - nude
         - rgbHistogram
         - face
+    rgbHistogram:
+        threshold: 2000
     geoipDBPath: GeoLite2-City.mmdb
     detectedTagMap:
         unwanted: 

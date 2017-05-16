@@ -56,12 +56,13 @@ function componentsStatus (callback) {
 }
 
 function fsStatus (callback) {
+  var fileName = "/tmp/rando-status-test" + Date.now() + ".txt";
   async.series({
     canWrite: function (done) {
-      fs.writeFile("/tmp/rando-status-test.txt", "Check fs status", done);
+      fs.writeFile(fileName, "Check fs status", done);
     },
     canRead: function (done) {
-      fs.readFile("/tmp/rando-status-test.txt", function (err, data) {
+      fs.readFile(fileName, function (err, data) {
         if (err || data != "Check fs status") {
           done(new Error("Can not read file"));
           return;
@@ -70,7 +71,7 @@ function fsStatus (callback) {
       });
     },
     canDelete: function (done) {
-      fs.unlink("/tmp/rando-status-test.txt", done);
+      fs.unlink(fileName, done);
     }
   }, function (err) {
     if (err) {
