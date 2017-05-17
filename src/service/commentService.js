@@ -27,7 +27,7 @@ module.exports = {
   },
   report (user, randoId, callback) {
     logger.debug("[commentService.report, ", user.email, "] Start report rando: ", randoId);
-    async.parallel([
+    async.parallel({
       reportRando (done) {
         logger.trace("[commentService.report.reportRando, ", user.email, "]", "reportRando: ", randoId);
         db.user.updateReportFlagForInRando(user.email, randoId, 1, done);
@@ -39,7 +39,7 @@ module.exports = {
           reason: "Reported by " + user.email + " because randoId: " + randoId,
         }, done);
       }
-    ], function (err) {
+    }, function (err) {
       logger.trace("[commentService.report, ", user.email, "]", "Processing db updated results for rando: ", randoId);
       if (err) {
         logger.debug("[commentService.report, ", user.email, "] We have error in DB when updating user with rando: ", randoId, " Error: ", err.message);
