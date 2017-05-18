@@ -68,6 +68,9 @@ module.exports = {
                 logger.trace("[commentService.report.banBadUserIfNecessary, ", badUser.email, "]", "Don't have enough unique users to ban this badUser");
                 parallelDone();
               }
+            } else {
+              logger.trace("[commentService.report.banBadUserIfNecessary, ", badUser.email, "]", "badUser.report is not an array");
+              parallelDone();
             }
           }
         }, done);
