@@ -32,7 +32,7 @@ module.exports = {
       return callback(Errors.IncorrectArgs());
     }
 
-    async.waterfall({
+    async.waterfall([
       fetchBadUser (done) {
         db.user.getLightUserMetaByOutRandoId(reporedRandoId, done);
       },
@@ -65,7 +65,7 @@ module.exports = {
             }
           }
         }, done);
-      }}, (err) => {
+      }], (err) => {
         logger.trace("[commentService.report, ", goodUser.email, "]", "Processing db updated results for rando: ", reporedRandoId);
         if (err) {
           logger.debug("[commentService.report, ", goodUser.email, "] We have error in DB when updating user with rando: ", reporedRandoId, " Error: ", err.message);
