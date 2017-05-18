@@ -110,6 +110,21 @@ if (cluster.isMaster) {
     });
   });
 
+  app.post("/report/:randoId", baseFilters, function (req, res) {
+    logger.data("Start process user request. POST /report. Id:", req.params.randoId , "for user:", req.lightUser.email);
+
+    commentService.report(req.lightUser, req.params.randoId, function (err, response) {
+      if (err) {
+        var response = Errors.toResponse(err);
+        logger.data("POST /report DONE with error: ", response.code);
+        return res.status(response.status).send(response);
+      }
+
+      logger.data("POST /report DONE");
+      res.send(response);
+    });
+  });
+
   app.post("/user", function(req, res) {
     logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
 
