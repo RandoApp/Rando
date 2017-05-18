@@ -27,7 +27,7 @@ module.exports = {
     });
   },
   report (goodUser, reporedRandoId, callback) {
-    logger.debug("[commentService.report, ", goodUser.email, "] Start report rando: ", randoId);
+    logger.debug("[commentService.report, ", goodUser.email, "] Start report rando: ", reporedRandoId);
     if (!goodUser || !goodUser.email || !reporedRandoId) {
       return callback(Errors.IncorrectArgs());
     }
