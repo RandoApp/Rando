@@ -64,6 +64,9 @@ module.exports = {
               users.push(goodUser.email);
               if (new Set(users).size >= config.app.limit.reporedByUsers) {
                 db.user.updateUserMetaByEmail(badUser.email, {ban: config.app.limit.permanentBanTo}, parallelDone);
+              } else {
+                logger.trace("[commentService.report.banBadUserIfNecessary, ", badUser.email, "]", "Don't have enough unique users to ban this badUser");
+                parallelDone();
               }
             }
           }
