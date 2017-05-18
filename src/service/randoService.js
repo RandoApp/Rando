@@ -261,7 +261,8 @@ module.exports =  {
           mapSizeURL,
           ip: lightUser.ip,
           tags,
-          delete: 0
+          delete: 0,
+          report: 0
         };
 
         async.parallel({

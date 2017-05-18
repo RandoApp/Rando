@@ -80,11 +80,12 @@ module.exports = {
         return callback(Errors.System(err));
       }
 
-      user.in = randos.in.filter(rando => {return rando.delete !== 1 && rando.randoId});
-      user.out = randos.out.filter(rando => {return rando.delete !== 1 && rando.randoId});
+      user.in = randos.in.filter(rando => {return rando.delete !== 1 && rando.report !== 1 && rando.randoId});
+      user.out = randos.out.filter(rando => {return rando.delete !== 1 && rando.report !== 1 && rando.randoId});
 
       user.in.forEach(rando => {
         delete rando.delete;
+        delete rando.report;
       });
 
       user.out.forEach(rando => {
@@ -93,6 +94,7 @@ module.exports = {
         delete rando.strangerMapURL;
         delete rando.strangerMapSizeURL;
         delete rando.delete;
+        delete rando.report;
         rando.detected = Array.isArray(rando.tags) ? rando.tags.map(tag => {
           for (var detectedTag in config.app.detectedTagMap) {
             if (config.app.detectedTagMap[detectedTag].indexOf(tag) !== -1) {
