@@ -52,7 +52,7 @@ module.exports = {
               reportedBy: goodUser.email,
               randoId: reporedRandoId,
               reportedDate: Date.now(),
-              reason: "Reported by " + goodUser.email + " because randoId: " + reporedRandoId,
+              reason: "Reported by " + goodUser.email + " because randoId: " + reporedRandoId
             };
 
             db.user.addReportForUser(badUser.email, reportData, parallelDone);
@@ -61,16 +61,17 @@ module.exports = {
             logger.trace("[commentService.report.banBadUserIfNecessary, ", badUser.email, "]", "reportedRandoId: ", reporedRandoId);
             if (Array.isArray(badUser.report)) {
               var users = badUser.report.map(r => r.reportedBy);
+              //Current report event in db can be added after this method, because executed in parallel. Force set user:
               users.push(goodUser.email);
               if (new Set(users).size >= config.app.limit.reporedByUsers) {
                 db.user.updateUserMetaByEmail(badUser.email, {ban: config.app.limit.permanentBanTo}, parallelDone);
               } else {
                 logger.trace("[commentService.report.banBadUserIfNecessary, ", badUser.email, "]", "Don't have enough unique users to ban this badUser");
-                parallelDone();
+                return parallelDone();
               }
             } else {
               logger.trace("[commentService.report.banBadUserIfNecessary, ", badUser.email, "]", "badUser.report is not an array");
-              parallelDone();
+              return parallelDone();
             }
           }
         }, done);
