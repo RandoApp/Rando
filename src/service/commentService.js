@@ -33,10 +33,10 @@ module.exports = {
     }
 
     async.waterfall([
-      fetchBadUser (done) {
+      function fetchBadUser (done) {
         db.user.getLightUserMetaByOutRandoId(reporedRandoId, done);
       },
-      updateData (badUser, done) {
+      function updateData (badUser, done) {
         if (!badUser || !badUser.email) {
           return done(Errors.IncorrectArgs());
         }
