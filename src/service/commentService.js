@@ -43,19 +43,22 @@ module.exports = {
 
         async.parallel({
           reportRandoOnGoodUser (parallelDone) {
-            logger.trace("[commentService.report.reportRando, report by: ", goodUser.email, "for user: ", badUser.email, "reportRando: ", reporedRandoId);
+            logger.trace("[commentService.report.reportRandoOnGoodUser, report by: ", goodUser.email, "for user: ", badUser.email, "reportRando: ", reporedRandoId);
             db.user.updateReportFlagForInRando(goodUser.email, reporedRandoId, 1, parallelDone);
           },
           addEventToReportArrayForBadUser (parallelDone) {
-            logger.trace("[commentService.report.reportUserByRandoId, ", goodUser.email, "]", "reportUserByRandoId: ", reporedRandoId);
-            db.user.addReportForUser(badUser.email, {
+            logger.trace("[commentService.report.addEventToReportArrayForBadUser, ", goodUser.email, "]", "reportUserByRandoId: ", reporedRandoId);
+            var reportData = {
               reportedBy: goodUser.email,
               randoId: reporedRandoId,
               reportedDate: Date.now(),
               reason: "Reported by " + goodUser.email + " because randoId: " + reporedRandoId,
-            }, parallelDone);
+            };
+
+            db.user.addReportForUser(badUser.email, reportData, parallelDone);
           },
           banBadUserIfNecessary (parallelDone) {
+            logger.trace("[commentService.report.banBadUserIfNecessary, ", badUser.email, "]", "reportedRandoId: ", reporedRandoId);
             if (Array.isArray(badUser.report)) {
               var users = badUser.report.map(r => r.reportedBy);
               users.push(goodUser.email);
