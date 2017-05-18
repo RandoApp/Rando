@@ -13,6 +13,8 @@ app:
         images: 10 #10 images per 10 mins
         ban: 10800000 #3 hours
         imageSize: 30mb
+        permanentBanTo: 9000000000000 #ban to 2255 year
+        reporedByUsers: 2 #ban when reported by this unique number of users
     img:
         quality: 85 
         ext: jpg
