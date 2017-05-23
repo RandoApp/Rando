@@ -3,6 +3,7 @@ var logger = require("../log/logger");
 var async = require("async");
 var config = require("config");
 var Errors = require("../error/errors");
+var pushNotificationService = require("./pushNotificationService");
 
 module.exports = {
   delete (user, randoId, callback) {
@@ -85,5 +86,44 @@ module.exports = {
         return callback(null, {command: "report", result: "done"});
       }
     );
+  },
+  rate (user, randoId, rating, callback) {
+    logger.debug("[commentService.rate, ", user.email, "] Start rate rando:", randoId);
+    rating = parseInt(rating);
+    async.waterfall([
+      function fetchBadUser (done) {
+        db.user.getLightUserMetaByOutRandoId(randoId, done);
+      },
+      function updateData (stranger, done) {
+        async.parallel({
+          rateRandoForUserIn (parallelDone) {
+            logger.trace("[commentService.rate.reportRandoOnGoodUser, ", user.email, "for user: ", stranger.email, "rateRando: ", randoId);
+            db.user.updateRatingForInRando(user.email, randoId, rating, parallelDone);
+          },
+          rateRandoForStrangerOut (parallelDone) {
+            logger.trace("[commentService.rate.rateRandoForStrangerOut, ", stranger.email, "by user: ", user.email, "rateRando: ", randoId);
+            db.user.updateRatingForInRando(stranger.email, randoId, rating, parallelDone);
+          }
+        }, done);
+      },
+      function notifyStrangerAboutRatingUpdate (done) {
+        var message = {
+          notificationType: "rated",
+          rando: {
+            randoId,
+            rating
+          }
+        };
+        pushNotificationService.sendMessageToAllActiveUserDevices(message, stranger, done);
+      }
+    ], (err) => {
+        logger.trace("[commentService.rate, ", user.email, "]", "Processing db updated results for rando: ", randoId);
+        if (err) {
+          logger.debug("[commentService.rate, ", user.email, "] We have error in DB when updating user with rando: ", randoId, " Error: ", err.message);
+          return callback(Errors.System(err));
+        }
+        logger.debug("[commentService.rate, ", user.email, "] User successfully updated with reported rando: ", randoId);
+        return callback(null, {command: "rate", result: "done"});
+    });
   }
 };
