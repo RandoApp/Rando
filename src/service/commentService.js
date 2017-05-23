@@ -97,12 +97,12 @@ module.exports = {
       function updateData (stranger, done) {
         async.parallel({
           rateRandoForUserIn (parallelDone) {
-            logger.trace("[commentService.rate.reportRandoOnGoodUser, ", user.email, "for user: ", stranger.email, "rateRando: ", randoId);
+            logger.trace("[commentService.rate.rateRandoForUserIn, ", user.email, "for user: ", stranger.email, "rateRando: ", randoId);
             db.user.updateRatingForInRando(user.email, randoId, rating, parallelDone);
           },
           rateRandoForStrangerOut (parallelDone) {
             logger.trace("[commentService.rate.rateRandoForStrangerOut, ", stranger.email, "by user: ", user.email, "rateRando: ", randoId);
-            db.user.updateRatingForInRando(stranger.email, randoId, rating, parallelDone);
+            db.user.updateRatingForOutRando(stranger.email, randoId, rating, parallelDone);
           }
         }, (err) => {
           done(err, stranger);
