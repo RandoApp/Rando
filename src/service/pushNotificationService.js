@@ -37,7 +37,7 @@ module.exports = {
 
     firebase.post("https://fcm.googleapis.com/fcm/send")
     .headers({
-      Authorization: "key=" + config.firebase.key,
+      Authorization: "key=" + config.app.firebase.key,
       "Content-Type": "application/json"
     })
     .send(buildMessage(message, deviceFirebaseId))
