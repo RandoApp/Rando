@@ -24,7 +24,8 @@
     "randoDB": "RandoApp/Rando-db",
     "randoRecognition": "RandoApp/Rando-recognition",
     "s3": "4.4.0",
-    "winston": "2.2.0"
+    "winston": "2.2.0",
+    "unirest": "0.5.0"
   },
   "devDependencies": {
     "mongoose": "4.5.2",
