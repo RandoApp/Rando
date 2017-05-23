@@ -104,9 +104,11 @@ module.exports = {
             logger.trace("[commentService.rate.rateRandoForStrangerOut, ", stranger.email, "by user: ", user.email, "rateRando: ", randoId);
             db.user.updateRatingForInRando(stranger.email, randoId, rating, parallelDone);
           }
-        }, done);
+        }, (err) => {
+          done(err, stranger);
+        });
       },
-      function notifyStrangerAboutRatingUpdate (done) {
+      function notifyStrangerAboutRatingUpdate (stranger, done) {
         var message = {
           notificationType: "rated",
           rando: {
