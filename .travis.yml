@@ -7,6 +7,6 @@ node_js:
 git:
   depth: 3
 before_install:
-  - touch 'GeoLite2-City.mmdb'
+  - npm run-script geoip
 after_script:
   - npm run-script coveralls
