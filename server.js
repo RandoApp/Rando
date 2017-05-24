@@ -27,6 +27,11 @@ if (cluster.isMaster) {
       console.error("File " + config.app.geoipDBPath + " not found. Did you download maxmind db file?\n");
       process.exit(1);
     }
+
+    if (!fs.existsSync("./node_modules/randoRecognition/package.json")) {
+      console.error("randoRecognition module not found. Please copy randoRecognition in node_modules folder\n");
+      process.exit(1);
+    }
   })();
 
   var access = require("./src/service/access");
