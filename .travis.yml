@@ -6,8 +6,5 @@ node_js:
   - node
 git:
   depth: 3
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install --qq libopencv-dev
 after_script:
   - npm run-script coveralls
