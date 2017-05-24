@@ -11,11 +11,11 @@ module.exports = {
     async.parallel([
       function deleteFromOut(done) {
         logger.trace("[commentService.delete, ", user.email, "]", "deleteFromOut: ", randoId);
-        db.user.updateDeleteFlagForOutRando(user.email, randoId, 1, done);
+        db.user.updateOutRandoProperties(user.email, randoId, {delete: 1}, done);
       },
       function deleteFromIn(done) {
         logger.trace("[commentService.delete, ", user.email, "]", "deleteFromIn: ", randoId);
-        db.user.updateDeleteFlagForInRando(user.email, randoId, 1, done);
+        db.user.updateInRandoProperties(user.email, randoId, {delete: 1}, done);
       }
     ], function (err) {
       logger.trace("[commentService.delete, ", user.email, "]", "Processing db updated results for rando: ", randoId);
@@ -45,7 +45,7 @@ module.exports = {
         async.parallel({
           reportRandoOnGoodUser (parallelDone) {
             logger.trace("[commentService.report.reportRandoOnGoodUser, report by: ", goodUser.email, "for user: ", badUser.email, "reportRando: ", reporedRandoId);
-            db.user.updateReportFlagForInRando(goodUser.email, reporedRandoId, 1, parallelDone);
+            db.user.updateInRandoProperties(goodUser.email, reporedRandoId, {report: 1}, parallelDone);
           },
           addEventToReportArrayForBadUser (parallelDone) {
             logger.trace("[commentService.report.addEventToReportArrayForBadUser, ", goodUser.email, "]", "reportUserByRandoId: ", reporedRandoId);
@@ -98,11 +98,11 @@ module.exports = {
         async.parallel({
           rateRandoForUserIn (parallelDone) {
             logger.trace("[commentService.rate.rateRandoForUserIn, ", user.email, "for user: ", stranger.email, "rateRando: ", randoId);
-            db.user.updateRatingForInRando(user.email, randoId, rating, parallelDone);
+            db.user.updateInRandoProperties(user.email, randoId, {rating}, parallelDone);
           },
           rateRandoForStrangerOut (parallelDone) {
             logger.trace("[commentService.rate.rateRandoForStrangerOut, ", stranger.email, "by user: ", user.email, "rateRando: ", randoId);
-            db.user.updateRatingForOutRando(stranger.email, randoId, rating, parallelDone);
+            db.user.updateOutRandoProperties(stranger.email, randoId, {rating}, parallelDone);
           }
         }, (err) => {
           done(err, stranger);
