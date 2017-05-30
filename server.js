@@ -55,7 +55,12 @@ app.use(bodyParser.json());
 
 app.get("/status", function (req, res) {
   statusService.status(function (status) {
-    res.send(status);
+    var statusCode = 200;
+    if (!status || Object.values(status).filter(s => s === "fail").length >= 1) {
+      statusCode = 500;
+    }
+
+    res.status(statusCode).send(status);
   });
 });
 
