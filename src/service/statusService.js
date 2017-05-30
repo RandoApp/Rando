@@ -5,6 +5,8 @@ var fs = require("fs");
 var exec = require("child_process").exec;
 var http = require("http");
 var config = require("config");
+var os = require("os");
+var hostname = os.hostname();
 
 module.exports = {
   status: function (callback) {
@@ -14,7 +16,10 @@ module.exports = {
       componentsStatus,
       fsStatus
       ], function (err, statuses) {
-        var status = {created: new Date()};
+        var status = {
+          created: new Date(),
+          node: hostname + ":" + config.app.port
+        };
 
         for (var i = 0; i < statuses.length; i++) {
           for (var attr in statuses[i]) {
