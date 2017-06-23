@@ -16,6 +16,7 @@ function isSpamDetected (randos) {
   if (randos.length >= config.app.limit.images) {
     logger.debug("[noSpamFilter.isSpamDetected]", "Randos size is bigger that limit. We should caclulate time");
     var lastRando = randos[config.app.limit.images - 1];
+    logger.debug("[noSpamFilter.isSpamDetected]", "lastRando:", lastRando);
     var timeBetwenImagesLimit = Date.now() - lastRando.creation;
     logger.debug("[noSpamFilter.isSpamDetected]", "timeBetwenImagesLimit:", timeBetwenImagesLimit);
     return timeBetwenImagesLimit <= config.app.limit.time;

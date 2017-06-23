@@ -7,12 +7,12 @@ var mockUtil = require("../mockUtil");
 describe("noSpamFilter.", () => {
   describe("run.", () => {
     afterEach(() => {
-      mockUtil.clean(db);
+      mockUtil.clean(db, Date);
     });
 
     it("Should sendForbidden", (done) => {
       var req = {lightUser: {email: "user@rando4.me" }};
-      var now = Date.now();
+      var now = 15*1000;
       var user = {
         out: [{
             randoId: "1",
@@ -49,7 +49,7 @@ describe("noSpamFilter.", () => {
       };
 
       sinon.stub(Date, "now", () => {
-        return 10000000000;
+        return now;
       });
 
       sinon.stub(db.user, "getAllLightOutRandosByEmail", (email, limit, callback) => {
@@ -66,7 +66,7 @@ describe("noSpamFilter.", () => {
           return this;
         },
         send (res) {
-          res.message.should.eql("Forbidden. Reset: 10010800000");
+          res.message.should.eql("Forbidden. Reset: 10815000");
           done();
         }
       }, () => {
