@@ -1,4 +1,3 @@
-var should = require("should");
 var noSpamFilter = require("../../src/filter/noSpamFilter");
 var sinon = require("sinon");
 var db = require("randoDB");
