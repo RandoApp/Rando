@@ -12,28 +12,28 @@ describe("Comment service.", function () {
       mockUtil.clean(db);
     });
 
-    it("Delete flag should be set to 1 in out by calling db.user.updateDeleteFlagForOutRando", function (done) {
+    it("Delete flag should be set to 1 in out by calling db.user.updateOutRandoProperties", function (done) {
       var user = {
         email: "user@mail.com",
         out:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
         in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
       };
 
-      sinon.stub(db.user, "updateDeleteFlagForOutRando", function (email, randoId, deleteFlag, callback) {
+      sinon.stub(db.user, "updateOutRandoProperties", function (email, randoId, deleteFlag, callback) {
         done();
       });
 
       commentService.delete(user, 456, function (err, response) {/*doesn't matter*/});
     });
 
-    it("Delete flag should be set to 1 in in by calling db.user.updateDeleteFlagForInRando", function (done) {
+    it("Delete flag should be set to 1 in in by calling db.user.updateInRandoProperties", function (done) {
       var user = {
         email: "user@mail.com",
         out:[{randoId: 123, delete: 0}, {randoId: 456, delete: 0}],
         in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
       };
 
-      sinon.stub(db.user, "updateDeleteFlagForInRando", function (email, randoId, deleteFlag, callback) {
+      sinon.stub(db.user, "updateInRandoProperties", function (email, randoId, deleteFlag, callback) {
         done();
       });
 
@@ -47,7 +47,7 @@ describe("Comment service.", function () {
         in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
       };
 
-      sinon.stub(db.user, "updateDeleteFlagForOutRando", function (email, randoId, deleteFlag, callback) {
+      sinon.stub(db.user, "updateOutRandoProperties", function (email, randoId, deleteFlag, callback) {
         callback(new Error("Some db error"));
       });
 
@@ -64,11 +64,11 @@ describe("Comment service.", function () {
         in:[{randoId: 789, delete: 0}, {randoId: 999, delete: 0}]
       };
 
-      sinon.stub(db.user, "updateDeleteFlagForOutRando", function (email, randoId, deleteFlag, callback) {
+      sinon.stub(db.user, "updateOutRandoProperties", function (email, randoId, deleteFlag, callback) {
         callback();
       });
 
-      sinon.stub(db.user, "updateDeleteFlagForInRando", function (email, randoId, deleteFlag, callback) {
+      sinon.stub(db.user, "updateInRandoProperties", function (email, randoId, deleteFlag, callback) {
         callback();
       });
 

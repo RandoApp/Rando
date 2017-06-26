@@ -15,6 +15,11 @@ var multer  = require("multer");
     console.error("File " + config.app.geoipDBPath + " not found. Did you download maxmind db file?\n");
     process.exit(1);
   }
+
+  if (!fs.existsSync("./node_modules/randoRecognition/package.json")) {
+    console.error("randoRecognition module not found. Please copy randoRecognition in node_modules folder\n");
+    process.exit(1);
+  }
 })();
 
 var access = require("./src/service/access");
@@ -114,6 +119,21 @@ app.post("/report/:randoId", baseFilters, function (req, res) {
     }
 
     logger.data("POST /report DONE");
+    res.send(response);
+  });
+});
+
+app.post("/rate/:randoId", baseFilters, (req, res) => {
+  logger.data("Start process user request. POST /rate. Id:", req.params.randoId , "for user:", req.lightUser.email, "rating:", req.query.rating);
+
+  commentService.rate(req.lightUser, req.params.randoId, req.query.rating, (err, response) => {
+    if (err) {
+      var response = Errors.toResponse(err);
+      logger.data("POST /rate DONE with error: ", response.code);
+      return res.status(response.status).send(response);
+    }
+
+    logger.data("POST /rate DONE");
     res.send(response);
   });
 });
