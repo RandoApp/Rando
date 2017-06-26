@@ -89,6 +89,5 @@ describe("Image service.", function () {
         done();
       });
     });
+  });
 });
-});
-

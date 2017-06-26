@@ -67,6 +67,8 @@ app:
     detectedTagMap:
         unwanted: 
             - monocolor
+    firebase:
+        key: STUB_SERVER_API_KEY
 scripts:
     maskPath: scripts/resources/round-mask.png
 
