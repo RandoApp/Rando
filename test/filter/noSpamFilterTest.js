@@ -49,6 +49,8 @@ describe("noSpamFilter.", () => {
         ]
       };
 
+      var VALUES = Object.values(user);
+
       sinon.stub(Date, "now", () => {
         return now;
       });
