@@ -13,7 +13,6 @@ module.exports = {
         } else if (typeof object[method] === "function") {
           if (object[method].restore) {
             object[method].restore();
-            console.log('clenup mythod:' + method);
           }
         }
       }
