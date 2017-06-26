@@ -1,5 +1,3 @@
-var sinon = require("sinon");
-
 module.exports = {
   clean (object) {
     if (typeof object === "function") {
