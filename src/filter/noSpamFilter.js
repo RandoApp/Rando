@@ -3,9 +3,26 @@ var logger = require("../log/logger");
 var config = require("config");
 var Errors = require("../error/errors");
 
-function sendForbidden(res, ban) {
+function sendForbidden (res, ban) {
   var response = Errors.toResponse(Errors.Forbidden(ban));
   res.status(response.status).send(response);
+}
+
+function isSpamDetected (randos) {
+  randos.sort((a, b) => a.creation - b.creation);
+
+  logger.debug("[noSpamFilter.isSpamDetected]", "Analyze randos array with length: ", randos.length);
+
+  if (randos.length >= config.app.limit.images) {
+    logger.debug("[noSpamFilter.isSpamDetected]", "Randos size is bigger that limit. We should caclulate time");
+    var lastRando = randos[config.app.limit.images - 1];
+    logger.debug("[noSpamFilter.isSpamDetected]", "lastRando:", lastRando);
+    var timeBetwenImagesLimit = Date.now() - lastRando.creation;
+    logger.debug("[noSpamFilter.isSpamDetected]", "Calculateion timeBetwenImagesLimit:", Date.now(), "-", lastRando.creation, " = ", timeBetwenImagesLimit);
+    return timeBetwenImagesLimit <= config.app.limit.time;
+  }
+  logger.debug("[noSpamFilter.isSpamDetected]", "No spam");
+  return false;
 }
 
 module.exports = {
@@ -23,31 +40,19 @@ module.exports = {
         return next();
       }
 
-      var randos = userWithOut.out;
-      randos.sort((a, b) => a.creation - b.creation);
+      if (isSpamDetected(userWithOut.out)) {
+        var ban = Date.now() + config.app.limit.ban;
+        logger.warn("[noSpamFilter, ", user.email, "] Spam found!!! Ban user to:", ban, " and send Forbidden.");
 
-      logger.debug("[noSpamFilter]", "Analyze randos array with length: ", randos.length);
-
-      if (randos.length >= config.app.limit.images) {
-        logger.debug("[noSpamFilter]", "Randos size is bigger that limit. We should caclulate time");
-        var lastRando = randos[config.app.limit.images - 1];
-        var timeBetwenImagesLimit = Date.now() - lastRando.creation;
-
-        if (timeBetwenImagesLimit <= config.app.limit.time) {
-          logger.warn("[noSpamFilter, ", user.email, "] Spam found!!! Return Forbidden. Now - randos #", config.app.limit.images, "creation is", timeBetwenImagesLimit);
-
-          db.user.updateUserMetaByEmail(user.email, {
-            ban: Date.now() + config.app.limit.ban
-          }, function (err) {
-            if (err) {
-              logger.error("[noSpamFilter]", "Cannot update user ban field in DB, because:", err);
-            }
-            return sendForbidden(res, user.ban);
-          });
-        }
+        db.user.updateUserMetaByEmail(user.email, {ban}, (err) => {
+          if (err) {
+            logger.error("[noSpamFilter]", "Cannot update user ban field in DB, because:", err);
+          }
+          return sendForbidden(res, ban);
+        });
+      } else {
+        return next();
       }
-
-      return next();
     });
   }
 };

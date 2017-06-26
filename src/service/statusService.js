@@ -1,5 +1,4 @@
-var Db = require("mongodb").Db;
-var Server = require("mongodb").Server;
+var db = require("randoDB");
 var async = require("async");
 var fs = require("fs");
 var exec = require("child_process").exec;
@@ -32,21 +31,12 @@ module.exports = {
 };
 
 function dbStatus (callback) {
-  var db = new Db(config.db.name, new Server(config.db.host, config.db.port), {safe: true});
-  db.open(function(err, db) {
-    if (err) {
-      callback(null, {db: "fail"});
-      return;
+  db.status( (err, status) => {
+    if (err || !status) {
+      return callback(null, {db: "fail"});
+    } else {
+      return callback(null, {db: "ok"});
     }
-
-    db.admin().serverStatus(function (err, info) {
-      if (err || info.ok != 1) {
-        callback(null, {db: "fail"});
-      } else {
-        callback(null, {db: "ok"});
-      }
-      db.close();
-    });
   });
 }
 
