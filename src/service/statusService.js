@@ -32,7 +32,7 @@ module.exports = {
 
 function dbStatus (callback) {
   db.status( (err, status) => {
-    if (err || !status || status.infoxOf('"ok" : 1' === -1)) {
+    if (err || !status || status.indexOf('"ok" : 1' === -1)) {
       return callback(null, {db: "fail"});
     } else {
       return callback(null, {db: "ok"});
