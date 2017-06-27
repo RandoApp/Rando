@@ -159,7 +159,7 @@ app.post("/user", function(req, res) {
 
 app.get("/user", baseFilters, function (req, res) {
   logger.data("Start process user request. GET /user. for: ", req.lightUser.email);
-  
+
   userService.getUser(req.lightUser.email, function (err, user) {
     if (err) {
       var response = Errors.toResponse(err);
@@ -217,7 +217,7 @@ app.post("/google", function (req, res) {
 
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
+  userService.verifyGoogleAndFindOrCreateUserV2(req.body.email, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);

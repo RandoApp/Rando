@@ -7,6 +7,9 @@ var Errors = require("../error/errors");
 var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
 var util = require("../util/util");
+var GoogleAuth = require('google-auth-library');
+var auth = new GoogleAuth;
+var client = new auth.OAuth2(CLIENT_ID, '', '');
 
 module.exports = {
   //Deprecated. See firebaseService
@@ -119,7 +122,7 @@ module.exports = {
         if (err) {
           logger.warn("[userService.getUser] Error when make user backward compaitble");
           return callback(Errors.System(err));
-          
+
         }
         callback(null, compatibleUserJSON);
       });
@@ -273,6 +276,25 @@ module.exports = {
     });
   },
 
+  verifyGoogleAndFindOrCreateUserV2 (email, token, ip, firebaseInstanceId, callback) {
+    logger.info("verifyGoogleAndFindOrCreateUserV2 with token: ", token);
+    client.verifyIdToken(
+      token,
+      CLIENT_ID,
+      // Or, if multiple clients access the backend:
+      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3],
+      function(e, login) {
+        var payload = login.getPayload();
+        var userid = payload['sub'];
+        var userEmail = payload['email'];
+        logger.info("USER ID: ", userid);
+        logger.info("USER EMAIL: ", userEmail);
+        // If request specified a G Suite domain:
+        //var domain = payload['hd'];
+      }
+    );
+  },
+
   verifyGoogleAndFindOrCreateUser (email, familyName, token, ip, firebaseInstanceId, callback) {
     logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
 
@@ -348,7 +370,7 @@ module.exports = {
         logger.debug("[userService.findOrCreateByFBData, ", data.email, " User not exist. Try create him");
 
         var newUser = {
-          authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"), 
+          authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
           facebookId: data.id,
           email: data.email,
           ip: data.ip,
@@ -413,8 +435,8 @@ module.exports = {
         logger.debug("[userService.findOrCreateByGoogleData, ", email, " User not exist. Try create him");
 
         var newUser = {
-          authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"), 
-          googleId: id, 
+          authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
+          googleId: id,
           email: email,
           ip: ip
         }
