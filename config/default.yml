@@ -16,7 +16,7 @@ app:
         permanentBanTo: 9000000000000 #ban to 2255 year
         reporedByUsers: 2 #ban when reported by this unique number of users
     img:
-        quality: 85 
+        quality: 85
         ext: jpg
         folder:
             origin: origin/
@@ -65,10 +65,13 @@ app:
         threshold: 2000
     geoipDBPath: GeoLite2-City.mmdb
     detectedTagMap:
-        unwanted: 
+        unwanted:
             - monocolor
     firebase:
         key: STUB_SERVER_API_KEY
+    auth:
+        googleClientId: STUB_GOOGLE_ID
+
 scripts:
     maskPath: scripts/resources/round-mask.png
 

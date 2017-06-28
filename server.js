@@ -213,7 +213,7 @@ app.post("/facebook", function (req, res) {
 });
 
 app.post("/google", function (req, res) {
-  logger.data("Start process user request. POST /google. Email: ", req.body.email, "Family name: ", req.body.family_name, " Google Token length: ", req.body.token.length);
+  logger.data("Start process user request. POST /google. Email: ", req.body.email,  " Google Token length: ", req.body.token.length);
 
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
