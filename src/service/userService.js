@@ -9,7 +9,7 @@ var passwordUtil = require("../util/password");
 var util = require("../util/util");
 var GoogleAuth = require('google-auth-library');
 var auth = new GoogleAuth;
-var client = new auth.OAuth2(CLIENT_ID, '', '');
+var client = new auth.OAuth2(config.app.auth.googleClientId, '', '');
 
 module.exports = {
   //Deprecated. See firebaseService
