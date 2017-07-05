@@ -293,8 +293,8 @@ module.exports = {
         var payload = data.getPayload();
         var userId = payload['sub'];
         var userEmail = payload['email'];
-        logger.info("USER ID: ", userid);
-        logger.info("USER EMAIL: ", userEmail);
+        logger.info("verifyGoogleAndFindOrCreateUserV2 got userId:", userId);
+        logger.info("verifyGoogleAndFindOrCreateUserV2 got userEmail:", userEmail);
         if (email === userEmail) {
           logger.info("verifyGoogleAndFindOrCreateUserV2 successful login: ", userEmail);
           return self.findOrCreateByGoogleData(userId, userEmail, ip, firebaseInstanceId, callback);
