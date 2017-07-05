@@ -277,16 +277,31 @@ module.exports = {
   },
 
   verifyGoogleAndFindOrCreateUserV2 (email, token, ip, firebaseInstanceId, callback) {
-    logger.info("verifyGoogleAndFindOrCreateUserV2 with token: ", token);
+    if (!email || !token) {
+      return callback(Errors.GoogleIncorrectArgs());
+    }
+
+    logger.info("verifyGoogleAndFindOrCreateUserV2 with token length: ", token.length);
     client.verifyIdToken(
       token,
       config.app.auth.googleClientId,
       function(e, login) {
+        if (e) {
+          logger.warn("verifyGoogleAndFindOrCreateUserV2 google response with err: ", e);
+          return callback(e);
+        }
         var payload = login.getPayload();
         var userid = payload['sub'];
         var userEmail = payload['email'];
         logger.info("USER ID: ", userid);
         logger.info("USER EMAIL: ", userEmail);
+        if (email === userEmail) {
+          logger.info("verifyGoogleAndFindOrCreateUserV2 successful login: ", userEmail);
+          return callback();
+        } else {
+          logger.warn("verifyGoogleAndFindOrCreateUserV2 Emails are different. requested: ", email, " But google return: ", userEmail);
+          return callback(Errors.GoogleError());
+        }
         // If request specified a G Suite domain:
         //var domain = payload['hd'];
       }
