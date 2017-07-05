@@ -70,8 +70,8 @@ app:
     firebase:
         key: STUB_SERVER_API_KEY
     auth:
-        googleClientId: STUB_GOOGLE_ID
-
+        googleClientIds:
+          - STUB_GOOGLE_ID
 scripts:
     maskPath: scripts/resources/round-mask.png
 

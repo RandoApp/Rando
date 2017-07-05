@@ -285,12 +285,12 @@ module.exports = {
     client.verifyIdToken(
       token,
       config.app.auth.googleClientId,
-      function(e, login) {
+      (e, data) => {
         if (e) {
           logger.warn("verifyGoogleAndFindOrCreateUserV2 google response with err: ", e);
           return callback(e);
         }
-        var payload = login.getPayload();
+        var payload = data.getPayload();
         var userid = payload['sub'];
         var userEmail = payload['email'];
         logger.info("USER ID: ", userid);
