@@ -284,7 +284,7 @@ module.exports = {
     logger.info("verifyGoogleAndFindOrCreateUserV2 with token length: ", token.length);
     client.verifyIdToken(
       token,
-      config.app.auth.googleClientId,
+      config.app.auth.googleClientIds,
       (e, data) => {
         if (e) {
           logger.warn("verifyGoogleAndFindOrCreateUserV2 google response with err: ", e);
