@@ -276,38 +276,38 @@ module.exports = {
     });
   },
 
-  verifyGoogleAndFindOrCreateUserV2 (email, token, ip, firebaseInstanceId, callback) {
+  verifyGoogleAndFindOrCreateUser (email, token, ip, firebaseInstanceId, callback) {
     if (!email || !token) {
       return callback(Errors.GoogleIncorrectArgs());
     }
     var self = this;
-    logger.info("verifyGoogleAndFindOrCreateUserV2 with token length: ", token.length);
+    logger.info("verifyGoogleAndFindOrCreateUser with token length: ", token.length);
     client.verifyIdToken(
       token,
       config.app.auth.googleClientIds,
       (e, data) => {
         if (e) {
-          logger.warn("verifyGoogleAndFindOrCreateUserV2 google response with err: ", e);
+          logger.warn("verifyGoogleAndFindOrCreateUser google response with err: ", e);
           return callback(e);
         }
         var payload = data.getPayload();
         var userId = payload['sub'];
         var userEmail = payload['email'];
-        logger.info("verifyGoogleAndFindOrCreateUserV2 got userId:", userId);
-        logger.info("verifyGoogleAndFindOrCreateUserV2 got userEmail:", userEmail);
+        logger.info("verifyGoogleAndFindOrCreateUser got userId:", userId);
+        logger.info("verifyGoogleAndFindOrCreateUser got userEmail:", userEmail);
         if (email === userEmail) {
-          logger.info("verifyGoogleAndFindOrCreateUserV2 successful login: ", userEmail);
+          logger.info("verifyGoogleAndFindOrCreateUser successful login: ", userEmail);
           return self.findOrCreateByGoogleData(userId, userEmail, ip, firebaseInstanceId, callback);
         } else {
-          logger.warn("verifyGoogleAndFindOrCreateUserV2 Emails are different. requested: ", email, " But google return: ", userEmail);
+          logger.warn("verifyGoogleAndFindOrCreateUser Emails are different. requested: ", email, " But google return: ", userEmail);
           return callback(Errors.GoogleError());
         }
       }
     );
   },
 
-  verifyGoogleAndFindOrCreateUser (email, familyName, token, ip, firebaseInstanceId, callback) {
-    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
+  verifyGoogleAndFindOrCreateUserDeprecated (email, familyName, token, ip, firebaseInstanceId, callback) {
+    logger.debug("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] Start");
 
     var self = this;
     var googleJson = "";
@@ -324,19 +324,19 @@ module.exports = {
         try {
           json = JSON.parse(googleJson);
         } catch (e) {
-          logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Bad JSON: ", e.message);
+          logger.warn("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] Bad JSON: ", e.message);
           return callback(Errors.GoogleError());
         }
-        logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
+        logger.debug("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] Recive json: ", json);
         if (json.family_name === familyName) {
-          logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
+          logger.debug("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] family names is equals");
           self.findOrCreateByGoogleData(json.id, email, ip, firebaseInstanceId, callback);
         } else {
-          logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
+          logger.debug("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] family names is not eql. Return incorrect args.");
           return callback(Errors.GoogleIncorrectArgs());
         }
       }).on("error", function (e) {
-        logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
+        logger.warn("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] Error in communication with Google: ", e);
         return callback(Errors.GoogleError());
       });
     });

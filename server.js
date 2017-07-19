@@ -1,9 +1,9 @@
 var fs = require("fs");
 var config = require("config");
 var express = require("express");
-var morgan  = require("morgan");
+var morgan = require("morgan");
 var bodyParser = require("body-parser");
-var multer  = require("multer");
+var multer = require("multer");
 
 (function checkSources() {
   if (!fs.existsSync(config.app.citiesJson)) {
@@ -46,7 +46,9 @@ var baseFilters = [accessByTokenFilter.run, ipFilter.run, fireBaseFilter.run, fl
 var Errors = require("./src/error/errors");
 
 var app = express();
-var upload = multer({ dest: "/tmp/" });
+var upload = multer({
+  dest: "/tmp/"
+});
 
 
 require("randoDB").connect(config.db.url);
@@ -58,8 +60,8 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 
-app.get("/status", function (req, res) {
-  statusService.status(function (status) {
+app.get("/status", function(req, res) {
+  statusService.status(function(status) {
     var statusCode = 200;
     if (!status || Object.values(status).filter(s => s === "fail").length >= 1) {
       statusCode = 500;
@@ -70,7 +72,7 @@ app.get("/status", function (req, res) {
 });
 
 function postImage(lightUser, file, location, res) {
-  randoService.saveImage(lightUser, file, location, function (err, response) {
+  randoService.saveImage(lightUser, file, location, function(err, response) {
     if (err) {
       var errResponse = Errors.toResponse(err);
       logger.data("POST /image DONE with error: ", errResponse.code);
@@ -82,7 +84,7 @@ function postImage(lightUser, file, location, res) {
   });
 };
 
-app.post("/image", baseFilters, blockBannedFilter.run, noSpamFilter.run, upload.single("image") , function (req, res) {
+app.post("/image", baseFilters, blockBannedFilter.run, noSpamFilter.run, upload.single("image"), function(req, res) {
   if (!req.file || !req.file.originalname || !req.file.path || !req.file.size) {
     req.file = {
       originalname: null,
@@ -90,13 +92,20 @@ app.post("/image", baseFilters, blockBannedFilter.run, noSpamFilter.run, upload.
       size: null
     };
   }
-  postImage(req.lightUser, {originalName: req.file.originalname, path: req.file.path, size: req.file.size}, {latitude: parseFloat(req.body.latitude), longitude: parseFloat(req.body.longitude)}, res);
+  postImage(req.lightUser, {
+    originalName: req.file.originalname,
+    path: req.file.path,
+    size: req.file.size
+  }, {
+    latitude: parseFloat(req.body.latitude),
+    longitude: parseFloat(req.body.longitude)
+  }, res);
 });
 
-app.post("/delete/:randoId", baseFilters, function (req, res) {
-  logger.data("Start process user request. POST /delete. Id:", req.params.randoId , "for user:", req.lightUser.email);
+app.post("/delete/:randoId", baseFilters, function(req, res) {
+  logger.data("Start process user request. POST /delete. Id:", req.params.randoId, "for user:", req.lightUser.email);
 
-  commentService.delete(req.lightUser, req.params.randoId, function (err, response) {
+  commentService.delete(req.lightUser, req.params.randoId, function(err, response) {
     if (err) {
       var response = Errors.toResponse(err);
       logger.data("POST /delete DONE with error: ", response.code);
@@ -108,10 +117,10 @@ app.post("/delete/:randoId", baseFilters, function (req, res) {
   });
 });
 
-app.post("/report/:randoId", baseFilters, function (req, res) {
-  logger.data("Start process user request. POST /report. Id:", req.params.randoId , "for user:", req.lightUser.email);
+app.post("/report/:randoId", baseFilters, function(req, res) {
+  logger.data("Start process user request. POST /report. Id:", req.params.randoId, "for user:", req.lightUser.email);
 
-  commentService.report(req.lightUser, req.params.randoId, function (err, response) {
+  commentService.report(req.lightUser, req.params.randoId, function(err, response) {
     if (err) {
       var response = Errors.toResponse(err);
       logger.data("POST /report DONE with error: ", response.code);
@@ -124,7 +133,7 @@ app.post("/report/:randoId", baseFilters, function (req, res) {
 });
 
 app.post("/rate/:randoId", baseFilters, (req, res) => {
-  logger.data("Start process user request. POST /rate. Id:", req.params.randoId , "for user:", req.lightUser.email, "rating:", req.query.rating);
+  logger.data("Start process user request. POST /rate. Id:", req.params.randoId, "for user:", req.lightUser.email, "rating:", req.query.rating);
 
   commentService.rate(req.lightUser, req.params.randoId, req.query.rating, (err, response) => {
     if (err) {
@@ -139,11 +148,11 @@ app.post("/rate/:randoId", baseFilters, (req, res) => {
 });
 
 app.post("/user", function(req, res) {
-  logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
+  logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: ", req.body.password.length);
 
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, ip, req.body.firebaseInstanceId, function (err, response) {
+  userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, ip, req.body.firebaseInstanceId, function(err, response) {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
@@ -157,10 +166,10 @@ app.post("/user", function(req, res) {
   });
 });
 
-app.get("/user", baseFilters, function (req, res) {
+app.get("/user", baseFilters, function(req, res) {
   logger.data("Start process user request. GET /user. for: ", req.lightUser.email);
 
-  userService.getUser(req.lightUser.email, function (err, user) {
+  userService.getUser(req.lightUser.email, function(err, user) {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
@@ -172,12 +181,12 @@ app.get("/user", baseFilters, function (req, res) {
   });
 });
 
-app.post("/anonymous", function (req, res) {
+app.post("/anonymous", function(req, res) {
   logger.data("Start process user request. POST /anonymous. id: ", req.body.id);
 
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  userService.findOrCreateAnonymous(req.body.id, ip, req.body.firebaseInstanceId, function (err, response) {
+  userService.findOrCreateAnonymous(req.body.id, ip, req.body.firebaseInstanceId, function(err, response) {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
@@ -192,12 +201,12 @@ app.post("/anonymous", function (req, res) {
   });
 });
 
-app.post("/facebook", function (req, res) {
-  logger.data("Start process user request. POST /facebook. Id:", req.body.id ," Email: ", req.body.email, " FB Token length: ", req.body.token.length);
+app.post("/facebook", function(req, res) {
+  logger.data("Start process user request. POST /facebook. Id:", req.body.id, " Email: ", req.body.email, " FB Token length: ", req.body.token.length);
 
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
+  userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, ip, req.body.firebaseInstanceId, function(err, response) {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
@@ -212,12 +221,12 @@ app.post("/facebook", function (req, res) {
   });
 });
 
-app.post("/google", function (req, res) {
-  logger.data("Start process user request. POST /google. Email: ", req.body.email,  " Google Token length: ", req.body.token.length);
+app.post("/google", function(req, res) {
+  logger.data("Start process user request. POST /google. Email: ", req.body.email, " Google Token length: ", req.body.token.length);
 
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  userService.verifyGoogleAndFindOrCreateUserV2(req.body.email, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
+  var callback = function(err, response) {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
@@ -229,11 +238,18 @@ app.post("/google", function (req, res) {
     logger.data("POST /google DONE");
     res.status(200);
     res.send(response);
-  });
+  };
+
+  if (!req.body.family_name) {
+    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.token, ip, req.body.firebaseInstanceId, callback);
+  } else {
+    userService.verifyGoogleAndFindOrCreateUserDeprecated(req.body.email, req.body.family_name, req.body.token, ip, req.body.firebaseInstanceId, callback);
+  }
+
 });
 
 function logout(req, res) {
-  userService.destroyAuthToken(req.lightUser.email, function (err, response) {
+  userService.destroyAuthToken(req.lightUser.email, function(err, response) {
     if (err) {
       var errResponse = Errors.toResponse(err);
       logger.data("POST /logout DONE with error: ", errResponse.code);
@@ -245,14 +261,14 @@ function logout(req, res) {
   });
 };
 
-app.post("/logout", accessByTokenFilter.run, ipFilter.run, flushUserMetaToDBFilter.run, function (req, res) {
+app.post("/logout", accessByTokenFilter.run, ipFilter.run, flushUserMetaToDBFilter.run, function(req, res) {
   logout(req, res);
 });
 
 
-app.get("/s/:randoId", function (req, res) {
+app.get("/s/:randoId", function(req, res) {
   logger.data("Start process user request. GET /s/", req.params.randoId);
-  shareService.generateHtmlWithRando(req.params.randoId, function (err, html) {
+  shareService.generateHtmlWithRando(req.params.randoId, function(err, html) {
     if (err) {
       var response = Errors.toResponse(err);
       logger.data("GET /s/:randoId DONE with error: ", err);
@@ -263,6 +279,6 @@ app.get("/s/:randoId", function (req, res) {
   });
 });
 
-app.listen(config.app.port, /*config.app.host,*/ function () {
+app.listen(config.app.port, /*config.app.host,*/ function() {
   logger.info("Express server: http://" + config.app.host + ":" + config.app.port);
 });
