@@ -159,7 +159,7 @@ app.post("/user", function(req, res) {
 
 app.get("/user", baseFilters, function (req, res) {
   logger.data("Start process user request. GET /user. for: ", req.lightUser.email);
-  
+
   userService.getUser(req.lightUser.email, function (err, user) {
     if (err) {
       var response = Errors.toResponse(err);
@@ -213,11 +213,11 @@ app.post("/facebook", function (req, res) {
 });
 
 app.post("/google", function (req, res) {
-  logger.data("Start process user request. POST /google. Email: ", req.body.email, "Family name: ", req.body.family_name, " Google Token length: ", req.body.token.length);
+  logger.data("Start process user request. POST /google. Email: ", req.body.email,  " Google Token length: ", req.body.token.length);
 
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.family_name, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
+  var callback = function(err, response) {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
@@ -229,7 +229,14 @@ app.post("/google", function (req, res) {
     logger.data("POST /google DONE");
     res.status(200);
     res.send(response);
-  });
+  };
+
+  if (!req.body.family_name) {
+    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.token, ip, req.body.firebaseInstanceId, callback);
+  } else {
+    userService.verifyGoogleAndFindOrCreateUserDeprecated(req.body.email, req.body.family_name, req.body.token, ip, req.body.firebaseInstanceId, callback);
+  }
+
 });
 
 function logout(req, res) {

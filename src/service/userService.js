@@ -7,6 +7,9 @@ var Errors = require("../error/errors");
 var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
 var util = require("../util/util");
+var GoogleAuth = require("google-auth-library");
+var auth = new GoogleAuth;
+var client = new auth.OAuth2(config.app.auth.googleClientId, "", "");
 
 module.exports = {
   //Deprecated. See firebaseService
@@ -119,7 +122,7 @@ module.exports = {
         if (err) {
           logger.warn("[userService.getUser] Error when make user backward compaitble");
           return callback(Errors.System(err));
-          
+
         }
         callback(null, compatibleUserJSON);
       });
@@ -273,8 +276,38 @@ module.exports = {
     });
   },
 
-  verifyGoogleAndFindOrCreateUser (email, familyName, token, ip, firebaseInstanceId, callback) {
-    logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Start");
+  verifyGoogleAndFindOrCreateUser (email, token, ip, firebaseInstanceId, callback) {
+    if (!email || !token) {
+      return callback(Errors.GoogleIncorrectArgs());
+    }
+    var self = this;
+    logger.info("verifyGoogleAndFindOrCreateUser with token length: ", token.length);
+    client.verifyIdToken(
+      token,
+      config.app.auth.googleClientIds,
+      (e, data) => {
+        if (e) {
+          logger.warn("verifyGoogleAndFindOrCreateUser google response with err: ", e);
+          return callback(e);
+        }
+        var payload = data.getPayload();
+        var userId = payload["sub"];
+        var userEmail = payload["email"];
+        logger.info("verifyGoogleAndFindOrCreateUser got userId:", userId);
+        logger.info("verifyGoogleAndFindOrCreateUser got userEmail:", userEmail);
+        if (email === userEmail) {
+          logger.info("verifyGoogleAndFindOrCreateUser successful login: ", userEmail);
+          return self.findOrCreateByGoogleData(userId, userEmail, ip, firebaseInstanceId, callback);
+        } else {
+          logger.warn("verifyGoogleAndFindOrCreateUser Emails are different. requested: ", email, " But google return: ", userEmail);
+          return callback(Errors.GoogleError());
+        }
+      }
+    );
+  },
+
+  verifyGoogleAndFindOrCreateUserDeprecated (email, familyName, token, ip, firebaseInstanceId, callback) {
+    logger.debug("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] Start");
 
     var self = this;
     var googleJson = "";
@@ -291,19 +324,19 @@ module.exports = {
         try {
           json = JSON.parse(googleJson);
         } catch (e) {
-          logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Bad JSON: ", e.message);
+          logger.warn("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] Bad JSON: ", e.message);
           return callback(Errors.GoogleError());
         }
-        logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Recive json: ", json);
+        logger.debug("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] Recive json: ", json);
         if (json.family_name === familyName) {
-          logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is equals");
+          logger.debug("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] family names is equals");
           self.findOrCreateByGoogleData(json.id, email, ip, firebaseInstanceId, callback);
         } else {
-          logger.debug("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] family names is not eql. Return incorrect args.");
+          logger.debug("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] family names is not eql. Return incorrect args.");
           return callback(Errors.GoogleIncorrectArgs());
         }
       }).on("error", function (e) {
-        logger.warn("[userService.verifyGoogleAndFindOrCreateUser, ", email, "] Error in communication with Google: ", e);
+        logger.warn("[userService.verifyGoogleAndFindOrCreateUserDeprecated, ", email, "] Error in communication with Google: ", e);
         return callback(Errors.GoogleError());
       });
     });
@@ -348,7 +381,7 @@ module.exports = {
         logger.debug("[userService.findOrCreateByFBData, ", data.email, " User not exist. Try create him");
 
         var newUser = {
-          authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"), 
+          authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
           facebookId: data.id,
           email: data.email,
           ip: data.ip,
@@ -413,8 +446,8 @@ module.exports = {
         logger.debug("[userService.findOrCreateByGoogleData, ", email, " User not exist. Try create him");
 
         var newUser = {
-          authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"), 
-          googleId: id, 
+          authToken: crypto.randomBytes(config.app.tokenLength).toString("hex"),
+          googleId: id,
           email: email,
           ip: ip
         }
