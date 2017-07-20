@@ -7,9 +7,9 @@ var Errors = require("../error/errors");
 var backwardCompatibility = require("../util/backwardCompatibility");
 var passwordUtil = require("../util/password");
 var util = require("../util/util");
-var GoogleAuth = require('google-auth-library');
+var GoogleAuth = require("google-auth-library");
 var auth = new GoogleAuth;
-var client = new auth.OAuth2(config.app.auth.googleClientId, '', '');
+var client = new auth.OAuth2(config.app.auth.googleClientId, "", "");
 
 module.exports = {
   //Deprecated. See firebaseService
@@ -291,8 +291,8 @@ module.exports = {
           return callback(e);
         }
         var payload = data.getPayload();
-        var userId = payload['sub'];
-        var userEmail = payload['email'];
+        var userId = payload["sub"];
+        var userEmail = payload["email"];
         logger.info("verifyGoogleAndFindOrCreateUser got userId:", userId);
         logger.info("verifyGoogleAndFindOrCreateUser got userEmail:", userEmail);
         if (email === userEmail) {
