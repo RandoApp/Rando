@@ -1,9 +1,10 @@
-var db = require("randoDB");
-var logger = require("../log/logger");
-var async = require("async");
-var config = require("config");
-var Errors = require("../error/errors");
-var pushNotificationService = require("./pushNotificationService");
+const db = require("randoDB");
+const logger = require("../log/logger");
+const async = require("async");
+const config = require("config");
+const Errors = require("../error/errors");
+const pushNotificationService = require("./pushNotificationService");
+const randoService = require("./randoService");
 
 module.exports = {
   delete (user, randoId, callback) {
@@ -90,9 +91,20 @@ module.exports = {
   rate (user, randoId, rating, callback) {
     logger.debug("[commentService.rate, ", user.email, "] Start rate rando:", randoId);
     rating = parseInt(rating);
+    if (rating < 1 || rating > 3) {
+      return callback(Errors.IncorrectArgs());
+    }
+
     async.waterfall([
-      function fetchBadUser (done) {
+      function fetchStranger (done) {
         db.user.getLightUserMetaByOutRandoId(randoId, done);
+      },
+      function checkThatUserDoesNotRatedHimself (stranger, done) {
+        if (stranger.email === user.email) {
+          return done(Errors.IncorrectArgs());
+        }
+
+        return done(null, stranger);
       },
       function updateData (stranger, done) {
         async.parallel({
@@ -108,13 +120,15 @@ module.exports = {
           done(err, stranger);
         });
       },
-      function notifyStrangerAboutRatingUpdate (stranger, done) {
+      function fetchRatedStrangerRando (stranger, done) {
+        db.user.getLightRandoByRandoId(randoId, (err, ratedRando) => {
+          return done(err, stranger, ratedRando);
+        });
+      },
+      function notifyStrangerAboutRatingUpdate (stranger, ratedRando, done) {
         var message = {
           notificationType: "rated",
-          rando: {
-            randoId,
-            rating
-          }
+          rando: randoService.buildRandoSync(ratedRando)
         };
         pushNotificationService.sendMessageToAllActiveUserDevices(message, stranger, done);
       }
