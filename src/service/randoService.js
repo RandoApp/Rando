@@ -10,7 +10,16 @@ var s3Service = require("./s3Service");
 var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
 var fs = require("fs");
-var randoRecognition = require("randoRecognition");
+try {
+    var randoRecognition = require("randoRecognition");
+}
+catch (e) {
+    if (e instanceof Error && e.code === "MODULE_NOT_FOUND")
+        logger.warn("Can't load \"randoRecognition\" since it doesn't exist!");
+    else {
+        throw e;
+      }
+}
 
 function buildPostImageResponseSync (rando) {
   logger.trace("[randoService.buildPostImageResponseSync] rando:", rando);
