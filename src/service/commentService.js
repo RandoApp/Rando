@@ -121,6 +121,7 @@ module.exports = {
         });
       },
       function fetchRatedStrangerRando (stranger, done) {
+        logger.trace("[commentService.rate.fetchRatedStrangerRando]", "Fetch rando by randoId:", randoId); 
         db.user.getLightRandoByRandoId(randoId, (err, ratedRando) => {
           return done(err, stranger, ratedRando);
         });
