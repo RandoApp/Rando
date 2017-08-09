@@ -87,13 +87,13 @@ describe("Comment service.", function () {
     var user = {
       email: "user@mail.com",
       out:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
-      in:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: "imageSizeURLValue", imageURL: "imageURLValue",mapSizeURL: "mapSizeURLValueIN", mapURL: "mapURLValueIN"  }, {randoId: 999, delete: 0, rating : 0}]
+      in:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlIN", medium: "mediumImageUrlIN", small: "smallImageUrlIN"}, imageURL: "imageURLValueIN", mapSizeURL: {large: "largeMapUrlIN", medium: "mediumUMaprlIN", small: "smallMapUrlIN"}, mapURL: "mapURLValueIN"  }, {randoId: 999, delete: 0, rating : 0}]
       };
 
       var user2 = {
       email: "user2@mail.com",
       in:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
-      out:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: "imageSizeURLValue", imageURL: "imageURLValue",mapSizeURL: "mapSizeURLValueOUT", mapURL: "mapURLValueOUT"  }, {randoId: 999, delete: 0, rating : 0}]
+      out:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlOUT", medium: "mediumImageUrlOUT", small: "smallImageUrlOUT"}, imageURL: "imageURLValueOUT", mapSizeURL: {large: "largeMapUrlOUT", medium: "mediumMapUrlOUT", small: "smallMapUrlOUT"}, mapURL: "mapURLValueOUT"  }, {randoId: 999, delete: 0, rating : 0}]
       };
 
     before((done) => {
@@ -169,15 +169,19 @@ describe("Comment service.", function () {
         should.exist(message);
         message.notificationType.should.be.eql("rated");
         should.exist(message.rando);
-        should(message).be.eql("");
-        should(message.rando.randoId).be.eql(789);
+        should(message.rando.randoId).be.eql("789");
         should(message.rando.rating).be.eql(3);
         should(message.rando.creation).be.eql(100);
-        should(message.rando.imageSizeURL).be.eql("imageSizeURLValue");
-        should(message.rando.imageURL).be.eql("imageURLValue");
-        should(message.rando.detected).be.eql(["bla"]);
-        should(message.rando.mapSizeURL).be.eql("mapSizeURLValueIN");
-        should(message.rando.mapURL).be.eql("mapURLValueIN");
+        should.exist(message.rando.imageSizeURL);
+        should(message.rando.imageSizeURL.large).be.eql("largeImageUrlOUT");
+        should(message.rando.imageSizeURL.medium).be.eql("mediumImageUrlOUT");
+        should(message.rando.imageSizeURL.small).be.eql("smallImageUrlOUT");
+        should(message.rando.imageURL).be.eql("imageURLValueOUT");
+        should.exist(message.rando.mapSizeURL);
+        should(message.rando.mapSizeURL.large).be.eql("largeMapUrlOUT");
+        should(message.rando.mapSizeURL.medium).be.eql("mediumMapUrlOUT");
+        should(message.rando.mapSizeURL.small).be.eql("smallMapUrlOUT");
+        should(message.rando.mapURL).be.eql("mapURLValueOUT");
         should.exist(stranger);
         stranger.email.should.be.eql("user2@mail.com");
         callback();
@@ -188,7 +192,7 @@ describe("Comment service.", function () {
         should.exist(response);
         response.command.should.be.eql("rate");
         response.result.should.be.eql("done");
-        //db.user.getLightUserWithInAndOutByEmail(user.email, ()
+        //TODO: test that Rating updated in DB for both randos
         done();
       });
     });
