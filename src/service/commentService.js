@@ -103,7 +103,6 @@ module.exports = {
         if (stranger.email === user.email) {
           return done(Errors.IncorrectArgs());
         }
-
         return done(null, stranger);
       },
       function updateData (stranger, done) {
@@ -136,8 +135,13 @@ module.exports = {
     ], (err) => {
         logger.trace("[commentService.rate, ", user.email, "]", "Processing db updated results for rando: ", randoId);
         if (err) {
-          logger.debug("[commentService.rate, ", user.email, "] We have error in DB when updating user with rando: ", randoId, " Error: ", err.message);
-          return callback(Errors.System(err));
+          if (err.rando) {
+            logger.debug("[commentService.rate, ", user.email, "]; waterfall stopped because error", err.rando.message);
+            return callback(err);
+          } else {
+            logger.debug("[commentService.rate, ", user.email, "] We have error in DB when updating user with rando: ", randoId, " Error: ", err.message);
+            return callback(Errors.System(err));
+          }
         }
         logger.debug("[commentService.rate, ", user.email, "] User successfully updated with reported rando: ", randoId);
         return callback(null, {command: "rate", result: "done"});
