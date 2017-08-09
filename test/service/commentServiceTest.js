@@ -97,7 +97,7 @@ describe("Comment service.", function () {
       };
 
     before((done) => {
-      db.connect(config.db.url, done);
+      db.connect(config.test.db.url, done);
     });
 
     after((done) => {
