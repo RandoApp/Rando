@@ -76,7 +76,7 @@ scripts:
     maskPath: scripts/resources/round-mask.png
 
 db:
-    url: mongodb://localhost/rando
+    url: mongodb://127.0.0.1/rando-integration-tests
     name: rando
     host: localhost
     port: 27017

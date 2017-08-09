@@ -91,7 +91,7 @@ module.exports = {
   rate (user, randoId, rating, callback) {
     logger.debug("[commentService.rate, ", user.email, "] Start rate rando:", randoId);
     rating = parseInt(rating);
-    if (rating < 1 || rating > 3) {
+    if (isNaN(rating) || rating < 1 || rating > 3) {
       return callback(Errors.IncorrectArgs());
     }
 
