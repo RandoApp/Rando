@@ -115,24 +115,30 @@ module.exports = {
             logger.trace("[commentService.rate.rateRandoForStrangerOut, ", stranger.email, "by user: ", user.email, "rateRando: ", randoId);
             db.user.updateOutRandoProperties(stranger.email, randoId, {rating}, parallelDone);
           }
-        }, (err) => {
+        }, err => {
           done(err, stranger);
         });
       },
       function fetchRatedStrangerRando (stranger, done) {
-        logger.trace("[commentService.rate.fetchRatedStrangerRando]", "Fetch rando by randoId:", randoId); 
-        db.user.getLightRandoByRandoId(randoId, (err, ratedRando) => {
+        logger.trace("[commentService.rate.fetchRatedStrangerRando]", "Fetch rando by randoId:", randoId);
+        db.user.getLightRandoByRandoId(randoId, (err, data) => {
+          let ratedRando = null;
+          if (data && data.out[0]) {
+            ratedRando = data.out[0];
+          }
+          logger.trace("[commentService.rate.fetchRatedStrangerRando]", "ratedRando:", ratedRando);
           return done(err, stranger, ratedRando);
         });
       },
       function notifyStrangerAboutRatingUpdate (stranger, ratedRando, done) {
+        logger.trace("[commentService.rate.notifyStrangerAboutRatingUpdate]", "Send rated notification to", stranger.email, "with rando:", ratedRando);
         var message = {
           notificationType: "rated",
           rando: randoService.buildRandoSync(ratedRando)
         };
         pushNotificationService.sendMessageToAllActiveUserDevices(message, stranger, done);
       }
-    ], (err) => {
+    ], err => {
         logger.trace("[commentService.rate, ", user.email, "]", "Processing db updated results for rando: ", randoId);
         if (err) {
           if (err.rando) {
