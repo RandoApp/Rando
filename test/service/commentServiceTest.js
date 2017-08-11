@@ -10,7 +10,7 @@ var mockUtil = require("../mockUtil");
 describe("Comment service.", function () {
   describe("Delete.", function () {
 
-    afterEach(function() {
+    afterEach(() => {
       mockUtil.clean(db);
       mockUtil.clean(pushNotificationService);
     });
@@ -82,41 +82,29 @@ describe("Comment service.", function () {
     });
   });
 
-  describe("Rate.", function () {
-    
-    var user = {
-      email: "user@mail.com",
-      out:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
-      in:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlIN", medium: "mediumImageUrlIN", small: "smallImageUrlIN"}, imageURL: "imageURLValueIN", mapSizeURL: {large: "largeMapUrlIN", medium: "mediumUMaprlIN", small: "smallMapUrlIN"}, mapURL: "mapURLValueIN"  }, {randoId: 999, delete: 0, rating : 0}]
-      };
+  describe("Rate.", () => {
 
-      var user2 = {
-      email: "user2@mail.com",
+    const user = {
+        email: "user@mail.com",
+        out:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
+        in:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlIN", medium: "mediumImageUrlIN", small: "smallImageUrlIN"}, imageURL: "imageURLValueIN", mapSizeURL: {large: "largeMapUrlIN", medium: "mediumUMaprlIN", small: "smallMapUrlIN"}, mapURL: "mapURLValueIN"  }, {randoId: 999, delete: 0, rating : 0}]
+    };
+
+    const stranger = {
+      email: "stranger@mail.com",
       in:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
       out:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlOUT", medium: "mediumImageUrlOUT", small: "smallImageUrlOUT"}, imageURL: "imageURLValueOUT", mapSizeURL: {large: "largeMapUrlOUT", medium: "mediumMapUrlOUT", small: "smallMapUrlOUT"}, mapURL: "mapURLValueOUT"  }, {randoId: 999, delete: 0, rating : 0}]
-      };
+    };
 
-    before((done) => {
-      db.connect(config.test.db.url, done);
+    beforeEach(() => {
+      mockUtil.clean(db, pushNotificationService);
     });
 
-    after((done) => {
-      db.disconnect(done);
+    afterEach(() => {
+      mockUtil.clean(db, pushNotificationService);
     });
 
-    beforeEach(function(done) {
-      db.user.create(user, (err)=>{
-        db.user.create(user2,done);
-      }
-        );
-      });
-
-    afterEach((done) => {
-      db.user.removeAll(done);
-      mockUtil.clean(db);
-    });
-
-    it("Rate should return Errors.IncorrectArgs when \"rating\" is lower than 1", function (done) {
+    it('Rate should return Errors. IncorrectArgs when "rating" is lower than 1', (done) => {
       commentService.rate(user, 789, 0, (err, response) => {
         should.exist(err);
         err.should.be.eql(Errors.IncorrectArgs());
@@ -124,7 +112,7 @@ describe("Comment service.", function () {
       });
     });
 
-    it("Rate should return Errors.IncorrectArgs when \"rating\" is greater than 3", function (done) {
+    it('Rate should return Errors. IncorrectArgs when "rating" is greater than 3', (done) => {
       commentService.rate(user, 789, 4, (err, response) => {
         should.exist(err);
         err.should.be.eql(Errors.IncorrectArgs());
@@ -132,7 +120,7 @@ describe("Comment service.", function () {
       });
     });
 
-    it("Rate flag should return Errors.IncorrectArgs when \"rating\" can't be parsed to number", function (done) {
+    it('Rate flag should return Errors. IncorrectArgs when "rating" cannot be parsed to number', (done) => {
       sinon.stub(db.user, "updateInRandoProperties", function (email, randoId, deleteFlag, callback) {
         done();
       });
@@ -144,8 +132,8 @@ describe("Comment service.", function () {
       });
     });
 
-    it("Should return system error when db return error", function (done) {
-      sinon.stub(db.user, "getLightUserMetaByOutRandoId", function (randoId, callback) {
+    it("Should return system error when db return error", (done) => {
+      sinon.stub(db.user, "getLightUserMetaByOutRandoId", (randoId, callback) => {
         callback(new Error("Some db error"));
       });
 
@@ -156,16 +144,20 @@ describe("Comment service.", function () {
       });
     });
 
-    it("Should return Errors.IncorrectArgs when user rates himself", function (done) {
+    it("Should return Errors. IncorrectArgs when user rates himself", (done) => {
+      sinon.stub(db.user, "getLightUserMetaByOutRandoId", (randoId, callback) => {
+        callback(null, user);
+      });
+
       commentService.rate(user, 456, 3, (err, response) => {
         should.exist(err);
-        err.should.be.eql(Errors.IncorrectArgs());  
+        err.should.be.eql(Errors.IncorrectArgs());
         done();
       });
     });
 
-     it("Should set rating correctly for both users when user rates rando in his IN", function (done) {
-      sinon.stub(pushNotificationService, "sendMessageToAllActiveUserDevices", function (message,stranger, callback) {
+    it("Should set rating correctly for both users when user rates rando in his IN", (done) => {
+      sinon.stub(pushNotificationService, "sendMessageToAllActiveUserDevices", (message, stranger, callback) => {
         should.exist(message);
         message.notificationType.should.be.eql("rated");
         should.exist(message.rando);
@@ -183,8 +175,49 @@ describe("Comment service.", function () {
         should(message.rando.mapSizeURL.small).be.eql("smallMapUrlOUT");
         should(message.rando.mapURL).be.eql("mapURLValueOUT");
         should.exist(stranger);
-        stranger.email.should.be.eql("user2@mail.com");
+        stranger.email.should.be.eql("stranger@mail.com");
         callback();
+      });
+
+      sinon.stub(db.user, "updateInRandoProperties", (email, randoId, rating, callback) => {
+        email.should.be.eql(user.email);
+        rating.should.have.property("rating", 3);
+        randoId.should.be.eql(789);
+        callback();
+      });
+
+      sinon.stub(db.user, "updateOutRandoProperties", (email, randoId, rating, callback) => {
+        email.should.be.eql(stranger.email);
+        rating.should.have.property("rating", 3);
+        randoId.should.be.eql(789);
+        callback();
+      });
+
+      sinon.stub(db.user, "getLightUserMetaByOutRandoId", (randoId, callback) => {
+        callback(null, stranger);
+      });
+
+      const ratedRando = {
+        randoId: "789",
+        rating: 3,
+        creation: 100,
+        imageURL: "imageURLValueOUT",
+        mapURL: "mapURLValueOUT",
+        imageSizeURL: {
+          large: "largeImageUrlOUT",
+          medium: "mediumImageUrlOUT",
+          small: "smallImageUrlOUT"
+        },
+        mapSizeURL: {
+          large: "largeMapUrlOUT",
+          medium: "mediumMapUrlOUT",
+          small: "smallMapUrlOUT"
+        },
+        stranger: "stranger@mail.com"
+      };
+
+      sinon.stub(db.user, "getLightRandoByRandoId", (randoId, callback) => {
+        callback(null, {out: [ratedRando]});
       });
 
       commentService.rate(user, 789, 3, (err, response) => {
@@ -192,10 +225,8 @@ describe("Comment service.", function () {
         should.exist(response);
         response.command.should.be.eql("rate");
         response.result.should.be.eql("done");
-        //TODO: test that Rating updated in DB for both randos
         done();
       });
     });
   });
 });
-
