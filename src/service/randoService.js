@@ -10,16 +10,6 @@ var s3Service = require("./s3Service");
 var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
 var fs = require("fs");
-try {
-    var randoRecognition = require("randoRecognition");
-}
-catch (e) {
-    if (e instanceof Error && e.code === "MODULE_NOT_FOUND")
-        logger.warn("Can't load \"randoRecognition\" since it doesn't exist!");
-    else {
-        throw e;
-      }
-}
 
 function buildPostImageResponseSync (rando) {
   logger.trace("[randoService.buildPostImageResponseSync] rando:", rando);
@@ -136,7 +126,11 @@ module.exports =  {
         });
       },
       function recognizeImage (imagePaths, lightUser, randoId, location, done) {
-        randoRecognition.recognizeWithScaners(config.app.static.folder.name + imagePaths.small, config.app.enabledScaners, function (err, tags) {
+        if (!config.app.recognitionEnabled) {
+          return done(null, imagePaths, lightUser, randoId, location, []);
+        }
+
+        require("randoRecognition").recognizeWithScaners(config.app.static.folder.name + imagePaths.small, config.app.enabledScaners, function (err, tags) {
           if (err) {
             tags = [];
             logger.error("[randoService.recognizeImage, ", lightUser.email, "] Can not recognize image because: ", err, "Skip this step!");
