@@ -84,24 +84,24 @@ describe("Comment service.", function () {
 
   describe("Rate.", () => {
 
-    var user = {
+    const user = {
         email: "user@mail.com",
         out:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
         in:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlIN", medium: "mediumImageUrlIN", small: "smallImageUrlIN"}, imageURL: "imageURLValueIN", mapSizeURL: {large: "largeMapUrlIN", medium: "mediumUMaprlIN", small: "smallMapUrlIN"}, mapURL: "mapURLValueIN"  }, {randoId: 999, delete: 0, rating : 0}]
     };
 
-    var user2 = {
-      email: "user2@mail.com",
+    const stranger = {
+      email: "stranger@mail.com",
       in:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
       out:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlOUT", medium: "mediumImageUrlOUT", small: "smallImageUrlOUT"}, imageURL: "imageURLValueOUT", mapSizeURL: {large: "largeMapUrlOUT", medium: "mediumMapUrlOUT", small: "smallMapUrlOUT"}, mapURL: "mapURLValueOUT"  }, {randoId: 999, delete: 0, rating : 0}]
     };
 
     beforeEach(() => {
-      mockUtil.clean(db);
+      mockUtil.clean(db, pushNotificationService);
     });
 
     afterEach(() => {
-      mockUtil.clean(db);
+      mockUtil.clean(db, pushNotificationService);
     });
 
     it('Rate should return Errors. IncorrectArgs when "rating" is lower than 1', (done) => {
@@ -156,41 +156,77 @@ describe("Comment service.", function () {
       });
     });
 
-    // it("Should set rating correctly for both users when user rates rando in his IN", (done) => {
-    //   sinon.stub(pushNotificationService, "sendMessageToAllActiveUserDevices", (message, stranger, callback) => {
-    //     should.exist(message);
-    //     message.notificationType.should.be.eql("rated");
-    //     should.exist(message.rando);
-    //     should(message.rando.randoId).be.eql("789");
-    //     should(message.rando.rating).be.eql(3);
-    //     should(message.rando.creation).be.eql(100);
-    //     should.exist(message.rando.imageSizeURL);
-    //     should(message.rando.imageSizeURL.large).be.eql("largeImageUrlOUT");
-    //     should(message.rando.imageSizeURL.medium).be.eql("mediumImageUrlOUT");
-    //     should(message.rando.imageSizeURL.small).be.eql("smallImageUrlOUT");
-    //     should(message.rando.imageURL).be.eql("imageURLValueOUT");
-    //     should.exist(message.rando.mapSizeURL);
-    //     should(message.rando.mapSizeURL.large).be.eql("largeMapUrlOUT");
-    //     should(message.rando.mapSizeURL.medium).be.eql("mediumMapUrlOUT");
-    //     should(message.rando.mapSizeURL.small).be.eql("smallMapUrlOUT");
-    //     should(message.rando.mapURL).be.eql("mapURLValueOUT");
-    //     should.exist(stranger);
-    //     stranger.email.should.be.eql("user2@mail.com");
-    //     callback();
-    //   });
-    //
-    //   sinon.stub(db.user, "getLightUserMetaByOutRandoId", (randoId, callback) => {
-    //     callback(null, user2);
-    //   });
-    //
-    //   commentService.rate(user, 789, 3, (err, response) => {
-    //     should.not.exist(err);
-    //     should.exist(response);
-    //     response.command.should.be.eql("rate");
-    //     response.result.should.be.eql("done");
-    //     //TODO: test that Rating updated in DB for both randos
-    //     done();
-    //   });
-    // });
+    it("Should set rating correctly for both users when user rates rando in his IN", (done) => {
+      sinon.stub(pushNotificationService, "sendMessageToAllActiveUserDevices", (message, stranger, callback) => {
+        should.exist(message);
+        message.notificationType.should.be.eql("rated");
+        should.exist(message.rando);
+        should(message.rando.randoId).be.eql("789");
+        should(message.rando.rating).be.eql(3);
+        should(message.rando.creation).be.eql(100);
+        should.exist(message.rando.imageSizeURL);
+        should(message.rando.imageSizeURL.large).be.eql("largeImageUrlOUT");
+        should(message.rando.imageSizeURL.medium).be.eql("mediumImageUrlOUT");
+        should(message.rando.imageSizeURL.small).be.eql("smallImageUrlOUT");
+        should(message.rando.imageURL).be.eql("imageURLValueOUT");
+        should.exist(message.rando.mapSizeURL);
+        should(message.rando.mapSizeURL.large).be.eql("largeMapUrlOUT");
+        should(message.rando.mapSizeURL.medium).be.eql("mediumMapUrlOUT");
+        should(message.rando.mapSizeURL.small).be.eql("smallMapUrlOUT");
+        should(message.rando.mapURL).be.eql("mapURLValueOUT");
+        should.exist(stranger);
+        stranger.email.should.be.eql("stranger@mail.com");
+        callback();
+      });
+
+      sinon.stub(db.user, "updateInRandoProperties", (email, randoId, rating, callback) => {
+        email.should.be.eql(user.email);
+        rating.should.have.property("rating", 3);
+        randoId.should.be.eql(789);
+        callback();
+      });
+
+      sinon.stub(db.user, "updateOutRandoProperties", (email, randoId, rating, callback) => {
+        email.should.be.eql(stranger.email);
+        rating.should.have.property("rating", 3);
+        randoId.should.be.eql(789);
+        callback();
+      });
+
+      sinon.stub(db.user, "getLightUserMetaByOutRandoId", (randoId, callback) => {
+        callback(null, stranger);
+      });
+
+      const ratedRando = {
+        randoId: "789",
+        rating: 3,
+        creation: 100,
+        imageURL: "imageURLValueOUT",
+        mapURL: "mapURLValueOUT",
+        imageSizeURL: {
+          large: "largeImageUrlOUT",
+          medium: "mediumImageUrlOUT",
+          small: "smallImageUrlOUT"
+        },
+        mapSizeURL: {
+          large: "largeMapUrlOUT",
+          medium: "mediumMapUrlOUT",
+          small: "smallMapUrlOUT"
+        },
+        stranger: "stranger@mail.com"
+      };
+
+      sinon.stub(db.user, "getLightRandoByRandoId", (randoId, callback) => {
+        callback(null, {out: [ratedRando]});
+      });
+
+      commentService.rate(user, 789, 3, (err, response) => {
+        should.not.exist(err);
+        should.exist(response);
+        response.command.should.be.eql("rate");
+        response.result.should.be.eql("done");
+        done();
+      });
+    });
   });
 });
