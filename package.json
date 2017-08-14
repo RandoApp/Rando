@@ -28,11 +28,10 @@
     "winston": "2.2.0"
   },
   "devDependencies": {
-    "mongoose": "4.5.2",
     "mocha": "2.5.3",
     "should": "9.0.2",
     "sinon": "1.17.4",
-    "istanbul": "0.4.4",
+    "istanbul": "0.4.5",
     "coveralls": "2.11.9"
   },
   "scripts": {

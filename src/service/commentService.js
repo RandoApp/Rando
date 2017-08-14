@@ -1,9 +1,10 @@
-var db = require("randoDB");
-var logger = require("../log/logger");
-var async = require("async");
-var config = require("config");
-var Errors = require("../error/errors");
-var pushNotificationService = require("./pushNotificationService");
+const db = require("randoDB");
+const logger = require("../log/logger");
+const async = require("async");
+const config = require("config");
+const Errors = require("../error/errors");
+const pushNotificationService = require("./pushNotificationService");
+const randoService = require("./randoService");
 
 module.exports = {
   delete (user, randoId, callback) {
@@ -90,9 +91,19 @@ module.exports = {
   rate (user, randoId, rating, callback) {
     logger.debug("[commentService.rate, ", user.email, "] Start rate rando:", randoId);
     rating = parseInt(rating);
+    if (isNaN(rating) || rating < 1 || rating > 3) {
+      return callback(Errors.IncorrectArgs());
+    }
+
     async.waterfall([
-      function fetchBadUser (done) {
+      function fetchStranger (done) {
         db.user.getLightUserMetaByOutRandoId(randoId, done);
+      },
+      function checkThatUserDoesNotRatedHimself (stranger, done) {
+        if (stranger.email === user.email) {
+          return done(Errors.IncorrectArgs());
+        }
+        return done(null, stranger);
       },
       function updateData (stranger, done) {
         async.parallel({
@@ -104,25 +115,39 @@ module.exports = {
             logger.trace("[commentService.rate.rateRandoForStrangerOut, ", stranger.email, "by user: ", user.email, "rateRando: ", randoId);
             db.user.updateOutRandoProperties(stranger.email, randoId, {rating}, parallelDone);
           }
-        }, (err) => {
+        }, err => {
           done(err, stranger);
         });
       },
-      function notifyStrangerAboutRatingUpdate (stranger, done) {
+      function fetchRatedStrangerRando (stranger, done) {
+        logger.trace("[commentService.rate.fetchRatedStrangerRando]", "Fetch rando by randoId:", randoId);
+        db.user.getLightRandoByRandoId(randoId, (err, data) => {
+          let ratedRando = null;
+          if (data && data.out[0]) {
+            ratedRando = data.out[0];
+          }
+          logger.trace("[commentService.rate.fetchRatedStrangerRando]", "ratedRando:", ratedRando);
+          return done(err, stranger, ratedRando);
+        });
+      },
+      function notifyStrangerAboutRatingUpdate (stranger, ratedRando, done) {
+        logger.trace("[commentService.rate.notifyStrangerAboutRatingUpdate]", "Send rated notification to", stranger.email, "with rando:", ratedRando);
         var message = {
           notificationType: "rated",
-          rando: {
-            randoId,
-            rating
-          }
+          rando: randoService.buildRandoSync(ratedRando)
         };
         pushNotificationService.sendMessageToAllActiveUserDevices(message, stranger, done);
       }
-    ], (err) => {
+    ], err => {
         logger.trace("[commentService.rate, ", user.email, "]", "Processing db updated results for rando: ", randoId);
         if (err) {
-          logger.debug("[commentService.rate, ", user.email, "] We have error in DB when updating user with rando: ", randoId, " Error: ", err.message);
-          return callback(Errors.System(err));
+          if (err.rando) {
+            logger.debug("[commentService.rate, ", user.email, "]; waterfall stopped because error", err.rando.message);
+            return callback(err);
+          } else {
+            logger.debug("[commentService.rate, ", user.email, "] We have error in DB when updating user with rando: ", randoId, " Error: ", err.message);
+            return callback(Errors.System(err));
+          }
         }
         logger.debug("[commentService.rate, ", user.email, "] User successfully updated with reported rando: ", randoId);
         return callback(null, {command: "rate", result: "done"});

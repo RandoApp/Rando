@@ -10,7 +10,6 @@ var s3Service = require("./s3Service");
 var Errors = require("../error/errors");
 var gm = require("gm").subClass({ imageMagick: true });
 var fs = require("fs");
-var randoRecognition = require("randoRecognition");
 
 function buildPostImageResponseSync (rando) {
   logger.trace("[randoService.buildPostImageResponseSync] rando:", rando);
@@ -127,7 +126,11 @@ module.exports =  {
         });
       },
       function recognizeImage (imagePaths, lightUser, randoId, location, done) {
-        randoRecognition.recognizeWithScaners(config.app.static.folder.name + imagePaths.small, config.app.enabledScaners, function (err, tags) {
+        if (!config.app.recognitionEnabled) {
+          return done(null, imagePaths, lightUser, randoId, location, []);
+        }
+
+        require("randoRecognition").recognizeWithScaners(config.app.static.folder.name + imagePaths.small, config.app.enabledScaners, function (err, tags) {
           if (err) {
             tags = [];
             logger.error("[randoService.recognizeImage, ", lightUser.email, "] Can not recognize image because: ", err, "Skip this step!");
@@ -246,9 +249,9 @@ module.exports =  {
         var imageURL = imageSizeURL.large;
         var mapURL = mapSizeURL.large;
         var self = this;
-        
+
         logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for this user, randoId:", randoId, "url:", imageURL, "map url:", mapURL);
-        
+
         var newRando = {
           email: lightUser.email,
           creation: Date.now(),
@@ -301,5 +304,31 @@ module.exports =  {
       logger.debug("[randoService.saveImage, ", lightUser.email, "] save done");
       return callback(null, rando);
     });
+  },
+  buildRandoSync (rando) {
+    if (!rando) {
+      logger.trace("[randoService.buildRando]", "rando is empty => return empty object");
+      return {};
+    }
+
+    logger.trace("[randoService.buildRando] build rando with id: ", rando.randoId);
+
+    return {
+      creation: rando.creation,
+      randoId: rando.randoId,
+      imageURL: rando.imageURL,
+      imageSizeURL: rando.imageSizeURL,
+      mapURL: rando.mapURL,
+      mapSizeURL: rando.mapSizeURL,
+      rating: rando.rating,
+      //1.0.19+
+      detected: Array.isArray(rando.tags) ? rando.tags.map(tag => {
+        for (var detectedTag in config.app.detectedTagMap) {
+          if (config.app.detectedTagMap[detectedTag].indexOf(tag) !== -1) {
+            return detectedTag;
+          }
+        }
+      }).filter(tag => tag) : []
+    };
   }
 };
