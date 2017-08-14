@@ -1,7 +1,18 @@
 language: node_js
+dist: precise
 node_js:
   - 7
   - node
+addons:
+  apt:
+    sources:
+      - mongodb-upstart
+      - mongodb-3.2-precise
+    packages:
+      - mongodb-org-server
+      - mongodb-org-shell
+before_script:
+  - sleep 10
 git:
   depth: 3
 before_install:

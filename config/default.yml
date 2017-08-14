@@ -57,6 +57,7 @@ app:
             name: static/
     share:
         url: https://rando4.me/s/
+    recognitionEnabled: true
     enabledScaners:
         - nude
         - rgbHistogram
@@ -90,3 +91,6 @@ s3:
             small: img.s.rando4me
             medium: img.m.rando4me
             large: img.l.rando4me
+test:
+    db:
+        url: mongodb://127.0.0.1/rando-integration-tests
