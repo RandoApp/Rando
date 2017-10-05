@@ -132,6 +132,11 @@ module.exports = {
       },
       function notifyStrangerAboutRatingUpdate (stranger, ratedRando, done) {
         logger.trace("[commentService.rate.notifyStrangerAboutRatingUpdate]", "Send rated notification to", stranger.email, "with rando:", ratedRando);
+        if (ratedRando.delete) {
+          logger.trace("[commentService.rate.notifyStrangerAboutRatingUpdate]", "Stranger rando has been deleted. Do not send notification");
+          return done();
+        }
+
         var message = {
           notificationType: "rated",
           rando: randoService.buildRandoSync(ratedRando)
