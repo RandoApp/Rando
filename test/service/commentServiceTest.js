@@ -84,6 +84,11 @@ describe("Comment service.", function () {
 
   describe("Rate.", () => {
 
+    afterEach(() => {
+      mockUtil.clean(db);
+      mockUtil.clean(pushNotificationService);
+    });
+
     const user = {
         email: "user@mail.com",
         out:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
@@ -93,16 +98,8 @@ describe("Comment service.", function () {
     const stranger = {
       email: "stranger@mail.com",
       in:[{randoId: 123, delete: 0, rating: 0}, {randoId: 456, delete: 0, rating:0}],
-      out:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlOUT", medium: "mediumImageUrlOUT", small: "smallImageUrlOUT"}, imageURL: "imageURLValueOUT", mapSizeURL: {large: "largeMapUrlOUT", medium: "mediumMapUrlOUT", small: "smallMapUrlOUT"}, mapURL: "mapURLValueOUT"  }, {randoId: 999, delete: 0, rating : 0}]
+      out:[{randoId: 789, delete: 0, rating: 0, creation: 100,  detected:["bla"], imageSizeURL: {large: "largeImageUrlOUT", medium: "mediumImageUrlOUT", small: "smallImageUrlOUT"}, imageURL: "imageURLValueOUT", mapSizeURL: {large: "largeMapUrlOUT", medium: "mediumMapUrlOUT", small: "smallMapUrlOUT"}, mapURL: "mapURLValueOUT"  }, {randoId: 999, delete: 1, rating : 0}]
     };
-
-    beforeEach(() => {
-      mockUtil.clean(db, pushNotificationService);
-    });
-
-    afterEach(() => {
-      mockUtil.clean(db, pushNotificationService);
-    });
 
     it('Rate should return Errors. IncorrectArgs when "rating" is lower than 1', (done) => {
       commentService.rate(user, 789, 0, (err, response) => {
@@ -201,6 +198,7 @@ describe("Comment service.", function () {
         randoId: "789",
         rating: 3,
         creation: 100,
+        delete: 0,
         imageURL: "imageURLValueOUT",
         mapURL: "mapURLValueOUT",
         imageSizeURL: {
@@ -228,5 +226,50 @@ describe("Comment service.", function () {
         done();
       });
     });
+
+    it("Should not send notification for stranger when stranger rando has been deleted", (done) => {
+      sinon.stub(pushNotificationService, "sendMessageToAllActiveUserDevices", (message, stranger, callback) => {
+        should.not.exist(message);
+      });
+
+      sinon.stub(db.user, "updateInRandoProperties", (email, randoId, rating, callback) => {
+        email.should.be.eql(user.email);
+        rating.should.have.property("rating", 3);
+        randoId.should.be.eql(999);
+        callback();
+      });
+
+      sinon.stub(db.user, "updateOutRandoProperties", (email, randoId, rating, callback) => {
+        email.should.be.eql(stranger.email);
+        rating.should.have.property("rating", 3);
+        randoId.should.be.eql(999);
+        callback();
+      });
+
+      sinon.stub(db.user, "getLightUserMetaByOutRandoId", (randoId, callback) => {
+        callback(null, stranger);
+      });
+
+      const ratedRando = {
+        randoId: "999",
+        rating: 3,
+        delete: 1,
+        creation: 100,
+        stranger: "stranger@mail.com"
+      };
+
+      sinon.stub(db.user, "getLightRandoByRandoId", (randoId, callback) => {
+        callback(null, {out: [ratedRando]});
+      });
+
+      commentService.rate(user, 999, 3, (err, response) => {
+        should.not.exist(err);
+        should.exist(response);
+        response.command.should.be.eql("rate");
+        response.result.should.be.eql("done");
+        done();
+      });
+    });
+
   });
 });
