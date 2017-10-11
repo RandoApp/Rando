@@ -8,6 +8,10 @@ const mockUtil = require("../mockUtil");
 
 describe("Login service.", () => {
   describe("Login As Rando User.", () => {
+    afterEach(() => {
+      mockUtil.clean(db);
+    });
+
     it("Should return error when email is invalid", () => {
       loginService.loginRandoUser("this is not email", "", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.should.be.eql(Errors.LoginAndPasswordIncorrectArgs());
@@ -40,13 +44,11 @@ describe("Login service.", () => {
     });
 
     it("Correct email and password should not return Error", (done) => {
-      sinon.stub(db.user, "getByEmail", (email, callback) => {
-        db.user.getByEmail.restore();
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback();
       });
 
       sinon.stub(db.user, "create", (user, callback) => {
-        db.user.create.restore();
         callback();
       });
 
@@ -57,8 +59,7 @@ describe("Login service.", () => {
     });
 
     it("Data base error should return error", (done) => {
-      sinon.stub(db.user, "getByEmail", (email, callback) => {
-        db.user.getByEmail.restore();
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(new Error("Db error"));
       });
 
@@ -69,8 +70,7 @@ describe("Login service.", () => {
     });
 
     it("Differents passwords should return error", (done) => {
-      sinon.stub(db.user, "getByEmail", (email, callback) => {
-        db.user.getByEmail.restore();
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(null, {
           email: "user@mail.com",
           password: "different"
@@ -85,14 +85,12 @@ describe("Login service.", () => {
 
     it("Same passwords should return user", (done) => {
       sinon.stub(passwordUtil, "isPasswordCorrect", (password, user, salt) => {
-        passwordUtil.isPasswordCorrect.restore();
         should.exist(user);
         user.email.should.be.eql("user@mail.com");
         return true;
       });
 
-      sinon.stub(db.user, "getByEmail", (email, callback) => {
-        db.user.getByEmail.restore();
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(null, {
           email: "user@mail.com",
           password: "99ee0b6fce831af48ffd5c9d9ad5f05fa24381d5", //echo -n "passwordForSha1user@mail.comSTUB" | sha1sum
@@ -102,8 +100,7 @@ describe("Login service.", () => {
         });
       });
 
-      sinon.stub(db.user, "update", (user, callback) => {
-        db.user.update.restore();
+      sinon.stub(db.user, "updateUserMetaByEmail", (email, meta, callback) => {
         callback();
       });
 
@@ -116,13 +113,11 @@ describe("Login service.", () => {
     });
 
     it("New user should be created in data base and return token", (done) => {
-      sinon.stub(db.user, "getByEmail", function(email, callback) {
-        db.user.getByEmail.restore();
+      sinon.stub(db.user, "getLightUserByEmail", function(email, callback) {
         callback();
       });
 
       sinon.stub(db.user, "create", (email, callback) => {
-        db.user.create.restore();
         callback();
       });
 
@@ -135,127 +130,106 @@ describe("Login service.", () => {
     });
   });
 
-  describe("Login as Google User.", function() {
-    it("Should return GoogleIncorrectArgs when no email from google", function(done) {
-      var isCallbackCalled = false;
-      loginService.loginGoogleUser("googleId", null, "127.0.0.1", "FireBaseInstanceId", function(err) {
-        isCallbackCalled = true;
+  describe("Login as Google User.", () => {
+    afterEach(() => {
+      mockUtil.clean(db);
+    });
+
+    it("Should return GoogleIncorrectArgs when no email from google", (done) => {
+      loginService.loginGoogleUser("googleId", null, "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.GoogleIncorrectArgs().rando);
         done();
       });
-      isCallbackCalled.should.be.true();
     });
 
-    it("Should return GoogleIncorrectArgs when no googleId sent", function(done) {
+    it("Should return GoogleIncorrectArgs when no googleId sent", (done) => {
       var isCallbackCalled = false;
-      loginService.loginGoogleUser(null, "email@email.com", "127.0.0.1", "FireBaseInstanceId", function(err) {
-        isCallbackCalled = true;
+      loginService.loginGoogleUser(null, "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.GoogleIncorrectArgs().rando);
         done();
       });
-      isCallbackCalled.should.be.true();
     });
 
-    it("Should return System Error when getByEmail Database call errors", function(done) {
-      var isCallbackCalled = false;
-      sinon.stub(db.user, "getByEmail", function(email, callback) {
-        db.user.getByEmail.restore();
+    it("Should return System Error when getByEmail Database call errors", (done) => {
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(new Error("Data base error"));
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function(err) {
-        isCallbackCalled = true;
+      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
-      isCallbackCalled.should.be.true();
     });
 
-    it("Should return System Error when user.update Database call errors", function(done) {
-      var isCallbackCalled = false;
-      sinon.stub(db.user, "getByEmail", function(email, callback) {
-        db.user.getByEmail.restore();
+    it("Should return System Error when user.update Database call errors", (done) => {
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(null, {
           user: "user@mail.com"
         });
       });
 
-      sinon.stub(db.user, "update", function(email, callback) {
-        db.user.update.restore();
+      sinon.stub(db.user, "updateUserMetaByEmail", (email, callback) => {
         callback(new Error("Data base error"));
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function(err) {
-        isCallbackCalled = true;
+      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
-      isCallbackCalled.should.be.true();
     });
 
-    it("Should return System Error when new user need to be created and.create Database call errors", function(done) {
+    it("Should return System Error when new user need to be created and.create Database call errors", (done) => {
       var isCallbackCalled = false;
-      sinon.stub(db.user, "getByEmail", function(email, callback) {
-        db.user.getByEmail.restore();
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(null, {
           user: "user@mail.com"
         });
       });
 
-      sinon.stub(db.user, "update", function(email, callback) {
-        db.user.update.restore();
+      sinon.stub(db.user, "updateUserMetaByEmail", (email, callback) => {
         callback(new Error("Data base error"));
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function(err) {
-        isCallbackCalled = true;
+      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
-      isCallbackCalled.should.be.true();
     });
 
-    it("Should return System Error when new user need to be created and.create Database call errors", function(done) {
-      var isCallbackCalled = false;
-      sinon.stub(db.user, "getByEmail", function(email, callback) {
-        db.user.getByEmail.restore();
+    it("Should return System Error when new user need to be created and.create Database call errors", (done) => {
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback();
       });
 
-      sinon.stub(db.user, "create", function(email, callback) {
-        db.user.create.restore();
+      sinon.stub(db.user, "updateUserMetaByEmail", (email, callback) => {
         callback(new Error("Data base error"));
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function(err) {
-        isCallbackCalled = true;
+      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
-      isCallbackCalled.should.be.true();
     });
 
-    it("Should find and return authToken for existing user", function(done) {
-      var isCallbackCalled = false;
-      sinon.stub(db.user, "getByEmail", function(email, callback) {
-        db.user.getByEmail.restore();
+    it("Should find and return authToken for existing user", (done) => {
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(null, {
           user: "user@mail.com"
         });
       });
 
-      sinon.stub(db.user, "update", function(user, callback) {
-        db.user.update.restore();
-        should.exist(user);
-        user.firebaseInstanceIds.length.should.be.eql(1);
-        user.firebaseInstanceIds[0].instanceId.should.be.eql("FireBaseInstanceId");
-        user.firebaseInstanceIds[0].active.should.be.true();
+      sinon.stub(db.user, "updateUserMetaByEmail", (email, meta, callback) => {
+        should.exist(email);
+        should.exist(meta);
+        meta.firebaseInstanceIds.length.should.be.eql(1);
+        meta.firebaseInstanceIds[0].instanceId.should.be.eql("FireBaseInstanceId");
+        meta.firebaseInstanceIds[0].active.should.be.true();
         callback(null, {
           token: "auttoken123"
         });
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function(err, userId) {
+      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err, userId) => {
         isCallbackCalled = true;
         should.not.exist(err);
         should.exist(userId);
@@ -264,25 +238,20 @@ describe("Login service.", () => {
       isCallbackCalled.should.be.true();
     });
 
-    it("Should create user when valid google data is passed and ther is no such user before", function(done) {
-      var isCallbackCalled = false;
-      sinon.stub(db.user, "getByEmail", function(email, callback) {
-        db.user.getByEmail.restore();
+    it("Should create user when valid google data is passed and ther is no such user before", (done) => {
+      sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback();
       });
 
-      sinon.stub(db.user, "create", function(user, callback) {
-        db.user.create.restore();
+      sinon.stub(db.user, "create", (user, callback) => {
         callback();
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", function(err, userId) {
-        isCallbackCalled = true;
+      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err, userId) => {
         should.not.exist(err);
         should.exist(userId);
         done();
       });
-      isCallbackCalled.should.be.true();
     });
   });
 

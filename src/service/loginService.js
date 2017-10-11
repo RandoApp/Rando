@@ -24,7 +24,7 @@ module.exports = {
       }
     ], function(err) {
       if (err) {
-        logger.info("[userService.destroyAuthToken, ", email, "] error deactivating firebaseInstanceIds");
+        logger.info("[loginService.destroyAuthToken, ", email, "] error deactivating firebaseInstanceIds");
         return callback(Errors.System(err));
       }
       return callback(null, {
@@ -34,16 +34,16 @@ module.exports = {
     });
   },
   loginRandoUser(email, password, ip, firebaseInstanceId, callback) {
-    logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
+    logger.debug("[loginService.findOrCreateByLoginAndPassword, ", email, "] Try find or create for user with email: ", email);
 
     if (!email || !/.+@.+\..+/.test(email) || !password) {
-      logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
+      logger.warn("[loginService.findOrCreateByLoginAndPassword, ", email, "] Email or password is incorrect. Return error");
       return callback(Errors.LoginAndPasswordIncorrectArgs());
     }
 
     db.user.getLightUserByEmail(email, (err, user) => {
       if (err) {
-        logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't db.user.getLightUserByEmail, because: ", err);
+        logger.warn("[loginService.findOrCreateByLoginAndPassword, ", email, "] Can't db.user.getLightUserByEmail, because: ", err);
         return callback(Errors.System(err));
       }
       if (user) {
@@ -62,9 +62,9 @@ module.exports = {
   },
 
   login(user, email, password, ip, firebaseInstanceId, googleId, callback) {
-    logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
+    logger.debug("[loginService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
     if (password && !passwordUtil.isPasswordCorrect(password, user, config.app.secret)) {
-      logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "] user: ", email, " type incorrect password");
+      logger.info("[loginService.findOrCreateByLoginAndPassword, ", email, "] user: ", email, " type incorrect password");
       return callback(Errors.LoginAndPasswordIncorrectArgs());
     }
 
@@ -98,7 +98,7 @@ module.exports = {
   },
 
   signup(newUser, email, firebaseInstanceId, callback) {
-    logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] user not exist. Try create him");
+    logger.debug("[loginService.findOrCreateByLoginAndPassword, ", email, "] user not exist. Try create him");
     async.waterfall([
       (done) => {
         firebaseService.addOrUpdateFirebaseInstanceIdOnUser(newUser, firebaseInstanceId, done);
@@ -108,7 +108,7 @@ module.exports = {
       }
     ], (err) => {
       if (err) {
-        logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't create user, because: ", err);
+        logger.warn("[loginService.findOrCreateByLoginAndPassword, ", email, "] Can't create user, because: ", err);
         return callback(Errors.System(err));
       } else {
         return callback(null, {
@@ -175,19 +175,18 @@ module.exports = {
   },
 
   findOrCreateByGoogleData(id, email, ip, firebaseInstanceId, callback) {
-    logger.data("[userService.findOrCreateByGoogleData, ", email, "] Try find or create.");
+    logger.data("[loginService.findOrCreateByGoogleData, ", email, "] Try find or create.");
 
     if (!email || !id) {
-      logger.data("[userService.findOrCreateByGoogleData, ", email, "] Data or data.email is incorrect. Return error.");
+      logger.data("[loginService.findOrCreateByGoogleData, ", email, "] Data or data.email is incorrect. Return error.");
       callback(Errors.GoogleIncorrectArgs());
       return;
     }
 
     db.user.getLightUserByEmail(email, (err, user) => {
       if (err) {
-        logger.warn("[userService.findOrCreateByGoogleData, ", email, "] Can't get user by email, because: ", err);
-        callback(Errors.System(err));
-        return;
+        logger.warn("[loginService.findOrCreateByGoogleData, ", email, "] Can't get user by email, because: ", err);
+        return callback(Errors.System(err));
       }
 
       if (user) {
