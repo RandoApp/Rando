@@ -2,7 +2,7 @@ var Errors = require("../error/errors");
 var db = require("randoDB");
 var logger = require("../log/logger");
 var config = require("config");
-var userService = require("./userService");
+var firebaseService = require("./firebaseService");
 
 function sendUnauthorized (res) {
   var response = Errors.toResponse(Errors.Unauthorized());
@@ -54,7 +54,7 @@ function checkAccess (req, res, next) {
     }
 
     var firebaseInstanceId = req.get("FirebaseInstanceId");
-    userService.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
+    firebaseService.addOrUpdateFirebaseInstanceIdOnUser(user, firebaseInstanceId, function (err, user) {
       if (err){
         var response = Errors.toResponse(Errors.System(err));
         res.status(response.status).send(response);

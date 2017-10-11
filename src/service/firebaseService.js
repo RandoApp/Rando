@@ -4,6 +4,9 @@ var Errors = require("../error/errors");
 
 module.exports = {
   addOrUpdateFirebaseInstanceIdOnUser (user, firebaseInstanceId, callback) {
+    if (!user) {
+      return callback("user should be present", user);
+    }
     //This if is needed to support old clients
     //TODO: Remove when all clients will be on 1.0.15+
     if (!firebaseInstanceId) {
