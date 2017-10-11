@@ -151,8 +151,8 @@ module.exports = {
           if (err) {
             logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "] error setting firebaseInstanceId");
             return callback(Errors.System(err));
-         }
-          db.user.updateUserMetaByEmail(user.email, { authToken: userAuthToken, ip: userIp }, function (err) {
+          }
+          db.user.updateUserMetaByEmail(user.email, { authToken: userAuthToken, ip: userIp, firebaseInstanceIds: user.firebaseInstanceIds }, function (err) {
             if (err) {
               logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
               return callback(Errors.System(err));
