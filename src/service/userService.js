@@ -145,19 +145,19 @@ module.exports = {
       if (user) {
         logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] User exist.");
         if (passwordUtil.isPasswordCorrect(password, user, config.app.secret)) {
-          user.authToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
-          user.ip = ip;
+          const userAuthToken = crypto.randomBytes(config.app.tokenLength).toString("hex");
+          const userIp = ip;
           self.addOrUpdateFirebaseInstanceId(user, firebaseInstanceId, function (err, user) {
           if (err) {
             logger.info("[userService.findOrCreateByLoginAndPassword, ", email, "] error setting firebaseInstanceId");
             return callback(Errors.System(err));
          }
-          db.user.update(user, function (err) {
+          db.user.updateUserMetaByEmail(user.email, { authToken: userAuthToken, ip: userIp }, function (err) {
             if (err) {
               logger.warn("[userService.findOrCreateByLoginAndPassword, ", email, "] Can't update user with new authToken, because: ", err);
               return callback(Errors.System(err));
             }
-            return callback(null, {token: user.authToken});
+            return callback(null, {token: userAuthToken});
           });
         });
         } else {
