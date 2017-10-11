@@ -56,7 +56,7 @@ module.exports = {
           ip,
           firebaseInstanceIds: []
         };
-        return this.signup(newUser, email, password, ip, firebaseInstanceId, callback);
+        return this.signup(newUser, email, firebaseInstanceId, callback);
       }
     });
   },
@@ -97,7 +97,7 @@ module.exports = {
     });
   },
 
-  signup(newUser, email, password, ip, firebaseInstanceId, callback) {
+  signup(newUser, email, firebaseInstanceId, callback) {
     logger.debug("[userService.findOrCreateByLoginAndPassword, ", email, "] user not exist. Try create him");
     async.waterfall([
       (done) => {
@@ -139,7 +139,7 @@ module.exports = {
           ip,
           firebaseInstanceIds: []
         };
-        return this.signup(newUser, email, password, ip, firebaseInstanceId, callback);
+        return this.signup(newUser, email, firebaseInstanceId, callback);
       }
     });
   },
@@ -199,7 +199,7 @@ module.exports = {
           ip,
           googleId: id
         };
-        return this.signup(newUser, email, password, ip, firebaseInstanceId, callback);
+        return this.signup(newUser, email, firebaseInstanceId, callback);
       }
     });
   }

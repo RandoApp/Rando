@@ -323,11 +323,12 @@ describe("Login service.", () => {
         });
       });
 
-      sinon.stub(db.user, "update", (user, callback) => {
-        should.exist(user);
-        user.firebaseInstanceIds.length.should.be.eql(1);
-        user.firebaseInstanceIds[0].instanceId.should.be.eql("FireBaseInstanceId");
-        user.firebaseInstanceIds[0].active.should.be.true();
+      sinon.stub(db.user, "updateUserMetaByEmail", (email, meta, callback) => {
+        should.exist(email);
+        should.exist(meta);
+        meta.firebaseInstanceIds.length.should.be.eql(1);
+        meta.firebaseInstanceIds[0].instanceId.should.be.eql("FireBaseInstanceId");
+        meta.firebaseInstanceIds[0].active.should.be.true();
         callback();
       });
 
