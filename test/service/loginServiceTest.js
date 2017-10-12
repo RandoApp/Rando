@@ -10,6 +10,7 @@ describe("Login service.", () => {
   describe("Login As Rando User.", () => {
     afterEach(() => {
       mockUtil.clean(db);
+      mockUtil.clean(passwordUtil);
     });
 
     it("Should return error when email is invalid", () => {
@@ -155,7 +156,7 @@ describe("Login service.", () => {
         callback(new Error("Data base error"));
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
+      loginService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
@@ -168,17 +169,17 @@ describe("Login service.", () => {
         });
       });
 
-      sinon.stub(db.user, "updateUserMetaByEmail", (email, callback) => {
+      sinon.stub(db.user, "updateUserMetaByEmail", (email, meta, callback) => {
         callback(new Error("Data base error"));
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
+      loginService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
     });
 
-    it("Should return System Error when new user need to be created and.create Database call errors", (done) => {
+    it("Should return System Error when exist use. Database call errors", (done) => {
       var isCallbackCalled = false;
       sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(null, {
@@ -186,11 +187,11 @@ describe("Login service.", () => {
         });
       });
 
-      sinon.stub(db.user, "updateUserMetaByEmail", (email, callback) => {
+      sinon.stub(db.user, "updateUserMetaByEmail", (email, meta, callback) => {
         callback(new Error("Data base error"));
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
+      loginService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
@@ -201,11 +202,11 @@ describe("Login service.", () => {
         callback();
       });
 
-      sinon.stub(db.user, "updateUserMetaByEmail", (email, callback) => {
+      sinon.stub(db.user, "create", (user, callback) => {
         callback(new Error("Data base error"));
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
+      loginService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.System(new Error()).rando);
         done();
       });
@@ -229,7 +230,7 @@ describe("Login service.", () => {
         });
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err, userId) => {
+      loginService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err, userId) => {
         isCallbackCalled = true;
         should.not.exist(err);
         should.exist(userId);
@@ -247,7 +248,7 @@ describe("Login service.", () => {
         callback();
       });
 
-      loginService.loginGoogleUser("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err, userId) => {
+      loginService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err, userId) => {
         should.not.exist(err);
         should.exist(userId);
         done();
