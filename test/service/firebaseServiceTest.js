@@ -1,10 +1,5 @@
 const should = require("should");
-const sinon = require("sinon");
 const firebaseService = require("../../src/service/firebaseService");
-const Errors = require("../../src/error/errors");
-const db = require("randoDB");
-const passwordUtil = require("../../src/util/password");
-const mockUtil = require("../mockUtil");
 
 describe("FirebaseInstanceId operations. ", function() {
   describe("AddOrUpdateFirebaseInstanceId: Positive flow. ", function() {

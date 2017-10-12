@@ -22,11 +22,11 @@ module.exports = {
       }
 
       user.in = randos.in.filter(rando => {
-        return rando.delete !== 1 && rando.report !== 1 && rando.randoId
+        return rando.delete !== 1 && rando.report !== 1 && rando.randoId;
       });
 
       user.out = randos.out.filter(rando => {
-        return rando.delete !== 1 && rando.report !== 1 && rando.randoId
+        return rando.delete !== 1 && rando.report !== 1 && rando.randoId;
       });
 
       user.in.forEach(rando => {

@@ -144,7 +144,6 @@ describe("Login service.", () => {
     });
 
     it("Should return GoogleIncorrectArgs when no googleId sent", (done) => {
-      var isCallbackCalled = false;
       loginService.loginGoogleUser(null, "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err) => {
         err.rando.should.be.eql(Errors.GoogleIncorrectArgs().rando);
         done();
@@ -180,7 +179,6 @@ describe("Login service.", () => {
     });
 
     it("Should return System Error when exist use. Database call errors", (done) => {
-      var isCallbackCalled = false;
       sinon.stub(db.user, "getLightUserByEmail", (email, callback) => {
         callback(null, {
           user: "user@mail.com"
@@ -231,12 +229,10 @@ describe("Login service.", () => {
       });
 
       loginService.findOrCreateByGoogleData("googleId", "email@email.com", "127.0.0.1", "FireBaseInstanceId", (err, userId) => {
-        isCallbackCalled = true;
         should.not.exist(err);
         should.exist(userId);
         done();
       });
-      isCallbackCalled.should.be.true();
     });
 
     it("Should create user when valid google data is passed and ther is no such user before", (done) => {

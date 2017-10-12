@@ -115,7 +115,7 @@ module.exports = {
           token: newUser.authToken
         });
       }
-    })
+    });
   },
 
   loginAnonymous(id, ip, firebaseInstanceId, callback) {
