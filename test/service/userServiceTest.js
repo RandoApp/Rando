@@ -1,9 +1,7 @@
 const should = require("should");
 const sinon = require("sinon");
 const userService = require("../../src/service/userService");
-const Errors = require("../../src/error/errors");
 const db = require("randoDB");
-const passwordUtil = require("../../src/util/password");
 const mockUtil = require("../mockUtil");
 
 describe("User service.", () => {

@@ -1,6 +1,5 @@
 const logger = require("../log/logger");
 const db = require("randoDB");
-const async = require("async");
 const config = require("config");
 const Errors = require("../error/errors");
 const backwardCompatibility = require("../util/backwardCompatibility");

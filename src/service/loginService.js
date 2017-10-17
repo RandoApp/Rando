@@ -5,7 +5,6 @@ const config = require("config");
 const crypto = require("crypto");
 const Errors = require("../error/errors");
 const passwordUtil = require("../util/password");
-const util = require("../util/util");
 const GoogleAuth = require("google-auth-library");
 const auth = new GoogleAuth;
 const client = new auth.OAuth2(config.app.auth.googleClientId, "", "");
