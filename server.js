@@ -211,7 +211,7 @@ app.post("/google", function (req, res) {
 });
 
 function logout(req, res) {
-  userService.destroyAuthToken(req.lightUser.email, function (err, response) {
+  loginService.destroyAuthToken(req.lightUser.email, function (err, response) {
     if (err) {
       var errResponse = Errors.toResponse(err);
       logger.data("POST /logout DONE with error: ", errResponse.code);
