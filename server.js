@@ -28,6 +28,7 @@ var tokenConverter = require("./src/util/backwardCompatibility").tokenConverter;
 var logger = require("./src/log/logger");
 
 var userService = require("./src/service/userService");
+const loginService = require("./src/service/loginService");
 var commentService = require("./src/service/commentService");
 var randoService = require("./src/service/randoService");
 var logService = require("./src/service/logService");
@@ -138,29 +139,10 @@ app.post("/rate/:randoId", baseFilters, (req, res) => {
   });
 });
 
-app.post("/user", function(req, res) {
-  logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
-
-  var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-
-  userService.findOrCreateByLoginAndPassword(req.body.email, req.body.password, ip, req.body.firebaseInstanceId, function (err, response) {
-    if (err) {
-      var response = Errors.toResponse(err);
-      res.status(response.status);
-      logger.data("POST /user DONE with error: ", response.code);
-      res.send(response);
-      return;
-    }
-
-    logger.data("POST /user DONE");
-    res.send(response);
-  });
-});
-
 app.get("/user", baseFilters, function (req, res) {
   logger.data("Start process user request. GET /user. for: ", req.lightUser.email);
 
-  userService.getUser(req.lightUser.email, function (err, user) {
+  userService.getUser(req.lightUser.email, (err, user) => {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
@@ -172,18 +154,35 @@ app.get("/user", baseFilters, function (req, res) {
   });
 });
 
+app.post("/user", function(req, res) {
+  logger.data("Start process user request. POST /user. Email: ", req.body.email, " Password length: " , req.body.password.length);
+
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+  loginService.loginRandoUser(req.body.email, req.body.password, ip, req.body.firebaseInstanceId, (err, response) => {
+    if (err) {
+      const response = Errors.toResponse(err);
+      res.status(response.status);
+      logger.data("POST /user DONE with error: ", response.code);
+      return res.send(response);
+    }
+
+    logger.data("POST /user DONE");
+    res.send(response);
+  });
+});
+
 app.post("/anonymous", function (req, res) {
   logger.data("Start process user request. POST /anonymous. id: ", req.body.id);
 
-  var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  userService.findOrCreateAnonymous(req.body.id, ip, req.body.firebaseInstanceId, function (err, response) {
+  loginService.loginAnonymous(req.body.id, ip, req.body.firebaseInstanceId, (err, response) => {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
       logger.data("POST /anonymous DONE with error: ", response.code);
-      res.send(response);
-      return;
+      return res.send(response);
     }
 
     logger.data("POST /anonymous DONE");
@@ -192,51 +191,23 @@ app.post("/anonymous", function (req, res) {
   });
 });
 
-app.post("/facebook", function (req, res) {
-  logger.data("Start process user request. POST /facebook. Id:", req.body.id ," Email: ", req.body.email, " FB Token length: ", req.body.token.length);
-
-  var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-
-  userService.verifyFacebookAndFindOrCreateUser(req.body.id, req.body.email, req.body.token, ip, req.body.firebaseInstanceId, function (err, response) {
-    if (err) {
-      var response = Errors.toResponse(err);
-      res.status(response.status);
-      logger.data("POST /facebook DONE with error: ", response.code);
-      res.send(response);
-      return;
-    }
-
-    logger.data("POST /facebook DONE");
-    res.status(200);
-    res.send(response);
-  });
-});
-
 app.post("/google", function (req, res) {
   logger.data("Start process user request. POST /google. Email: ", req.body.email,  " Google Token length: ", req.body.token.length);
 
-  var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+  const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  var callback = function(err, response) {
+  loginService.loginGoogleUser(req.body.email, req.body.token, ip, req.body.firebaseInstanceId, (err, response) => {
     if (err) {
       var response = Errors.toResponse(err);
       res.status(response.status);
       logger.data("POST /google DONE with error: ", response.code);
-      res.send(response);
-      return;
+      return res.send(response);
     }
 
     logger.data("POST /google DONE");
     res.status(200);
     res.send(response);
-  };
-
-  if (!req.body.family_name) {
-    userService.verifyGoogleAndFindOrCreateUser(req.body.email, req.body.token, ip, req.body.firebaseInstanceId, callback);
-  } else {
-    userService.verifyGoogleAndFindOrCreateUserDeprecated(req.body.email, req.body.family_name, req.body.token, ip, req.body.firebaseInstanceId, callback);
-  }
-
+  });
 });
 
 function logout(req, res) {

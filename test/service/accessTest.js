@@ -1,10 +1,10 @@
-var should = require("should");
-var sinon = require("sinon");
-var access = require("../../src/service/access");
-var config = require("config");
-var Errors = require("../../src/error/errors");
-var db = require("randoDB");
-var userService = require("../../src/service/userService");
+const should = require("should");
+const sinon = require("sinon");
+const access = require("../../src/service/access");
+const config = require("config");
+const Errors = require("../../src/error/errors");
+const db = require("randoDB");
+const firebaseService = require("../../src/service/firebaseService");
 
 describe("Access service.", function () {
   describe("No Spam.", function () {
@@ -208,8 +208,8 @@ describe("For user with token.", function () {
   });
 
     it("Should return System error when error updating FirebaseInstanceId", function (done) {
-      sinon.stub(userService, "addOrUpdateFirebaseInstanceId", function (user, firebaseInstanceId, callback) {
-        userService.addOrUpdateFirebaseInstanceId.restore();
+      sinon.stub(firebaseService, "addOrUpdateFirebaseInstanceIdOnUser", function (user, firebaseInstanceId, callback) {
+        firebaseService.addOrUpdateFirebaseInstanceIdOnUser.restore();
         callback(new Error("err finding instanceId"));
       });
 
@@ -258,7 +258,7 @@ describe("For user with token.", function () {
     });
 
     var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
-    
+
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId") {
         return "FirebaseInstanceId12345";
@@ -293,7 +293,7 @@ it("Should return existing user without error and add FirebaseInstanceId", funct
     });
 
     var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
-    
+
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId") {
         return "FirebaseInstanceId12345";
@@ -328,7 +328,7 @@ it("Should return existing user without error and bump lastUsedDate for Firebase
     });
 
     var req = {headers: { authorization: "Token 12345"}, connection: {remoteAddress : "127.0.0.1" }, get(){}};
-    
+
     sinon.stub(req, "get", function (header){
       if (header === "FirebaseInstanceId"){
         return "FirebaseInstanceId12345";
