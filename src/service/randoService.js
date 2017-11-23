@@ -18,6 +18,7 @@ function buildPostImageResponseSync (rando) {
     randoId: rando.randoId,
     //1.0.1+
     creation: rando.creation,
+    exchangedDate: rando.exchangedDate,
     //1.0.1+
     imageURL: rando.imageURL,
     //1.0.15+
@@ -251,10 +252,12 @@ module.exports =  {
         var self = this;
 
         logger.debug("[randoService.updateRandoInDB,", lightUser.email, "] Try update rando for this user, randoId:", randoId, "url:", imageURL, "map url:", mapURL);
+        const now = Date.now();
 
         var newRando = {
           email: lightUser.email,
-          creation: Date.now(),
+          creation: now,
+          exchangedDate: 0,
           originalFileName: imageInfo.originalName,
           randoId,
           imageURL,
@@ -315,6 +318,7 @@ module.exports =  {
 
     return {
       creation: rando.creation,
+      exchangedDate: rando.exchangedDate,
       randoId: rando.randoId,
       imageURL: rando.imageURL,
       imageSizeURL: rando.imageSizeURL,
