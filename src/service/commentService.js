@@ -1,4 +1,4 @@
-const db = require("randoDB");
+const db = require("@rando4.me/db");
 const logger = require("../log/logger");
 const async = require("async");
 const config = require("config");

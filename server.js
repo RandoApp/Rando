@@ -51,7 +51,7 @@ var app = express();
 var upload = multer({ dest: "/tmp/" });
 
 
-require("randoDB").connect(config.db.url);
+require("@rando4.me/db").connect(config.db.url);
 
 app.use(morgan("combined"));
 app.use(bodyParser.urlencoded({
