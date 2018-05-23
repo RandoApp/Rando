@@ -3,7 +3,7 @@ var sinon = require("sinon");
 var config = require("config");
 var commentService = require("../../src/service/commentService");
 const pushNotificationService = require("../../src/service/pushNotificationService");
-var db = require("randoDB");
+var db = require("@rando4.me/db");
 var Errors = require("../../src/error/errors");
 var mockUtil = require("../mockUtil");
 

@@ -34,6 +34,7 @@ var randoService = require("./src/service/randoService");
 var logService = require("./src/service/logService");
 var statusService = require("./src/service/statusService");
 var shareService = require("./src/service/shareService");
+var statService = require("./src/service/statService");
 
 var accessByTokenFilter = require("./src/filter/accessByTokenFilter");
 var ipFilter = require("./src/filter/ipFilter");
@@ -151,6 +152,21 @@ app.get("/user", baseFilters, function (req, res) {
     }
     logger.data("GET /user DONE");
     return res.send(user);
+  });
+});
+
+app.get("/user/statistics", baseFilters, function (req, res) {
+  logger.data("Start process user request. GET /user. for: ", req.lightUser.email);
+
+  statService.getUserStats(req.lightUser.email, (err, stats) => {
+    if (err) {
+      var response = Errors.toResponse(err);
+      res.status(response.status);
+      logger.data("GET /user/statistics DONE with error: ", response.code);
+      return res.send(response);
+    }
+    logger.data("GET /user/statistics DONE");
+    return res.send(stats);
   });
 });
 

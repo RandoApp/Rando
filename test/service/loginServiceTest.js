@@ -2,7 +2,7 @@ const should = require("should");
 const sinon = require("sinon");
 const loginService = require("../../src/service/loginService");
 const Errors = require("../../src/error/errors");
-const db = require("randoDB");
+const db = require("@rando4.me/db");
 const passwordUtil = require("../../src/util/password");
 const mockUtil = require("../mockUtil");
 

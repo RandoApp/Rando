@@ -3,7 +3,7 @@ const sinon = require("sinon");
 const access = require("../../src/service/access");
 const config = require("config");
 const Errors = require("../../src/error/errors");
-const db = require("randoDB");
+const db = require("@rando4.me/db");
 const firebaseService = require("../../src/service/firebaseService");
 
 describe("Access service.", function () {
