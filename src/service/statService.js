@@ -1,9 +1,6 @@
 const logger = require("../log/logger");
 const db = require("@rando4.me/db");
-const config = require("config");
 const Errors = require("../error/errors");
-const backwardCompatibility = require("../util/backwardCompatibility");
-const util = require("../util/util");
 
 module.exports = {
   getUserStats(email, callback) {

@@ -13,8 +13,8 @@ describe("Statservice", () => {
 
     it("should return User Stats successfully", (done) => {
       sinon.stub(db.user, "getUserStatistics", (email, callback) => {
-        if (email == "user@mail.com") {
-          callback(null, {"likes" : 5, "dislikes" : 1});
+        if (email === "user@mail.com") {
+          return callback(null, {"likes" : 5, "dislikes" : 1});
       }
       });
 
@@ -29,7 +29,7 @@ describe("Statservice", () => {
     it("should return system error when db returns error state", (done) => {
       sinon.stub(db.user, "getUserStatistics", (email, callback) => {
         if (email == "user@mail.com") {
-          callback("error");
+          return callback("error");
       }
       });
 
