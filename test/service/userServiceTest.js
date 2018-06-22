@@ -1,7 +1,7 @@
 const should = require("should");
 const sinon = require("sinon");
 const userService = require("../../src/service/userService");
-const db = require("randoDB");
+const db = require("@rando4.me/db");
 const mockUtil = require("../mockUtil");
 
 describe("User service.", () => {

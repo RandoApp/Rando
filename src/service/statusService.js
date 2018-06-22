@@ -1,4 +1,4 @@
-var db = require("randoDB");
+var db = require("@rando4.me/db");
 var async = require("async");
 var fs = require("fs");
 var exec = require("child_process").exec;

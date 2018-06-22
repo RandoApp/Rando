@@ -1,6 +1,6 @@
 var noSpamFilter = require("../../src/filter/noSpamFilter");
 var sinon = require("sinon");
-var db = require("randoDB");
+var db = require("@rando4.me/db");
 var mockUtil = require("../mockUtil");
 
 describe("noSpamFilter.", () => {

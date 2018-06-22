@@ -1,5 +1,5 @@
 const logger = require("../log/logger");
-const db = require("randoDB");
+const db = require("@rando4.me/db");
 const async = require("async");
 const config = require("config");
 const crypto = require("crypto");

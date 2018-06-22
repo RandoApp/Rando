@@ -1,5 +1,5 @@
 var Errors = require("../error/errors");
-var db = require("randoDB");
+var db = require("@rando4.me/db");
 var logger = require("../log/logger");
 var util = require("../util/util");
 

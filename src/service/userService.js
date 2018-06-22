@@ -1,5 +1,5 @@
 const logger = require("../log/logger");
-const db = require("randoDB");
+const db = require("@rando4.me/db");
 const config = require("config");
 const Errors = require("../error/errors");
 const backwardCompatibility = require("../util/backwardCompatibility");

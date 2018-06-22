@@ -1,4 +1,4 @@
-var db = require("randoDB");
+var db = require("@rando4.me/db");
 var logger = require("../log/logger");
 
 module.exports = {
