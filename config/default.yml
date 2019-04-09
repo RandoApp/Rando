@@ -14,7 +14,8 @@ app:
         ban: 10800000 #3 hours
         imageSize: 30mb
         permanentBanTo: 9000000000000 #ban to 2255 year
-        reporedByUsers: 2 #ban when reported by this unique number of users
+        lastNTimeReports: 1209600000 #analyze only last [two week] report events => (14d * 24h * 60m * 60s * 1000ms)
+        reporedByUsers: 3 #ban when reported by this unique number of users
     img:
         quality: 85
         ext: jpg
