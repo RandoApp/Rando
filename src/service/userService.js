@@ -29,6 +29,10 @@ module.exports = {
       });
 
       user.in.forEach(rando => {
+        if (!rando.exchangedDate) {
+          //for backward compatibility:
+          rando.exchangedDate = rando.creation;
+        }
         delete rando.delete;
         delete rando.report;
       });
@@ -36,6 +40,12 @@ module.exports = {
       user.out.forEach(rando => {
         rando.mapURL = rando.strangerMapURL ? rando.strangerMapURL : "";
         rando.mapSizeURL = util.getSizeableOrEmpty(rando.strangerMapSizeURL);
+
+        if (!rando.exchangedDate) {
+          //for backward compatibility:
+          rando.exchangedDate = rando.creation;
+        }
+
         delete rando.strangerMapURL;
         delete rando.strangerMapSizeURL;
         delete rando.delete;
